@@ -1,0 +1,171 @@
+/* Updated login.css */
+
+/* General container for the login form */
+.login-container {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 10px;
+    -fx-padding: 30px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0.0, 0.0, 8.0);
+    -fx-background-radius: 10px;
+    -fx-alignment: center;
+}
+
+/* Title label (e.g., "Login") */
+.title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1E88E5;
+    -fx-padding: 0 0 10px 0;
+}
+
+/* Login button */
+.login-button {
+    -fx-background-color: #1E88E5;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-padding: 8px 16px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-pref-width: 300px; /* Fixed width to match input fields */
+    -fx-effect: dropshadow(gaussian, rgba(30, 136, 229, 0.3), 10, 0.0, 0.0, 3.0);
+    -fx-cursor: hand;
+}
+
+.login-button:hover {
+    -fx-background-color: #1565C0;
+    -fx-scale: 1.02;
+    -fx-effect: dropshadow(gaussian, rgba(30, 136, 229, 0.5), 15, 0.0, 0.0, 5.0);
+}
+
+.login-button:pressed {
+    -fx-background-color: #0D47A1;
+    -fx-scale: 0.98;
+}
+
+/* Error messages */
+.error-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #e53935;
+    -fx-padding: 5px 0;
+    -fx-wrap-text: true;
+    -fx-max-width: 300px; /* Match input field width */
+    -fx-alignment: center;
+}
+
+/* Container for FormsFX fields */
+#formContainer {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-alignment: center;
+}
+
+/* FormsFX renderer tweaks */
+.form-renderer {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.form-renderer > * {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* Forgot Password Label */
+.forgot-password {
+    -fx-font-size: 13px;
+    -fx-text-fill: #1E88E5;
+    -fx-underline: false;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+    -fx-padding: 5px 0;
+}
+
+.forgot-password:hover {
+    -fx-underline: true;
+    -fx-text-fill: #1565C0;
+}
+
+/* "Or" divider styling */
+.divider-container {
+    -fx-padding: 10px 0;
+    -fx-alignment: center;
+}
+
+.divider-line {
+    -fx-stroke: #cccccc;
+    -fx-stroke-width: 1px;
+}
+
+.divider-text {
+    -fx-font-size: 14px;
+    -fx-padding: 0 10px;
+    -fx-text-fill: #666666;
+}
+
+/* Google Sign-In Button Styling */
+.gsi-material-button {
+    -fx-background-color: WHITE;
+    -fx-border-color: #dadce0;
+    -fx-border-radius: 4px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #1f1f1f;
+    -fx-font-family: "Roboto", "Arial", sans-serif;
+    -fx-font-size: 14px;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-pref-height: 40px;
+    -fx-pref-width: 300px; /* Match input field width */
+}
+
+.gsi-material-button-content-wrapper {
+    -fx-alignment: CENTER;
+    -fx-spacing: 12px;
+    -fx-padding: 0 20px;
+    -fx-pref-height: inherit;
+    -fx-background-color: transparent;
+}
+
+.gsi-material-button-icon {
+    -fx-font-size: 20px;
+    -fx-fit-width: 20px;
+    -fx-fit-height: 20px;
+    -fx-text-fill: #4285F4;
+    -fx-padding: 0;
+}
+
+.gsi-material-button-contents {
+    -fx-font-family: "Roboto", "Arial", sans-serif;
+    -fx-font-weight: 500;
+    -fx-text-fill: #1f1f1f;
+    -fx-padding: 0;
+    -fx-alignment: CENTER;
+}
+
+.gsi-material-button:hover {
+    -fx-background-color: #f7f7f7;
+    -fx-effect: dropshadow(gaussian, rgba(60, 64, 67, 0.1), 2, 0.5, 0, 1);
+}
+
+.gsi-material-button:pressed {
+    -fx-background-color: #f0f0f0;
+    -fx-effect: dropshadow(gaussian, rgba(60, 64, 67, 0.2), 3, 0.5, 0, 2);
+}
+
+.gsi-material-button:focused {
+    -fx-border-color: #4285F4;
+    -fx-border-width: 1.5px;
+}
+
+.gsi-material-button:disabled {
+    -fx-background-color: #ffffff61;
+    -fx-border-color: #1f1f1f1f;
+    -fx-cursor: default;
+}
+
+.gsi-material-button:disabled .gsi-material-button-contents,
+.gsi-material-button:disabled .gsi-material-button-icon {
+    -fx-opacity: 0.38;
+}

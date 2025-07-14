@@ -1,0 +1,50 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://database:5432/InventoryManagementDB
+    username: postgres
+    password: leroy001
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    enabled: true
+  application:
+    name: InventoryManagementSpringBoot
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+      port: 8080
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 216499047134-fa5831sf4t6e8imuidcfiafb462sv7d0.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: "urn:ietf:wg:oauth:2.0:oob"
+            scope:
+              - email
+              - profile
+            authorization-grant-type: authorization_code
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://www.googleapis.com/oauth2/v4/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+            user-name-attribute: email
+
+
+
+jwt:
+  secret: e829bace6a8a79b6fd9970c50ea76186e5e7449ad6fdb465a5cadcc6ee43e0e45780a8a7bb89175b8559cea913c4ba0d42cc7b92226a869260502a292364de7fc95d11a490eca41ca2693a639c3e2c074f08dc417556d7b927c0826c5456dff20eb6453dcaa1c2949d6366df3b654b37f958fc20a0f331a4ec8dfc96b13f79ad180a755ae00c564b66bf958446463a02e9cbc9550dcc83dca726df1c0362a890977ffc89656343a261b37f93dcf2633204045a45ff4a65501b3dd8b8ec55dddc566b67c330ac51753b6e03b86716885a63fbf0304dca5e09ce5247cd91d8aad1c751872a66470252d5e0afdb134aa528130f41cd05e84cb8180137b5ab37c9b8
+  expiration: 86400000
+
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: LAX
+        secure: false

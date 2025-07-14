@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: alter-tables
+      author: leroy
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: active
+                  type: boolean
+                  constraints:
+                    nullable: false
+        - addColumn:
+            tableName: stock_transactions
+            columns:
+              - column:
+                  name: department_id
+                  type: int
+                  constraints:
+                    foreignKeyName: fk_user_department
+                    references: departments(id)
+                    nullable: false
+        - addColumn:
+            tableName: inventory_items
+            columns:
+              - column:
+                  name: department_id
+                  type: int
+                  constraints:
+                    foreignKeyName: fk_item_department
+                    references: departments(id)
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: inventory_items
+            columnNames: name, department_id
+            constraintName: uq_inventory_item
+
+        - sql:
+            sql : ALTER TABLE stock_transactions DROP CONSTRAINT transaction_type_enum
+
+        - sql:
+            sql: ALTER TABLE stock_transactions ADD CONSTRAINT transaction_type_enum CHECK (transaction_type IN ('RECEIVED', 'ISSUED'))

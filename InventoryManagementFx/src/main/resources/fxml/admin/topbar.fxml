@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Import StackPane -->
+
+<HBox fx:id="topBar" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="80.0" prefHeight="80.0" prefWidth="800.0" styleClass="top-bar" stylesheets="@../../styles/topbar.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.leroy.inventorymanagementfx.controller.admin.AdminTopbarController">
+    <padding>
+        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+    </padding>
+
+    <!-- Left Section: Logo and Navigation -->
+    <HBox alignment="CENTER_LEFT" spacing="20.0">
+        <!-- Logo -->
+        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" style="-fx-background-radius: 50%;">
+            <Image url="@../../static/images/ucc-logo.png" />
+        </ImageView>
+
+        <!-- Sidebar Toggle -->
+        <Button fx:id="sidebarToggle" styleClass="icon-button">
+            <graphic>
+                <FontIcon iconColor="WHITE" iconLiteral="fas-bars" iconSize="24" />
+            </graphic>
+            <cursor>
+                <Cursor fx:constant="HAND" />
+            </cursor>
+        </Button>
+
+        <!-- Navigation Buttons -->
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="nav-buttons">
+            <Button fx:id="backBtn" styleClass="nav-button">
+                <graphic>
+                    <FontIcon iconColor="WHITE" iconLiteral="fas-arrow-left" iconSize="18" />
+                </graphic>
+                <cursor>
+                    <Cursor fx:constant="HAND" />
+                </cursor>
+            </Button>
+            <Button fx:id="forwardBtn" styleClass="nav-button">
+                <graphic>
+                    <FontIcon iconColor="WHITE" iconLiteral="fas-arrow-right" iconSize="18" />
+                </graphic>
+                <cursor>
+                    <Cursor fx:constant="HAND" />
+                </cursor>
+            </Button>
+        </HBox>
+    </HBox>
+
+    <!-- Spacer -->
+    <HBox HBox.hgrow="ALWAYS" />
+
+    <!-- Right Section: User Controls -->
+    <HBox alignment="CENTER_RIGHT" spacing="15.0">
+
+        <!-- Notification -->
+        <StackPane alignment="CENTER" styleClass="cart-notification-stack-pane"> <!-- Use StackPane -->
+            <Button fx:id="notificationBtn" styleClass="notification-button"> <!-- Changed styleClass for clarity -->
+                <graphic>
+                    <FontIcon iconColor="WHITE" iconLiteral="fas-bell" iconSize="20" styleClass="notification-icon" /> <!-- Changed styleClass -->
+                </graphic>
+                <cursor>
+                    <Cursor fx:constant="HAND" />
+                </cursor>
+            </Button>
+            <Label fx:id="notificationCountLabel" styleClass="notification-badge" text="1" /> <!-- Added default text -->
+            <cursor>
+                <Cursor fx:constant="HAND" />
+            </cursor>
+        </StackPane>
+
+        <!-- User Dropdown -->
+        <MenuButton fx:id="userName" styleClass="user-menu" text="John Doe">
+            <graphic>
+                <FontIcon iconColor="WHITE" iconLiteral="fas-user-circle" iconSize="24" />
+            </graphic>
+            <items>
+                <MenuItem fx:id="profileBtn" styleClass="menu-item" text="Profile">
+                    <graphic>
+                        <FontIcon iconColor="#3498db" iconLiteral="fas-user" iconSize="16" />
+                    </graphic>
+                </MenuItem>
+                <MenuItem styleClass="menu-item" text="Settings">
+                    <graphic>
+                        <FontIcon iconColor="#3498db" iconLiteral="fas-cog" iconSize="16" />
+                    </graphic>
+                </MenuItem>
+                <MenuItem fx:id="logoutBtn" styleClass="menu-item" text="Logout">
+                    <graphic>
+                        <FontIcon iconColor="#e74c3c" iconLiteral="fas-sign-out-alt" iconSize="16" />
+                    </graphic>
+                </MenuItem>
+            </items>
+            <cursor>
+                <Cursor fx:constant="HAND" />
+            </cursor>
+        </MenuButton>
+    </HBox>
+</HBox>

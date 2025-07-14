@@ -1,0 +1,582 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001
+      author: leroy
+      changes:
+        - createTable:
+            tableName: departments
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: TEXT
+                  constraints:
+                    nullable: false
+                    unique: true
+
+        - createTable:
+            tableName: offices
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: department_id
+                  type: INT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_office_department
+                    references: departments(id)
+                    deleteCascade: true
+              - column:
+                  name: name
+                  type: TEXT
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: offices
+            columnNames: department_id, name
+
+
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+#        - addCheckConstraint:
+#            tableName: roles
+#            constraintName: role_enum
+#            constraintBody: "name IN ('ADMIN', 'STAFF', 'STOREKEEPER')"
+        - sql:
+            sql: ALTER TABLE roles ADD CONSTRAINT role_enum CHECK (name IN ('ADMIN', 'STAFF', 'STOREKEEPER'))
+
+
+
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: first_name
+                  type: VARCHAR(75)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: VARCHAR(75)
+              - column:
+                  name: email
+                  type: TEXT
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: role_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_user_role
+                    references: roles(id)
+              - column:
+                  name: password
+                  type: TEXT
+              - column:
+                  name: office_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_user_office
+                    references: offices(id)
+              - column:
+                  name: password_reset_token
+                  type: TEXT
+              - column:
+                  name: reset_password_expires_at
+                  type: TIMESTAMP
+
+        - createTable:
+            tableName: inventory_items
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: unit
+                  type: TEXT
+              - column:
+                  name: image_path
+                  type: TEXT
+              - column:
+                  name: reorder_level
+                  type: INT
+                  defaultValueNumeric: '0'
+
+        - createTable:
+            tableName: inventory_batches
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: item_id
+                  type: INT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_batch_item
+                    references: inventory_items(id)
+                    deleteCascade: true
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: remaining_quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: unit_price
+                  type: NUMERIC(12,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: batch_date
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - createTable:
+            tableName: request_status
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+#        - addCheckConstraint:
+#            tableName: request_status
+#            constraintName: status_enum
+#            constraintBody:  "name IN ('PENDING', 'APPROVED', 'REJECTED', 'FULFILLED')"
+
+        - sql:
+            sql: ALTER TABLE request_status ADD CONSTRAINT status_enum CHECK (name IN ('PENDING', 'APPROVED', 'REJECTED', 'FULFILLED'))
+
+        - createTable:
+            tableName: requests
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_request_user
+                    references: users(id)
+              - column:
+                  name: status_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_request_status
+                    references: request_status(id)
+              - column:
+                  name: submitted_at
+                  type: TIMESTAMP
+              - column:
+                  name: approved_by
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_request_approver
+                    references: users(id)
+              - column:
+                  name: approved_at
+                  type: TIMESTAMP
+
+        - createTable:
+            tableName: request_items
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: request_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_request_item_request
+                    references: requests(id)
+                    deleteCascade: true
+              - column:
+                  name: item_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_request_item_item
+                    references: inventory_items(id)
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: request_status_history
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: request_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_status_history_request
+                    references: requests(id)
+
+                    deleteCascade: true
+              - column:
+                  name: status_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_status_history_status
+                    references: request_status(id)
+              - column:
+                  name: changed_by
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_status_history_user
+                    references: users(id)
+              - column:
+                  name: changed_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+        - createTable:
+            tableName: inventory_issuance
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: request_item_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_issuance_request_item
+                    references: request_items(id)
+                    deleteCascade: true
+
+              - column:
+                  name: batch_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_issuance_batch
+                    references: inventory_batches(id)
+                    deleteCascade: true
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: issued_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+        - createTable:
+            tableName: stock_transactions
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: item_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_transaction_item
+                    references: inventory_items(id)
+              - column:
+                  name: transaction_type
+                  type: VARCHAR(10)
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: unit_price
+                  type: NUMERIC(12,2)
+              - column:
+                  name: transaction_date
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: related_request_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_transaction_request
+                    references: requests(id)
+              - column:
+                  name: supplier
+                  type: TEXT
+              - column:
+                  name: invoice_id
+                  type: VARCHAR(20)
+              - column:
+                  name: created_by
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_transaction_user
+                    references: users(id)
+              - column:
+                  name: batch_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_transaction_batch
+                    references: inventory_batches(id)
+#        - addCheckConstraint:
+#            tableName: stock_transactions
+#            constraintName: transaction_type_enum
+#            constraintBody: "transaction_type IN ('IN', 'OUT')"
+
+        - sql:
+            sql: ALTER TABLE stock_transactions ADD CONSTRAINT transaction_type_enum CHECK (transaction_type IN ('IN', 'OUT'))
+
+        - createTable:
+            tableName: notifications
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_notification_user
+                    references: users(id)
+              - column:
+                  name: title
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: message
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_read
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: related_request_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_notification_request
+                    references: requests(id)
+              - column:
+                  name: related_item_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_notification_item
+                    references: inventory_items(id)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+        - createTable:
+            tableName: carts
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_cart_user
+                    references: users(id)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+        - createTable:
+            tableName: cart_items
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: cart_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_cart_item_cart
+                    references: carts(id)
+              - column:
+                  name: item_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_cart_item_item
+                    references: inventory_items(id)
+              - column:
+                  name: quantity
+                  type: INT
+#        - addCheckConstraint:
+#            tableName: cart_items
+#            constraintName: cart_item_quantity_check
+#            constraintBody: "quantity > 0"
+
+        - sql:
+            sql: ALTER TABLE cart_items ADD CONSTRAINT cart_item_quantity_check CHECK(quantity > 0)
+
+        - createTable:
+            tableName: inventory_balances
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: item_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_balance_item
+                    references: inventory_items(id)
+              - column:
+                  name: snapshot_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_value
+                  type: NUMERIC(12,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: department_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_balance_department
+                    references: departments(id)
+              - column:
+                  name: method
+                  type: VARCHAR(20)
+#        - addCheckConstraint:
+#            tableName: inventory_balances
+#            constraintName: cost_method_enum
+#            constraintBody: "method IN ('FIFO', 'AVG')"
+
+        - sql:
+            sql: ALTER TABLE inventory_balances ADD CONSTRAINT cost_method_enum CHECK(method IN ('FIFO', 'AVG'))
+
+
+        - addUniqueConstraint:
+            tableName: inventory_balances
+            columnNames: item_id,snapshot_date,method,department_id
+            constraintName: uq_inventory_balance_snapshot
+
+        - createTable:
+            tableName: audit_log
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    foreignKeyName: fk_audit_user
+                    references: users(id)
+              - column:
+                  name: action
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: entity_type
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: entity_id
+                  type: INT
+              - column:
+                  name: old_data
+                  type: JSONB
+              - column:
+                  name: new_data
+                  type: JSONB
+              - column:
+                  name: context
+                  type: TEXT
+              - column:
+                  name: ip_address
+                  type: TEXT
+              - column:
+                  name: user_agent
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP

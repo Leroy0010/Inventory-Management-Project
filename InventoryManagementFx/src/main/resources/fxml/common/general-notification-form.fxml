@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+
+<VBox alignment="TOP_CENTER" prefHeight="700.0" prefWidth="800.0" spacing="20.0" stylesheets="@../../styles/general-notification-service.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.leroy.inventorymanagementfx.controller.GeneralNotificationController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <Label styleClass="header-label" text="Send General Notification">
+        <font>
+            <Font size="24.0" />
+        </font>
+    </Label>
+    <VBox fx:id="formContainer" alignment="CENTER" maxWidth="600.0" spacing="10.0" styleClass="form-card">
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        </padding>
+    </VBox>
+    <Label fx:id="errorMessageLabel" styleClass="error-message" textFill="RED" wrapText="true" />
+    <Label fx:id="successMessageLabel" styleClass="success-message" textFill="GREEN" wrapText="true" />
+    <Button fx:id="sendNotificationButton" mnemonicParsing="false" onAction="#sendNotification" prefWidth="250.0" styleClass="primary-button" text="Send Notification" />
+</VBox>

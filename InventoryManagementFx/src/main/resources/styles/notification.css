@@ -1,0 +1,245 @@
+/* src/main/resources/css/styles.css */
+
+/* General page container styling */
+.notification-page-container {
+    -fx-background-color: #f7f9fc; /* Light background for the page */
+    -fx-padding: 20px;
+}
+
+/* Page Title */
+.page-title {
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-size: 28px;
+    -fx-text-fill: #333333;
+    -fx-alignment: center;
+    -fx-padding: 0 0 10px 0;
+}
+
+/* Header Controls (Unread Count, Mark All, Refresh) */
+.header-controls {
+    -fx-spacing: 15px;
+    -fx-padding: 10px 0;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1px 0; /* Bottom border */
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2); /* Subtle shadow */
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-padding: 10px 15px;
+}
+
+.unread-count-label {
+    -fx-font-family: "Segoe UI Bold";
+    -fx-font-size: 16px;
+    -fx-text-fill: #007bff; /* Primary blue color */
+}
+
+.action-button {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 15px;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);
+}
+.action-button:hover {
+    -fx-background-color: #0056b3;
+}
+.action-button:pressed {
+    -fx-background-color: #004085;
+}
+
+/* List View Styling */
+.notification-list-view {
+    -fx-background-color: transparent; /* Make list view background transparent */
+    -fx-padding: 0;
+}
+
+/* Cell Styling (The "Card" for each notification) */
+.list-cell {
+    -fx-background-color: transparent; /* Ensure list cell background is transparent */
+    -fx-padding: 5px 0; /* Padding around each card */
+    -fx-alignment: top-left;
+}
+
+.notification-card {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3); /* More pronounced shadow for cards */
+    -fx-padding: 15px;
+    -fx-spacing: 8px;
+    -fx-border-color: #e0e0e0; /* Subtle border */
+    -fx-border-width: 1px;
+    -fx-cursor: hand; /* Indicate clickable nature */
+}
+
+.notification-card:hover {
+    -fx-background-color: #f0f8ff; /* Light hover effect */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0, 0, 5); /* Slightly larger shadow on hover */
+}
+
+/* Read/Unread Cell Styling */
+.notification-unread {
+    -fx-background-color: #e6f7ff; /* Light blue for unread notifications */
+    -fx-border-color: #a7d9f2;
+}
+
+.notification-unread .notification-card {
+    -fx-background-color: #e6f7ff; /* Ensure card also has the unread background */
+}
+
+.notification-read {
+    -fx-opacity: 0.7; /* Dim read notifications slightly */
+    -fx-background-color: #fcfcfc; /* Very light background for read */
+}
+.notification-read .notification-card {
+     -fx-background-color: #fcfcfc;
+}
+
+/* Text Styles within the card */
+.notification-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-text-fill: #333333;
+}
+
+.notification-message {
+    -fx-font-size: 13px;
+    -fx-text-fill: #555555;
+    -fx-max-width: 400px; /* Limit width for better readability */
+}
+
+.notification-timestamp {
+    -fx-font-size: 11px;
+    -fx-text-fill: #999999;
+    -fx-alignment: center-right;
+}
+
+/* Action Buttons within cell */
+.mark-read-button, .view-details-button {
+    -fx-background-color: #28a745; /* Green for "Mark as Read" */
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-padding: 5px 10px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+.mark-read-button:hover, .view-details-button:hover {
+    -fx-background-color: #218838;
+}
+
+.view-details-button {
+    -fx-background-color: #17a2b8; /* Info blue for "View Details" */
+}
+.view-details-button:hover {
+    -fx-background-color: #138496;
+}
+
+.notification-actions {
+    -fx-alignment: bottom-right; /* Align buttons to the right */
+    -fx-hgrow: ALWAYS; /* Push actions to the right */
+}
+
+
+/* Empty State Label */
+.empty-state-label {
+    -fx-font-size: 18px;
+    -fx-text-fill: #888888;
+    -fx-alignment: center;
+    -fx-padding: 50px;
+}
+
+
+/* src/main/resources/css/notifications.css */
+
+/* Base style for the notification pane */
+.notification-pane {
+    -fx-background-color: linear-gradient(to bottom right, #34495e, #2c3e50); /* Dark gradient background */
+    -fx-background-radius: 10; /* Rounded corners */
+    -fx-border-color: #4CAF50; /* Subtle border color */
+    -fx-border-width: 1px;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 15, 0, 0, 5); /* Soft shadow */
+    -fx-padding: 15px;
+    -fx-spacing: 10px;
+}
+
+/* Title of the notification */
+.notification-pane .title {
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ecf0f1; /* Light text color */
+}
+
+/* Message content of the notification */
+.notification-pane .message {
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif;
+    -fx-font-size: 13px;
+    -fx-text-fill: #bdc3c7; /* Slightly darker light text */
+    -fx-wrap-text: true; /* Ensure text wraps */
+}
+
+/* Close button */
+.notification-pane .close-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50%;
+    -fx-padding: 5px;
+}
+
+.notification-pane .close-button .graphic {
+    -fx-shape: "M 0 0 L 10 10 M 0 10 L 10 0"; /* Custom 'X' shape */
+    -fx-stroke: #ecf0f1; /* Color of the 'X' */
+    -fx-stroke-width: 2px;
+}
+
+.notification-pane .close-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2); /* Subtle hover effect */
+}
+
+/* Custom styles for different notification types */
+
+/* Information */
+.notification-pane.information {
+    -fx-border-color: #3498db; /* Blue border */
+}
+.notification-pane.information .title {
+    -fx-text-fill: #85c1e9; /* Lighter blue title */
+}
+
+/* Confirmation (Success) */
+.notification-pane.confirm {
+    -fx-border-color: #2ecc71; /* Green border */
+}
+.notification-pane.confirm .title {
+    -fx-text-fill: #a2e8c2; /* Lighter green title */
+}
+
+/* Warning */
+.notification-pane.warning {
+    -fx-border-color: #f39c12; /* Orange border */
+}
+.notification-pane.warning .title {
+    -fx-text-fill: #f7dc6f; /* Lighter orange title */
+}
+
+/* Error */
+.notification-pane.error {
+    -fx-border-color: #e74c3c; /* Red border */
+}
+.notification-pane.error .title {
+    -fx-text-fill: #f1948a; /* Lighter red title */
+}
+
+/* Optional: Custom graphic for specific types */
+/* You can add an ImageView to the notification and style it here */
+.notification-pane .graphic-container {
+    -fx-padding: 0 10px 0 0;
+}
+.notification-pane .graphic-container .image-view {
+    -fx-fit-width: 32px;
+    -fx-fit-height: 32px;
+}

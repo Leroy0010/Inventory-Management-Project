@@ -1,0 +1,76 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://database:5432/InventoryManagementDB
+    username: postgres
+    password: leroy001
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    enabled: true
+  application:
+    name: InventoryManagementSpringBoot
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+      port: 8080
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 216499047134-fa5831sf4t6e8imuidcfiafb462sv7d0.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: "urn:ietf:wg:oauth:2.0:oob"
+            scope:
+              - email
+              - profile
+            authorization-grant-type: authorization_code
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://www.googleapis.com/oauth2/v4/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+            user-name-attribute: email
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: leroydennisa@gmail.com
+    password: cmxh wxmb ugeg sqgy
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enabled: true
+            required: true
+          ssl:
+            protocols: TLSv1.2
+        test-connection: true
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 10
+        queue-capacity: 100
+      thread-name-prefix: MailSender-
+
+
+
+jwt:
+  secret: aHNma3VoZGZodWl3Nzg0Mzc4aDJyOzIzdWlmeXVrNDM4N3dleWZ2dWtzZWZoajtlcml1bGdyaWxldWlsc2QuMzJyM2tqLDIzNzgzNDJpeXJ3
+  expiration: 86400000
+
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: LAX
+        secure: false
+
+app:
+  frontend:
+    base-url: localhost:80

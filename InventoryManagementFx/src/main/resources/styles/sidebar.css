@@ -1,0 +1,99 @@
+/* Base Sidebar Styling */
+.sidebar {
+    -fx-background-color: #34495e;
+    -fx-border-color: #2c3e50;
+    -fx-border-width: 0 1 0 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 0);
+    -fx-padding: 0 15px;
+}
+
+/* Sidebar Items */
+/* Selected Item State */
+.selectable-sidebar-item.selected {
+    -fx-background-color: #3498db !important;
+    -fx-text-fill: white !important;
+}
+
+/* Remove the :active and :focused states from the original CSS */
+.sidebar-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ecf0f1;
+    -fx-font-family: 'Segoe UI', Arial;
+    -fx-font-size: 14px;
+    -fx-padding: 12 20;
+    -fx-alignment: CENTER_LEFT;
+    -fx-content-display: LEFT;
+    -fx-border-width: 0;
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 15px;
+}
+
+/* Keep all your existing hover and other states */
+
+.sidebar-item:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-cursor: hand;
+}
+
+.sidebar-item:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Active Item State */
+.sidebar-item:active, .sidebar-item:focused {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+/* Bottom-aligned items */
+.bottom-item {
+    -fx-border-width: 1 0 0 0;
+    -fx-border-color: derive(#2c3e50, 10%);
+    -fx-padding: 15 20;
+}
+
+/* Icon Styling (if using FontAwesomeFX) */
+.sidebar-item .ikonli-font-icon {
+    -fx-icon-color: #ecf0f1;
+    -fx-icon-size: 18px;
+}
+
+/* Hover effect for icons */
+.sidebar-item:hover .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+/* New Styles for Reports Section */
+.sidebar-submenu {
+    -fx-padding: 0 0 0 15px; /* Indent sub-items */
+}
+
+.sidebar-sub-submenu {
+    -fx-padding: 0 0 0 30px; /* Indent sub-sub-items further */
+}
+
+.sidebar-subitem {
+    -fx-background-color: transparent;
+    -fx-text-fill: #bdc3c7; /* Slightly lighter text for sub-items */
+    -fx-font-family: 'Segoe UI', Arial;
+    -fx-font-size: 13px; /* Slightly smaller font for sub-items */
+    -fx-padding: 8 15;
+    -fx-alignment: CENTER_LEFT;
+    -fx-content-display: LEFT;
+    -fx-border-width: 0;
+    -fx-cursor: hand;
+}
+
+.sidebar-subitem:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-cursor: hand;
+}
+
+.sidebar-subitem:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-subitem:active, .sidebar-subitem:focused {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}

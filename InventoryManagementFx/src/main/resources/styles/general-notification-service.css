@@ -1,0 +1,46 @@
+/* Existing styles... */
+
+/* FormsFX Radio Button specific styles */
+.formsfx-control.radio-button-control {
+    -fx-padding: 0; /* Remove default padding as it's an HBox */
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.formsfx-control.radio-button-control .radio-button {
+    -fx-padding: 5px 10px; /* Padding for individual radio buttons */
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+.formsfx-control.radio-button-control .radio-button:hover {
+    -fx-background-color: #f0f0f0;
+    -fx-background-radius: 5px;
+}
+
+.formsfx-control.radio-button-control .radio-button:selected {
+    -fx-background-color: #e0f2f7; /* Light blue background for selected radio */
+    -fx-background-radius: 5px;
+}
+
+/* Ensure the custom FilteredComboBox also gets basic form field styling */
+.combo-box.form-field {
+    -fx-background-color: white;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 5px;
+    -fx-border-width: 1px;
+    -fx-padding: 0; /* Important: ComboBox itself has internal padding, adjust content via editor padding */
+    -fx-prompt-text-fill: #6c757d;
+    -fx-font-size: 14px;
+}
+
+.combo-box.form-field .text-field {
+    -fx-padding: 8px 10px; /* Padding for the editable text field inside the combobox */
+    -fx-background-color: transparent; /* Text field background should be transparent */
+    -fx-border-color: transparent; /* No border for the internal text field */
+}
+
+.combo-box.form-field:focused {
+    -fx-border-color: #007bff;
+    -fx-effect: innershadow(gaussian, rgba(0, 123, 255, 0.2), 5, 0, 0, 0);
+}

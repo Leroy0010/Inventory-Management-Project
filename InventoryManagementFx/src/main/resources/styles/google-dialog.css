@@ -1,0 +1,142 @@
+/* General styling for the dialog pop-up */
+.root {
+    -fx-background-color: #f0f2f5; /* Light grey background for the dialog */
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif; /* Modern, readable font */
+    -fx-font-size: 14px;
+    -fx-background-radius: 10px; /* Rounded corners for the root, if it's the main stage content */
+    -fx-border-radius: 10px;
+    -fx-height: auto;
+    -fx-padding: 10px 16px
+}
+
+/* Container for the dialog content */
+.vbox {
+    -fx-background-color: white;
+    -fx-background-radius: 10px; /* Rounded corners */
+    -fx-border-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0.0, 0.0, 5.0); /* Softer shadow */
+    -fx-padding: 25px; /* Slightly reduced padding */
+    -fx-alignment: TOP_CENTER; /* Align content to top center, allows labels to naturally stack */
+}
+
+/* Title label */
+.label#dialog-title { /* Using an ID for more specific targeting */
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-padding: 0 0 20px 0; /* More space below title */
+    -fx-alignment: CENTER; /* Ensure title is centered */
+    -fx-max-width: 1.7976931348623157E308; /* Allow it to expand */
+}
+
+/* Instruction labels within VBoxes */
+.vbox > .label { /* Targets labels directly inside a VBox */
+    -fx-font-size: 13px;
+    -fx-text-fill: #555555;
+    -fx-padding: 2px 0; /* Reduced vertical padding for line-height feel */
+    -fx-wrap-text: true;
+}
+
+/* Text field for auth code */
+.text-field { /* Targeting all TextField directly */
+    -fx-font-size: 14px;
+    -fx-pref-height: 40px; /* Slightly taller for better touch/click target */
+    -fx-border-color: #dcdcdc; /* Lighter border color */
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px; /* Slightly more rounded */
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 12px; /* More horizontal padding */
+    -fx-prompt-text-fill: #999999;
+    -fx-background-color: #ffffff;
+}
+
+.text-field:focused {
+    -fx-border-color: #4CAF50; /* Google-like green focus */
+    -fx-border-width: 2px; /* Thicker border on focus */
+    -fx-background-color: #f7fff7; /* Very light green background on focus */
+}
+
+/* Base styles for all buttons */
+.button {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 6px; /* Consistent rounded corners */
+    -fx-border-radius: 6px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 8, 0.0, 0.0, 2.0); /* Consistent button shadow */
+    -fx-max-width: 1.7976931348623157E308; /* Ensure buttons fill width when needed */
+}
+
+.button:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 12, 0.0, 0.0, 4.0);
+}
+
+.button:pressed {
+    -fx-translate-y: 1px; /* Subtle press effect */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 4, 0.0, 0.0, 1.0);
+}
+
+.button:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+    -fx-effect: none;
+}
+
+/* Primary buttons (e.g., Open Google Sign-In, Verify Code) */
+.button#openBrowserButton, .button#submitAuthorizationCodeButton { /* Specific IDs for primary actions */
+    -fx-background-color: #4285F4; /* Google Blue */
+    -fx-text-fill: white;
+}
+
+.button#openBrowserButton:hover, .button#submitAuthorizationCodeButton:hover {
+    -fx-background-color: #357ae8; /* Darker blue on hover */
+}
+
+.button#openBrowserButton:pressed, .button#submitAuthorizationCodeButton:pressed {
+    -fx-background-color: #2a65cc;
+}
+
+/* Secondary button (e.g., Cancel) */
+.button#cancelButton { /* Specific ID for cancel button */
+    -fx-background-color: #f0f0f0; /* Light grey */
+    -fx-text-fill: #6c757d; /* Dark grey text */
+    -fx-border-color: #cccccc; /* Subtle border */
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 6, 0.0, 0.0, 1.0);
+}
+
+.button#cancelButton:hover {
+    -fx-background-color: #e0e0e0; /* Slightly darker grey on hover */
+    -fx-text-fill: #333333;
+}
+
+.button#cancelButton:pressed {
+    -fx-background-color: #d0d0d0;
+}
+
+
+/* Status label (for authorizationErrorLabel) */
+.label#authorizationErrorLabel { /* Using an ID for specific targeting */
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 0; /* Vertical padding */
+    -fx-background-color: transparent;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-text-fill: #dc3545; /* Default to red for errors */
+    -fx-alignment: CENTER;
+    /* -fx-max-width: 1.7976931348623157E308; */
+
+}
+
+/* Specific styles applied via Java for different status types */
+.label#authorizationErrorLabel.info {
+    -fx-text-fill: #007bff; /* Blue for info */
+}
+.label#authorizationErrorLabel.success {
+    -fx-text-fill: #28a745; /* Green for success */
+}
+.label#authorizationErrorLabel.error {
+    -fx-text-fill: #dc3545; /* Red for errors */
+}

@@ -1,0 +1,38 @@
+/* common.css - Basic global styles */
+.root {
+    -fx-font-family: "Segoe UI", sans-serif; /* Or your preferred font */
+    -fx-font-size: 14px;
+    -fx-background-color: #F0F2F5; /* Light background for the overall app */
+}
+
+.label {
+    -fx-text-fill: #333333;
+}
+
+.button {
+    -fx-background-color: #007bff; /* Primary blue button */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #0056b3; /* Darker blue on hover */
+}
+
+.button:pressed {
+    -fx-background-color: #004085;
+}
+
+.text-field, .combo-box, .choice-box {
+    -fx-font-size: 1em;
+    -fx-background-color: white;
+    -fx-border-color: #CCCCCC;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px;
+}
+
+/* Add other common styles as needed */

@@ -1,0 +1,16 @@
+/* dialog.css */
+.dialog-pane {
+    -fx-padding: 20;
+}
+
+/*
+.dialog-pane .button {
+    -fx-min-width: 120;
+    -fx-pref-width: 120;
+}
+*/
+
+.dialog-pane .content.label {
+    -fx-font-size: 14px;
+    -fx-padding: 20;
+}

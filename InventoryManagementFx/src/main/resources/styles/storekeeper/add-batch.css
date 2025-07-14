@@ -1,0 +1,24 @@
+/* FormsFX custom styling */
+.formsfx-form {
+    -fx-padding: 15px;
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 0);
+}
+
+.formsfx-control-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #374151;
+}
+
+.formsfx-text-field, .formsfx-text-area, .formsfx-spinner {
+    -fx-background-color: #f9fafb;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px;
+}
+
+.formsfx-text-field:focused, .formsfx-text-area:focused {
+    -fx-border-color: #3aafa9;
+}

@@ -1,0 +1,124 @@
+plugins {
+  id 'java'
+  id 'application'
+  id 'org.javamodularity.moduleplugin' version '1.8.12' // Keep this for JPMS
+  id 'org.openjfx.javafxplugin' version '0.0.13'
+  id 'org.beryx.jlink' version '2.25.0'
+}
+
+group 'com.leroy'
+version '1.0-SNAPSHOT'
+
+repositories {
+  mavenCentral()
+  // No need for Jitpack unless you add other specific GitHub dependencies later
+  // maven { url 'https://jitpack.io' }
+}
+
+ext {
+  junitVersion = '5.10.2'
+  springVersion =  '6.2.8' // Ensure this matches your backend's Spring Framework version
+  tyrusVersion = '2.2.0' // Latest stable Tyrus version
+  jacksonVersion = '2.17.1' // Use the latest stable Jackson version for security and features
+  controlsfxVersion = '11.2.2' // Latest stable ControlsFX version
+  ikonliVersion = '12.4.0' // Your current Ikonli version
+  log4jVersion = '2.23.1' // Latest stable Log4j2 version (as of current date)
+}
+
+sourceCompatibility = '21'
+targetCompatibility = '21'
+
+tasks.withType(JavaCompile).configureEach {
+  options.encoding = 'UTF-8'
+}
+
+application {
+  mainModule = 'com.leroy.inventorymanagementfx'
+  mainClass = 'com.leroy.inventorymanagementfx.InventoryApplication'
+}
+
+javafx {
+  version = '21' // Make sure this matches your JDK 21
+  // Add javafx.graphics module explicitly as it's often needed and sometimes implicitly brought
+  modules = ['javafx.controls', 'javafx.fxml', 'javafx.web', 'javafx.swing', 'javafx.graphics' ]
+}
+
+dependencies {
+  // JavaFX related dependencies
+  implementation("org.controlsfx:controlsfx:${controlsfxVersion}")
+  // You had two controlsfx entries, removed duplicate
+  // implementation('org.controlsfx:controlsfx:11.2.1')
+
+  implementation("com.dlsc.formsfx:formsfx-core:11.6.0") {
+    // Exclude javafx.base if it causes conflicts, but often not necessary
+    exclude(group: 'org.openjfx', module: 'javafx-base')
+    exclude(group: 'org.openjfx', module: 'javafx-controls') // FormsFX has its own dependency on controls
+  }
+  // The formsfx-core is usually enough, formsfx alone might be redundant if not a specific variant
+  // implementation 'com.dlsc.formsfx:formsfx:11.6.0'
+
+  implementation("net.synedra:validatorfx:0.5.0") {
+    // Exclude transitive javafx dependencies if they cause conflicts
+    exclude(group: 'org.openjfx')
+  }
+  implementation("org.kordamp.ikonli:ikonli-javafx:${ikonliVersion}")
+  implementation 'org.kordamp.ikonli:ikonli-fontawesome6-pack:12.4.0'
+  implementation("eu.hansolo:tilesfx:21.0.3") {
+    exclude(group: 'org.openjfx') // Exclude if conflicts arise
+  }
+
+  // Logging
+  implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+  implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+
+  // REMOVE THIS LINE: This is the old Java-WebSocket client that we're replacing with Spring's STOMP client
+  // implementation 'org.java-websocket:Java-WebSocket:1.5.7'
+
+  implementation 'javax.websocket:javax.websocket-api:1.1'
+
+  // Spring WebSocket and Messaging for STOMP Client
+  implementation "org.springframework:spring-websocket:${springVersion}"
+  implementation "org.springframework:spring-messaging:${springVersion}"
+  implementation "org.springframework:spring-context:${springVersion}"
+
+  // WebSocket Runtime (Tyrus for JSR-356 compliance) - RE-ADD THIS!
+  implementation "org.glassfish.tyrus:tyrus-client:${tyrusVersion}"
+  implementation "org.glassfish.tyrus:tyrus-container-grizzly-client:${tyrusVersion}" // THIS IS THE ONE YOU NEEDED TO RE-ADD!
+
+  // Explicitly add the Jakarta WebSocket Client API, though Tyrus should bring it
+  // This can sometimes help with ServiceLoader issues in JPMS environments
+//  implementation "jakarta.websocket:jakarta.websocket-client-api:2.2.0" // Match Tyrus major version
+
+  // JSON Processing (Jackson) - Consolidated and updated version
+  implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0"
+  // If you also need core and annotations separately for other reasons, add them:
+  // implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+  // implementation "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+
+
+  // JWT dependencies
+  implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+  runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+  runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+  // Testing
+  testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+}
+
+test {
+  useJUnitPlatform()
+}
+
+jlink {
+  imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
+  options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+  launcher {
+    name = 'app'
+  }
+}
+
+jlinkZip {
+  group = 'distribution'
+}

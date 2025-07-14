@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.leroy.inventorymanagementfx.controller.storekeeper.CreateOfficeController">
+    <children>
+        <VBox fx:id="rootContainer" alignment="CENTER" maxWidth="600.0" style="-fx-border-width: 2px;" stylesheets="@../../styles/admin/create-department.css" StackPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+
+            <!-- Header Section -->
+            <HBox alignment="CENTER_LEFT" styleClass="view-header">
+                <children>
+                    <Label styleClass="view-title" text="Add Office" />
+                </children>
+                <padding>
+                    <Insets bottom="15.0" />
+                </padding>
+            </HBox>
+
+            <!-- Form Section -->
+            <VBox VBox.vgrow="NEVER">
+                <GridPane alignment="CENTER_LEFT" hgap="15.0" vgap="15.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" minWidth="100.0" prefWidth="140.0" />
+                        <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="250.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="35.0" prefHeight="35.0" vgrow="NEVER" />
+                    </rowConstraints>
+                    <children>
+                        <Label styleClass="form-label" text="Office Name:" />
+                        <TextField fx:id="nameField" promptText="Enter office name" styleClass="form-input" GridPane.columnIndex="1" />
+                    </children>
+                </GridPane>
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                </padding>
+            </VBox>
+
+            <!-- Error Message Section -->
+            <HBox fx:id="errorLabelContainer" alignment="CENTER" styleClass="error-container">
+                <children>
+                    <Label fx:id="errorLabel" styleClass="error-message"/>
+                </children>
+                <padding>
+                    <Insets bottom="15.0" top="5.0" />
+                </padding>
+            </HBox>
+
+            <!-- Button Section -->
+            <HBox alignment="CENTER_RIGHT" styleClass="button-container">
+                <children>
+                    <Button fx:id="submitBtn" mnemonicParsing="false" onAction="#addOffice" styleClass="primary-button" text="Save Office" />
+                </children>
+                <padding>
+                    <Insets top="15.0" />
+                </padding>
+            </HBox>
+        </VBox>
+    </children>
+    <padding>
+        <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+    </padding>
+</StackPane>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane fx:id="rootContainer" stylesheets="@/styles/storekeeper/inventory-items.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.leroy.inventorymanagementfx.controller.storekeeper.InventoryItemsController">
+
+    <VBox spacing="15" styleClass="container">
+        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-filter-bar">
+            <TextField fx:id="searchField" promptText="Search items..." styleClass="search-field" />
+
+            <ComboBox fx:id="filterComboBox" promptText="Filter by..." styleClass="filter-combo">
+            <cursor>
+               <Cursor fx:constant="HAND" />
+            </cursor></ComboBox>
+
+            <ComboBox fx:id="sortComboBox" promptText="Sort by..." styleClass="sort-combo">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Name (A-Z)" />
+                        <String fx:value="Name (Z-A)" />
+                        <String fx:value="Quantity (High-Low)" />
+                        <String fx:value="Quantity (Low-High)" />
+                    </FXCollections>
+                </items>
+            <cursor>
+               <Cursor fx:constant="HAND" />
+            </cursor>
+            </ComboBox>
+
+            <Button fx:id="refreshBtn" styleClass="refresh-button">
+                <tooltip>
+                    <Tooltip text="Refresh" />
+                </tooltip>
+                <graphic>
+                    <FontIcon iconLiteral="fas-sync-alt" iconSize="14" />
+                </graphic>
+            </Button>
+
+            <HBox HBox.hgrow="ALWAYS" />
+
+            <ToggleButton fx:id="gridViewBtn" styleClass="view-toggle-button">
+                <tooltip>
+                    <Tooltip text="Grid View" />
+                </tooltip>
+                <graphic>
+                    <FontIcon iconLiteral="fas-th-large" iconSize="16" />
+                </graphic>
+            </ToggleButton>
+
+            <ToggleButton fx:id="listViewBtn" styleClass="view-toggle-button">
+                <tooltip>
+                    <Tooltip text="List View" />
+                </tooltip>
+                <graphic>
+                    <FontIcon iconLiteral="fas-list" iconSize="16" />
+                </graphic>
+            </ToggleButton>
+
+
+        </HBox>
+
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+            <StackPane>
+            <FlowPane fx:id="gridItemsContainer" hgap="20.0" styleClass="items-container grid-view" vgap="20.0" />
+
+            <TableView fx:id="listItemsContainer" styleClass="items-container list-view" visible="false">
+                <columns>
+                    <TableColumn fx:id="idColumn" styleClass="table-column" text="ID" />
+                    <TableColumn fx:id="imageColumn" styleClass="table-column" text="Image" />
+                    <TableColumn fx:id="nameColumn" styleClass="table-column" text="Name" />
+                    <TableColumn fx:id="unitColumn" styleClass="table-column" text="Unit" />
+                    <TableColumn fx:id="quantityColumn" styleClass="table-column" text="Quantity" />
+                    <TableColumn fx:id="reorderLevelColumn" styleClass="table-column" text="Reorder Level" />
+                    <TableColumn fx:id="actionsColumn" styleClass="table-column" text="Actions" />
+                </columns>
+            </TableView>
+            </StackPane>
+        </ScrollPane>
+
+        <HBox alignment="CENTER" styleClass="pagination-container">
+            <Button fx:id="prevPageBtn" disable="true" styleClass="pagination-button">
+                <graphic>
+                    <FontIcon iconLiteral="fas-chevron-left" iconSize="14" />
+                </graphic>
+            <cursor>
+               <Cursor fx:constant="HAND" />
+            </cursor>
+            </Button>
+            <Label fx:id="pageInfoLabel" styleClass="page-info-label" />
+            <Button fx:id="nextPageBtn" styleClass="pagination-button">
+                <graphic>
+                    <FontIcon iconLiteral="fas-chevron-right" iconSize="14" />
+                </graphic>
+            <cursor>
+               <Cursor fx:constant="HAND" />
+            </cursor>
+            </Button>
+         <padding>
+            <Insets bottom="8.0" top="8.0" />
+         </padding>
+        </HBox>
+      <StackPane.margin>
+         <Insets bottom="10.0" />
+      </StackPane.margin>
+    </VBox>
+
+    <ProgressIndicator fx:id="loadingIndicator" styleClass="loading-indicator" visible="false" />
+</StackPane>

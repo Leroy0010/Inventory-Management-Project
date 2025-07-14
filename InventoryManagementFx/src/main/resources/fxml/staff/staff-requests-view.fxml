@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+
+<BorderPane stylesheets="@../../styles/request-management.css, @../../styles/common.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.leroy.inventorymanagementfx.controller.staff.MyRequestsController">
+    <top>
+        <VBox alignment="CENTER_LEFT" spacing="10" styleClass="header-box">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20" />
+            </padding>
+            <Label styleClass="page-title" text="My Submitted Requests" />
+        </VBox>
+    </top>
+    <center>
+        <VBox alignment="TOP_CENTER" spacing="20" styleClass="content-area">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20" />
+            </padding>
+
+            <TableView fx:id="requestTable" VBox.vgrow="ALWAYS" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="idColumn" prefWidth="80.0" text="Request ID" />
+                    <TableColumn fx:id="submittedAtColumn" prefWidth="180.0" text="Submitted At" />
+                    <TableColumn fx:id="statusColumn" prefWidth="150.0" text="Status" />
+                    <TableColumn fx:id="itemCountColumn" prefWidth="100.0" text="Items" />
+                    <TableColumn fx:id="approverColumn" prefWidth="150.0" text="Approver" />
+                    <TableColumn fx:id="actionsColumn" prefWidth="120.0" text="Actions" />
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                </columnResizePolicy>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>

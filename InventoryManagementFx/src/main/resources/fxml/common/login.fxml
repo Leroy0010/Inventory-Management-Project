@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane stylesheets="@/styles/login.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.leroy.inventorymanagementfx.controller.LoginController">
+    <children>
+        <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="500.0" prefHeight="500.0" spacing="20.0" styleClass="login-container">
+            <children>
+                <Label fx:id="title" styleClass="title" text="Login" />
+                <VBox fx:id="formContainer" alignment="CENTER" spacing="10.0" />
+                <Label fx:id="errorLabel" styleClass="error-label" textFill="#e53935" />
+                <Button fx:id="loginButton" onAction="#login" styleClass="login-button" text="Login">
+                    <cursor>
+                        <Cursor fx:constant="HAND" />
+                    </cursor>
+                </Button>
+                <!-- Forgot Password Label -->
+                <Label fx:id="resetPasswordLabel" styleClass="forgot-password" text="Forgot Password? Reset Password" />
+
+                <!-- "Or" divider -->
+                <HBox alignment="CENTER" styleClass="divider-container">
+                    <children>
+                        <Line endX="100.0" styleClass="divider-line" />
+                        <Label styleClass="divider-text" text="Or" />
+                        <Line endX="100.0" styleClass="divider-line" />
+                    </children>
+                </HBox>
+
+                <!-- Google Sign-In Button -->
+                <Button fx:id="googleSignInBtn" onAction="#googleSignIn" styleClass="gsi-material-button" textAlignment="CENTER">
+                    <graphic>
+                        <HBox alignment="CENTER" styleClass="gsi-material-button-content-wrapper">
+                            <FontIcon iconLiteral="fab-google" styleClass="gsi-material-button-icon" />
+                            <Label alignment="CENTER" styleClass="gsi-material-button-contents" text="Sign in with Google" />
+                        </HBox>
+                    </graphic>
+                    <cursor>
+                        <Cursor fx:constant="HAND" />
+                    </cursor>
+                </Button>
+            </children>
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+        </VBox>
+    </children>
+</StackPane>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox stylesheets="@../../styles/profile.css" fx:controller="com.leroy.inventorymanagementfx.controller.ProfileController"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      prefWidth="700.0" prefHeight="600.0" alignment="TOP_CENTER" spacing="20" styleClass="root-pane">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="My Profile" styleClass="page-title"/>
+
+<!--    <VBox alignment="CENTER" spacing="10" styleClass="profile-picture-container">-->
+<!--        <ImageView fitWidth="120" fitHeight="120" pickOnBounds="true" preserveRatio="true">-->
+<!--            <image>-->
+<!--                <Image url="@/images/default_avatar.png" />-->
+<!--            </image>-->
+<!--        </ImageView>-->
+<!--    </VBox>-->
+
+    <VBox styleClass="form-section">
+        <Label text="Personal Information" styleClass="section-header"/>
+        <HBox styleClass="info-row">
+            <Label text="Full Name:" styleClass="field-label"/>
+            <Label fx:id="fullNameLabel" styleClass="field-value"/>
+        </HBox>
+        <HBox styleClass="info-row">
+            <Label text="Email:" styleClass="field-label"/>
+            <Label fx:id="emailLabel" styleClass="field-value"/>
+        </HBox>
+        <HBox styleClass="info-row">
+            <Label text="Role:" styleClass="field-label"/>
+            <Label fx:id="roleLabel" styleClass="field-value"/>
+        </HBox>
+        <VBox fx:id="officeNameContainer">
+            <HBox styleClass="info-row">
+                <Label text="Office:" styleClass="field-label"/>
+                <Label fx:id="officeNameLabel" styleClass="field-value"/>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <Label fx:id="errorMessageLabel" styleClass="error-message-label" wrapText="true"/>
+
+</VBox>

@@ -1,0 +1,32 @@
+/* Add these styles to your request-management.css */
+
+/* Ensure table cells show their content */
+.data-table .table-cell {
+    -fx-alignment: CENTER_LEFT; /* Changed from CENTER to CENTER_LEFT for text alignment */
+    -fx-text-fill: #333333; /* Ensure dark text color */
+    -fx-font-size: 1.0em;
+    -fx-padding: 8px 10px; /* Add some padding */
+}
+
+/* Specifically style the item name column */
+#itemNameColumn .table-cell {
+    -fx-alignment: CENTER_LEFT; /* Left align for text */
+    -fx-font-weight: normal;
+}
+
+/* Style the quantity column differently */
+#itemQuantityColumn .table-cell {
+    -fx-alignment: CENTER; /* Center align numbers */
+    -fx-font-weight: bold;
+}
+
+/* Make sure text isn't being clipped */
+.table-view .column-header,
+.table-view .table-cell {
+    -fx-label-padding: 0 10px 0 10px; /* Add padding to prevent clipping */
+}
+
+/* Ensure table rows have proper height */
+.data-table .table-row-cell {
+    -fx-cell-size: 35px; /* Set a fixed row height */
+}

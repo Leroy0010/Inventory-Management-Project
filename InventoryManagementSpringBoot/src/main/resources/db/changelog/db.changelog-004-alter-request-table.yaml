@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: alter-request-table
+      author: leroy
+      changes:
+        - addColumn:
+            tableName: requests
+            columns:
+              - column:
+                  name: fulfilled_at
+                  type: TIMESTAMP
+              - column:
+                  name: fulfilled_by
+                  type: int
+                  constraints:
+                    foreignKeyName: fk_request_fulfiller
+                    references: users(id)

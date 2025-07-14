@@ -1,0 +1,193 @@
+/* Base Top Bar */
+.top-bar {
+    -fx-background-color: #2c3e50; /* Dark blue/grey */
+    -fx-border-color: #34495e;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 8, 0, 0, 3); /* Slightly stronger shadow */
+    -fx-alignment: CENTER_LEFT; /* Ensure vertical centering of content */
+}
+
+/* Logo Group */
+.top-bar .image-view {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 3, 0, 0, 1);
+    -fx-background-radius: 50%;
+}
+
+/* Icon Buttons (Sidebar Toggle, Notification Button) */
+.icon-button, .cart-button, .notification-button { /* Combined styles for similar buttons */
+    -fx-background-color: transparent;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px; /* Increased padding for larger clickable area */
+    -fx-cursor: hand;
+    -fx-transition: -fx-background-color 0.2s ease-in-out;
+}
+
+.icon-button:hover, .cart-button:hover, .notification-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1); /* Subtle hover effect */
+}
+
+.icon-button:pressed, .cart-button:pressed, .notification-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2); /* Pressed state */
+}
+
+/* Navigation Buttons (Back/Forward) */
+.nav-buttons .nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px;
+    -fx-cursor: hand;
+    -fx-transition: -fx-background-color 0.2s ease-in-out;
+}
+
+.nav-buttons .nav-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-buttons .nav-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* FontIcon Colors for Buttons */
+.icon-button .font-icon,
+.nav-button .font-icon,
+.cart-button .font-icon,
+.notification-button .font-icon {
+    -fx-fill: white; /* Default icon color */
+}
+
+/* User Menu */
+.user-menu {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 5 10 5 5;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+    -fx-transition: -fx-background-color 0.2s ease-in-out;
+}
+
+.user-menu .label {
+    -fx-text-fill: white;
+}
+
+.user-menu:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-menu .graphic-container .font-icon { /* Target the FontIcon inside the graphic container */
+    -fx-fill: white;
+}
+
+/* Menu Items */
+.user-menu .menu-item {
+    -fx-pref-width: 150;
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: white;
+    -fx-padding: 8 15 8 15;
+    -fx-cursor: hand;
+    -fx-transition: -fx-background-color 0.2s ease-in-out;
+}
+
+.user-menu .menu-item .label {
+    -fx-text-fill: white;
+}
+
+.user-menu .menu-item:hover {
+    -fx-background-color: #34495e;
+}
+
+.user-menu .menu-item .graphic-container {
+    -fx-padding: 0 10 0 0;
+}
+
+/* Cart and Notification StackPanes */
+.cart-notification-stack-pane {
+    -fx-alignment: CENTER; /* Align children (button and badge) in the center */
+    -fx-padding: 0;
+    -fx-cursor: hand; /* Cursor for the whole clickable area */
+}
+
+/* Cart Icon */
+.cart-icon {
+    -fx-fill: white;
+    -fx-icon-size: 20px;
+    -fx-transition: -fx-fill 0.2s ease-in-out;
+}
+.cart-notification-stack-pane:hover .cart-icon {
+    -fx-fill: #3498db; /* Blue color on hover */
+}
+
+/* Notification Icon */
+.notification-icon { /* New style class for notification icon */
+    -fx-fill: white;
+    -fx-icon-size: 20px;
+    -fx-transition: -fx-fill 0.2s ease-in-out;
+}
+.cart-notification-stack-pane:hover .notification-icon { /* Apply hover to parent stackpane */
+    -fx-fill: #3498db; /* Blue color on hover */
+}
+
+
+/* Badges (Cart and Notification) */
+.cart-badge, .notification-badge { /* Combined styles for both badges */
+    -fx-background-color: #e74c3c; /* Red background */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 9px; /* Smaller font for badge */
+    -fx-min-width: 16px;
+    -fx-min-height: 16px;
+    -fx-padding: 0 4px; /* Horizontal padding for numbers > 9 */
+    -fx-alignment: center;
+    -fx-background-radius: 50%; /* Makes the badge round */
+    -fx-border-color: #2c3e50; /* Border color matches top bar background */
+    -fx-border-width: 1px; /* Small border for definition */
+    -fx-translate-x: 10px;  /* Adjust horizontal position relative to icon center */
+    -fx-translate-y: -10px; /* Adjust vertical position relative to icon center */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 3, 0, 0, 1); /* Stronger shadow for badge */
+    -fx-transition: -fx-scale-x 0.2s, -fx-scale-y 0.2s;
+    -fx-z-index: 10; /* Ensure badge is on top (conceptual in JavaFX, but good practice) */
+}
+
+/* Hover effect for badges when their parent StackPane is hovered */
+.cart-notification-stack-pane:hover .cart-badge,
+.cart-notification-stack-pane:hover .notification-badge {
+    -fx-scale-x: 1.15; /* Slightly enlarge badge on container hover */
+    -fx-scale-y: 1.15;
+}
+
+/* Hide badges if their text is "0" (or empty, or not visible) */
+/*
+.cart-badge[text="0"], .notification-badge[text="0"] {
+    -fx-opacity: 0;
+    -fx-scale-x: 0;
+    -fx-scale-y: 0;
+    -fx-translate-x: 0;
+    -fx-translate-y: 0;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+    -fx-padding: 0;
+    -fx-managed: false;
+    -fx-visible: false;
+}
+*/
+
+/* TEMPORARY DEBUGGING RULE */
+.cart-badge[text="0"], .notification-badge[text="0"] {
+    -fx-background-color: blue !important; /* Make it undeniably blue */
+    -fx-font-size: 20px !important;       /* Make font huge */
+}
+
+
+/* In topbar.css - make more specific */
+.top-bar .cart-notification-stack-pane .cart-badge[text="0"],
+.top-bar .cart-notification-stack-pane .notification-badge[text="0"] {
+    -fx-opacity: 0 !important; /* Force it */
+    -fx-scale-x: 0 !important;
+    -fx-scale-y: 0 !important;
+    -fx-translate-x: 0 !important;
+    -fx-translate-y: 0 !important;
+    -fx-min-width: 0 !important;
+    -fx-min-height: 0 !important;
+    -fx-padding: 0 !important;
+    -fx-managed: false !important;
+}

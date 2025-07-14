@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox stylesheets="@../../styles/notification.css" alignment="TOP_CENTER" spacing="15.0" styleClass="notification-page-container" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.leroy.inventorymanagementfx.controller.NotificationPageController">
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+
+    <Label styleClass="page-title" text="Your Notifications">
+        <font>
+            <Font name="System Bold" size="28.0" />
+        </font>
+        <VBox.margin>
+            <Insets bottom="10.0" />
+        </VBox.margin>
+    </Label>
+
+    <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="header-controls">
+        <Label fx:id="unreadCountLabel" text="Unread: 0" styleClass="unread-count-label">
+            <font>
+                <Font size="16.0" />
+            </font>
+        </Label>
+        <HBox HBox.hgrow="ALWAYS" /> <Button fx:id="markAllReadButton" mnemonicParsing="false" onAction="#handleMarkAllRead" text="Mark All As Read" styleClass="action-button">
+        <cursor>
+            <Cursor fx:constant="HAND" />
+        </cursor>
+    </Button>
+        <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#handleRefresh" text="Refresh" styleClass="action-button">
+            <cursor>
+                <Cursor fx:constant="HAND" />
+            </cursor>
+        </Button>
+    </HBox>
+
+    <ListView fx:id="notificationListView" VBox.vgrow="ALWAYS" styleClass="notification-list-view" />
+
+    <Label fx:id="emptyStateLabel" text="You have no new notifications." visible="false" managed="false" styleClass="empty-state-label">
+        <VBox.margin>
+            <Insets top="50.0" />
+        </VBox.margin>
+    </Label>
+
+</VBox>

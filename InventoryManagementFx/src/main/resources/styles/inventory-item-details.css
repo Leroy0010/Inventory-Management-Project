@@ -1,0 +1,161 @@
+/* Base Styles */
+.item-details-view {
+    -fx-background-color: #ffffff;
+    -fx-pref-width: 500px;
+    -fx-pref-height: 600px;
+}
+
+/* Header Styles */
+.header-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2b7a78;
+}
+
+.close-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.close-button:hover {
+    -fx-text-fill: #e74c3c;
+}
+
+.separator {
+    -fx-padding: 5 0;
+}
+
+/* Field Styles */
+.field-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #555555;
+}
+
+.field-value {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+.description-area {
+    -fx-font-size: 13px;
+    -fx-pref-height: 100px;
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #eeeeee;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+/* Image Styles */
+.image-view {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 1);
+}
+
+.action-buttons {
+    -fx-padding: 10px 0 0 0;
+    -fx-alignment: center;
+}
+
+/* === BASE ACTION BUTTON STYLES - Aggressive Reset === */
+.action-button {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: white;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 2, 0, 0, 1);
+    -fx-transition: all 0.2s ease;
+
+    /* AGGRESSIVE RESET for Button defaults */
+    -fx-background-color: transparent; /* Start with transparent to ensure no default color */
+    -fx-background-insets: 0;
+    -fx-background-image: null;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-highlight-fill: transparent; /* Remove highlight on focus */
+    -fx-text-box-border: transparent; /* Remove text box border on focus */
+}
+
+/* Hover and Pressed effects for ALL action buttons */
+.action-button:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.18), 4, 0, 0, 2);
+    -fx-translate-y: -1px;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+.action-button:pressed {
+    -fx-translate-y: 0;
+    -fx-opacity: 0.9;
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+}
+
+/* --- General style for FontIcon with "button-icon" class (matches FXML) --- */
+.button-icon {
+    -fx-fill: white;
+    -fx-font-size: 14px;
+}
+
+/* === SPECIFIC BUTTON STYLES (Edit/Delete/Add to Cart) === */
+
+/* --- Storekeeper Buttons (Edit/Delete) --- */
+.storekeeper-buttons .action-button {
+    -fx-min-width: 38px;
+    -fx-min-height: 38px;
+    -fx-padding: 0;
+    -fx-background-radius: 19px;
+    -fx-shape: "M 0 19 A 19 19 0 0 1 19 0 L 19 0 A 19 19 0 0 1 38 19 L 38 19 A 19 19 0 0 1 19 38 L 19 38 A 19 19 0 0 1 0 19 Z";
+}
+
+/* Override icon size specifically for the round buttons */
+.storekeeper-buttons .action-button .button-icon {
+    -fx-font-size: 18px;
+}
+
+/* Edit Button - Specific colors */
+.action-button.edit-button {
+    -fx-background-color: #3498db;
+}
+.action-button.edit-button:hover {
+    -fx-background-color: #2980b9;
+}
+.action-button.edit-button:pressed {
+    -fx-background-color: #2472a4;
+}
+
+/* Delete Button - Specific colors */
+.action-button.delete-button {
+    -fx-background-color: #e74c3c;
+}
+.action-button.delete-button:hover {
+    -fx-background-color: #c0392b;
+}
+.action-button.delete-button:pressed {
+    -fx-background-color: #a5281b;
+}
+
+/* --- Add to Cart Button --- */
+.action-button.add-to-cart-button {
+    -fx-background-color: #2ecc71;
+    -fx-min-width: 150px;
+    -fx-padding: 10px 20px;
+    -fx-font-size: 14px;
+}
+.action-button.add-to-cart-button:hover {
+    -fx-background-color: #27ae60;
+}
+.action-button.add-to-cart-button:pressed {
+    -fx-background-color: #219653;
+}
+
+/* Icon specifically for Add to Cart Button */
+.action-button.add-to-cart-button .button-icon {
+    -fx-fill: white;
+    -fx-font-size: 16px;
+}

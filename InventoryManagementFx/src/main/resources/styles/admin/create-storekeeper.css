@@ -1,0 +1,17 @@
+#formContainer {
+    -fx-border-color: transparent; /* Remove visible border */
+    -fx-border-width: 0;
+    -fx-padding: 0; /* Remove padding if FormsFX adds it internally */
+}
+
+/* FormsFX renderer tweaks to remove its default borders/backgrounds */
+.form-renderer {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.form-renderer > * {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+    -fx-padding: 8px;
+}

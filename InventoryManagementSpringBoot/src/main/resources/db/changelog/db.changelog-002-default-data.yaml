@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: seed-roles
+      author: leroy
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: ADMIN
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: STAFF
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: STOREKEEPER
+
+  - changeSet:
+      id: seed-request-status
+      author: leroy
+      changes:
+        - insert:
+            tableName: request_status
+            columns:
+              - column:
+                  name: name
+                  value: PENDING
+        - insert:
+            tableName: request_status
+            columns:
+              - column:
+                  name: name
+                  value: APPROVED
+        - insert:
+            tableName: request_status
+            columns:
+              - column:
+                  name: name
+                  value: REJECTED
+        - insert:
+            tableName: request_status
+            columns:
+              - column:
+                  name: name
+                  value: FULFILLED

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+
+<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.leroy.inventorymanagementfx.controller.InventoriesPageController">
+   <center>
+      <VBox spacing="10.0" style="-fx-padding: 15;" BorderPane.alignment="CENTER">
+         <children>
+            <TextField fx:id="searchTerm" promptText="Search..." />
+            <ListView fx:id="listView" prefHeight="200.0" prefWidth="200.0" />
+            <TableView fx:id="myTable" prefHeight="200.0" prefWidth="200.0">
+              <columns>
+                <TableColumn fx:id="nameField" prefWidth="75.0" text="Name" />
+                <TableColumn fx:id="emailField" prefWidth="150.0" text="Email" />
+                  <TableColumn fx:id="ageField" prefWidth="75.0" text="Age" />
+              </columns>
+            </TableView>
+            <Label fx:id="selectedItem" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Select An Item">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <ComboBox fx:id="searchableComboBox" editable="true" onAction="#getItem" prefWidth="150.0" promptText="Select an item">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </ComboBox>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>

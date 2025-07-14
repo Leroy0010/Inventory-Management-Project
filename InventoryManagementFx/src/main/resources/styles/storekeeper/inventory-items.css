@@ -1,0 +1,146 @@
+/* Base Styles */
+.root {
+    -fx-background-color: #f5f7fa;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.container {
+    -fx-padding: 20;
+    -fx-spacing: 15;
+}
+
+
+.title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2b7a78;
+}
+
+/* Search and Filter Bar */
+.search-filter-bar {
+    -fx-padding: 10 0;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-padding: 10;
+}
+
+.search-field {
+    -fx-pref-width: 250px;
+    -fx-padding: 5 10 5 30;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+}
+
+.filter-combo, .sort-combo {
+    -fx-pref-width: 150px;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+}
+
+.refresh-button {
+    -fx-background-color: transparent;
+    -fx-padding: 5;
+    -fx-cursor: hand;
+}
+
+.refresh-button:hover {
+    -fx-text-fill: #3aafa9;
+}
+
+.view-toggle-button {
+    -fx-background-color: transparent;
+    -fx-padding: 5;
+    -fx-cursor: hand;
+}
+
+.view-toggle-button:selected {
+    -fx-background-color: #e0f0ef;
+    -fx-background-radius: 3;
+}
+
+/* Items Container */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 5;
+    -fx-fit-to-height: true;
+}
+
+.items-container {
+    -fx-alignment: TOP_LEFT;
+    -fx-padding: 10;
+    -fx-padding-bottom: 25;
+}
+
+.grid-view {
+    -fx-alignment: TOP_LEFT;
+}
+
+.list-view {
+    -fx-alignment: CENTER;
+}
+
+.table-column {
+    -fx-alignment: CENTER;
+    -fx-font-weight: bold;
+}
+
+/* Pagination */
+.pagination-container {
+    -fx-padding: 15 0 0 0;
+    -fx-spacing: 15;
+}
+
+.pagination-button {
+    -fx-background-color: #3aafa9;
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-padding: 5 10;
+    -fx-cursor: hand;
+}
+
+.pagination-button:hover {
+    -fx-background-color: #2b7a78;
+}
+
+.pagination-button:disabled {
+    -fx-background-color: #95a5a6;
+}
+
+.page-info-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #555555;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    -fx-progress-color: #3aafa9;
+    -fx-pref-width: 50;
+    -fx-pref-height: 50;
+}
+
+/* styles/storekeeper/inventory-items.css */
+
+.action-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 5px;
+    -fx-cursor: hand;
+}
+
+.action-button:hover {
+    -fx-background-color: #e0e0e0;
+}
+
+/* Specific colors for icons */
+.action-button .ikonli-font-icon {
+    -fx-fill: #3aafa9; /* A common color for action buttons */
+    -fx-icon-size: 16px; /* Adjust size as needed */
+}
+
+.action-button .ikonli-font-icon:hover {
+     -fx-fill: #2b7a78; /* Darker on hover */
+}
+

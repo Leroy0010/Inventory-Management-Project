@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/db.changelog-001-initial-schema.yaml
+  - include:
+      file: db/changelog/db.changelog-002-default-data.yaml
+  - include:
+     file: db/changelog/db.changelog-003-alter-tables.yaml
+
+  - include:
+      file: db/changelog/db.changelog-004-alter-request-table.yaml

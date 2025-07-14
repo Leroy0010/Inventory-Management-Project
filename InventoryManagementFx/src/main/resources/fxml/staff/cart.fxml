@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<?import javafx.scene.layout.StackPane?>
+<StackPane prefHeight="600.0" prefWidth="800.0" styleClass="root-pane" stylesheets="@/styles/staff/cart.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.leroy.inventorymanagementfx.controller.staff.CartController">
+    <VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="800.0" >
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        </padding>
+        <Label styleClass="title-label" text="Inventory Cart">
+            <font>
+                <Font name="System Bold" size="24.0" />
+            </font>
+            <VBox.margin>
+                <Insets bottom="20.0" />
+            </VBox.margin>
+        </Label>
+        <TableView fx:id="cartTableView" prefHeight="350.0" prefWidth="760.0" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="idColumn" prefWidth="75.0" text="ID" />
+                <TableColumn fx:id="itemIdColumn" prefWidth="100.0" text="Item ID" />
+                <TableColumn fx:id="itemNameColumn" prefWidth="300.0" text="Item Name" />
+                <TableColumn fx:id="quantityColumn" prefWidth="100.0" text="Quantity" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+            <VBox.margin>
+                <Insets bottom="20.0" />
+            </VBox.margin>
+        </TableView>
+        <HBox alignment="CENTER" spacing="10.0">
+            <VBox.margin>
+                <Insets bottom="10.0" />
+            </VBox.margin>
+            <Label text="Item ID:" />
+            <TextField fx:id="itemIdField" promptText="Enter Item ID" />
+            <Label text="Quantity:" />
+            <TextField fx:id="quantityField" promptText="Enter Quantity" />
+        </HBox>
+        <HBox alignment="CENTER" spacing="15.0">
+            <Button onAction="#handleAddItem" styleClass="action-button,add-button" text="Add Item">
+                <graphic>
+                    <FontIcon iconLiteral="fas-plus-circle" styleClass="button-icon" />
+                </graphic>
+            </Button>
+            <Button onAction="#handleRemoveItem" styleClass="action-button,remove-button" text="Remove Item">
+                <graphic>
+                    <FontIcon iconLiteral="fas-minus-circle" styleClass="button-icon" />
+                </graphic>
+            </Button>
+            <Button onAction="#handleUpdateItem" styleClass="action-button,update-button" text="Update Item">
+                <graphic>
+                    <FontIcon iconLiteral="fas-sync-alt" styleClass="button-icon" />
+                </graphic>
+            </Button>
+            <Button onAction="#handleClearCart" styleClass="action-button,clear-button" text="Clear Cart">
+                <graphic>
+                    <FontIcon iconLiteral="fas-trash-alt" styleClass="button-icon" />
+                </graphic>
+            </Button>
+            <Button onAction="#handleGetCart" styleClass="action-button,refresh-button" text="Refresh Cart">
+                <graphic>
+                    <FontIcon iconLiteral="fas-redo" styleClass="button-icon" />
+                </graphic>
+            </Button>
+            <Button onAction="#handleSubmitRequest" styleClass="action-button,submit-button" text="Submit Request">
+                <graphic>
+                    <FontIcon iconLiteral="fas-paper-plane" styleClass="button-icon" />
+                </graphic>
+            </Button>
+        </HBox>
+        <Label fx:id="statusLabel" alignment="CENTER" prefWidth="760.0" styleClass="status-label" textFill="#e00000">
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+        </Label>
+    </VBox>
+</StackPane>
