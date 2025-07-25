@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://database:5432/InventoryManagementDB
-    username: postgres
-    password: leroy001
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   liquibase:
@@ -10,7 +10,7 @@ spring:
     enabled: true
   application:
     name: InventoryManagementSpringBoot
-  devtools:
+  devtools: # These settings are generally for local development and might not have an effect in a Dockerized production environment
     restart:
       enabled: true
     livereload:
@@ -21,8 +21,9 @@ spring:
       client:
         registration:
           google:
-            client-id: 216499047134-fa5831sf4t6e8imuidcfiafb462sv7d0.apps.googleusercontent.com
-            client-secret: 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
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            # For desktop apps, "urn:ietf:wg:oauth:2.0:oob" is common for out-of-band flow
             redirect-uri: "urn:ietf:wg:oauth:2.0:oob"
             scope:
               - email
@@ -38,8 +39,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: leroydennisa@gmail.com
-    password: cmxh wxmb ugeg sqgy
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -49,7 +50,7 @@ spring:
             required: true
           ssl:
             protocols: TLSv1.2
-        test-connection: true
+        test-connection: false # You might want to set this to false for production if it causes issues on startup
   task:
     execution:
       pool:
@@ -58,10 +59,8 @@ spring:
         queue-capacity: 100
       thread-name-prefix: MailSender-
 
-
-
 jwt:
-  secret: aHNma3VoZGZodWl3Nzg0Mzc4aDJyOzIzdWlmeXVrNDM4N3dleWZ2dWtzZWZoajtlcml1bGdyaWxldWlsc2QuMzJyM2tqLDIzNzgzNDJpeXJ3
+  secret: ${JWT_SECRET}
   expiration: 86400000
 
 server:
@@ -69,8 +68,13 @@ server:
     session:
       cookie:
         same-site: LAX
-        secure: false
+        # IMPORTANT: For Render (HTTPS), this should be 'true' in production.
+        # You can either set it here and remember to change it, or use an env var.
+        # Let's set it to true for Render's HTTPS environment.
+        secure: true
 
 app:
   frontend:
-    base-url: localhost:80
+    # This will be the public URL of your Spring Boot backend on Render,
+    # as your JavaFX app will interact directly with your backend's public endpoint.
+    base-url: ${FRONTEND_BASE_URL}
