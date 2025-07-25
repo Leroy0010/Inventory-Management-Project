@@ -29,8 +29,6 @@ This system supports multi-role access (Admin, Staff, Storekeeper) with authenti
 ### 👨‍💼 Admin
 
 * Manage users, roles, and departments
-* Approve/track staff requests
-* Assign stock and reorder alerts
 
 ### 👷 Staff
 
