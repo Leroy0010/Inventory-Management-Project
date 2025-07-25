@@ -8,13 +8,13 @@ WORKDIR /app
 # If pom.xml doesn't change, this layer will be cached
 COPY pom.xml .
 
-
 # Copy the Maven wrapper files and script
-# The `.` ensures it copies `mvnw`, `mvnw.cmd` and the entire `.mvn` directory
 COPY .mvn .mvn/
 COPY mvnw .
 COPY mvnw.cmd .
 
+# Give execute permissions to the mvnw script
+RUN chmod +x mvnw
 
 # Copy the source code
 COPY src ./src
@@ -43,8 +43,4 @@ COPY --from=build /app/target/classes/db /app/resources/db/
 EXPOSE 8080
 
 # Run the application
-
 ENTRYPOINT ["java", "-jar", "app.jar"]
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
-
