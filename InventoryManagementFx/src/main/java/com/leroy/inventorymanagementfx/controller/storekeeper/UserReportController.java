@@ -57,11 +57,11 @@ public class UserReportController {
         setupTableColumns();
 
         // Load initial data
-        try {
-            loadUserReportData(null);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            loadUserReportData(null);
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     /**

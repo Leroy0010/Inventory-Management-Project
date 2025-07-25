@@ -25,7 +25,7 @@ public class UserReportService {
         UserReportRequest request = new UserReportRequest(userId, year);
         String json = objectMapper.writeValueAsString(request);
         HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(BACKEND_URL + "/api/report/user"))
+                .uri(URI.create(BACKEND_URL + "/api/reports/user"))
                 .header("Authorization", "Bearer " + AuthTokenHolder.getJwtToken())
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();

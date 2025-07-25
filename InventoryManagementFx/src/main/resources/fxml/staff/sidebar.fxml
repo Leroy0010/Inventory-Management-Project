@@ -16,7 +16,7 @@
     </Rectangle>
 
     <!-- Sidebar Items -->
-    <Button fx:id="dashboardBtn" styleClass="sidebar-item" text="Dashboard" />
+    <Button fx:id="dashboardBtn" styleClass="sidebar-item" visible="false" text="Dashboard" />
 
     <Button fx:id="inventoryItemsBtn" layoutX="10.0" layoutY="95.0" mnemonicParsing="false" styleClass="sidebar-item" text="Inventory Items" />
     <Button fx:id="cartBtn" layoutX="10.0" layoutY="95.0" mnemonicParsing="false" styleClass="sidebar-item" text="Cart" />

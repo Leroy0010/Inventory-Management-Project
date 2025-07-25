@@ -16,6 +16,6 @@ public interface InventoryItemMapper {
     @Mapping(target = "department", ignore = true)
     InventoryItem toInventoryItemOnUpdate(UpdateInventoryItemDto updateInventoryItemDto);
 
-    InventoryItemNameAndIdResponseDto toInventoryItemNameAndIdDto(InventoryItem inventoryItem);
 
+    InventoryItemNameAndIdResponseDto toInventoryItemNameAndIdDto(InventoryItem inventoryItem);
 }

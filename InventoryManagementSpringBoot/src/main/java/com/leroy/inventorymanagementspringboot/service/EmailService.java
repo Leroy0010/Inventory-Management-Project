@@ -1,3 +1,4 @@
+// EmailService.java
 package com.leroy.inventorymanagementspringboot.service;
 
 import jakarta.mail.internet.MimeMessage;
@@ -7,10 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async; // Import this
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.spring6.SpringTemplateEngine; // Import this for Thymeleaf
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.nio.charset.StandardCharsets;
 
@@ -20,7 +21,7 @@ public class EmailService {
     private static final Logger logger = LogManager.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
-    private final SpringTemplateEngine templateEngine; // Inject Thymeleaf template engine
+    private final SpringTemplateEngine templateEngine;
 
     @Value("${spring.mail.username}")
     private String senderEmail;
@@ -34,15 +35,15 @@ public class EmailService {
     }
 
     @Async
-    public void sendAccountCreatedNotification(String toEmail, String userName) { // Renamed method
+    public void sendAccountCreatedNotification(String toEmail, String userName, String generatedPassword) { // Added generatedPassword parameter
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
             Context context = new Context();
             context.setVariable("userName", userName);
-            // Use a simpler template, or repurpose registration-welcome to be just "account created"
-            String htmlContent = templateEngine.process("email/account-created", context); // New template name
+            context.setVariable("generatedPassword", generatedPassword); // Pass the generated password to the template
+            String htmlContent = templateEngine.process("email/account-created", context);
 
             helper.setTo(toEmail);
             helper.setFrom(senderEmail);
@@ -64,7 +65,6 @@ public class EmailService {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
-            // The frontend will need to correctly construct this URL based on its routing
             String resetLink = frontendBaseUrl + "/reset-password?token=" + token;
             Context context = new Context();
             context.setVariable("userName", userName);

@@ -40,15 +40,13 @@ public class StaffSidebarController implements NeedsMainController, Initializabl
 
                 // Add style class for selection management
                 button.getStyleClass().add("selectable-sidebar-item");
-                button.setOnAction(event -> {
-                    handleButtonSelection(button);
-                });
+                button.setOnAction(event -> handleButtonSelection(button));
 
             }
         }
 
         // Set initial selection
-        setSelectedButton(dashboardBtn);
+        setSelectedButton(inventoryItemsBtn);
     }
 
     /**

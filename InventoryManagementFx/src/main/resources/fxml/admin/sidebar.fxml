@@ -15,7 +15,7 @@
     </Rectangle>
 
     <!-- Sidebar Items -->
-    <Button fx:id="dashboardBtn" styleClass="sidebar-item" text="Dashboard" />
+    <Button fx:id="dashboardBtn" visible="false" styleClass="sidebar-item" text="Dashboard" />
     <Button fx:id="addDepartmentBtn" onAction="#loadAddDepartmentPage" styleClass="sidebar-item" text="Add Department" />
     <Button fx:id="addStoreKeeperBtn" onAction="#loadAddStoreKeeperPage" styleClass="sidebar-item" text="Add Store Keeper/Admin" />
     <Button fx:id="settingsBtn" onAction="#loadSettingsPage" styleClass="sidebar-item" text="Settings" />

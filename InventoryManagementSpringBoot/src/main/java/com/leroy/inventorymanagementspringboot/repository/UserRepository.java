@@ -6,6 +6,7 @@ import com.leroy.inventorymanagementspringboot.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -33,4 +34,7 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     Optional<List<User>> findAllByIdNot(int id);
 
     Optional<List<User>> findAllByOffice_DepartmentAndIdNot(Department department, int id);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.office.department = :department")
+    long countByDepartment(@Param("department") Department department);
 }

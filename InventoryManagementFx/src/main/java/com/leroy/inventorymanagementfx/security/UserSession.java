@@ -15,6 +15,8 @@ public final class UserSession {
     private static final Logger logger = LogManager.getLogger(UserSession.class);
     private static final String SESSION_FILE = "user_session.properties";
     private static final Path SESSION_FILE_PATH = Paths.get(SESSION_FILE);
+    private static final long SESSION_VALID_DURATION_MS = 24 * 60 * 60 * 1000L; // 24 hours
+
 
     private static class Holder {
         static final UserSession INSTANCE = new UserSession();
@@ -51,6 +53,8 @@ public final class UserSession {
             props.setProperty("firstName", firstName.get());
             props.setProperty("role", role.get());
             props.setProperty("authenticated", "true");
+            props.setProperty("timestamp", String.valueOf(System.currentTimeMillis()));
+
         }
 
         try (OutputStream output = Files.newOutputStream(Paths.get(SESSION_FILE))) {
@@ -71,23 +75,39 @@ public final class UserSession {
         try (InputStream input = Files.newInputStream(SESSION_FILE_PATH)) {
             props.load(input);
 
+            String timestampStr = props.getProperty("timestamp");
+            if (timestampStr == null) {
+                logger.warn("Session timestamp missing. Clearing session.");
+                clearSessionFile();
+                return;
+            }
+
+            long savedTime = Long.parseLong(timestampStr);
+            long currentTime = System.currentTimeMillis();
+
+            if ((currentTime - savedTime) > SESSION_VALID_DURATION_MS) {
+                logger.info("Session expired. Clearing session.");
+                clearSessionFile();
+                return;
+            }
+
             if ("true".equals(props.getProperty("authenticated"))) {
-                
                 id.set(Integer.parseInt(props.getProperty("id")));
                 firstName.set(props.getProperty("firstName"));
                 role.set(props.getProperty("role"));
                 authenticated.set(true);
-                
+
                 logger.info("Loaded existing session for user {} (ID: {}, Role: {})",
                         props.getProperty("firstName"),
                         props.getProperty("id"),
                         props.getProperty("role"));
             }
+
         } catch (IOException e) {
             logger.error("Failed to load session from {}: {}", SESSION_FILE, e.getMessage(), e);
             clearSessionFile();
         } catch (NumberFormatException e) {
-            logger.error("Invalid ID format in session file: {}", e.getMessage(), e);
+            logger.error("Invalid number format in session file: {}", e.getMessage(), e);
             clearSessionFile();
         }
     }

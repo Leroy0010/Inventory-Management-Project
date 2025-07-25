@@ -74,7 +74,7 @@ public class TransactionReportController {
         netChangeColumn.setCellValueFactory(new PropertyValueFactory<>("netChange"));
 
         // Load initial data
-        loadTransactionReportData(null);
+//        loadTransactionReportData(null);
     }
 
     /**

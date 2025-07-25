@@ -1,3 +1,4 @@
+/* sidebar.css (Updated with ScrollPane Styling) */
 /* Base Sidebar Styling */
 .sidebar {
     -fx-background-color: #34495e;
@@ -68,9 +69,7 @@
     -fx-padding: 0 0 0 15px; /* Indent sub-items */
 }
 
-.sidebar-sub-submenu {
-    -fx-padding: 0 0 0 30px; /* Indent sub-sub-items further */
-}
+/* Removed .sidebar-sub-submenu */
 
 .sidebar-subitem {
     -fx-background-color: transparent;
@@ -96,4 +95,49 @@
 .sidebar-subitem:active, .sidebar-subitem:focused {
     -fx-background-color: #3498db;
     -fx-text-fill: white;
+}
+
+/* Style for the toggle icon */
+.sidebar-item .toggle-icon {
+    -fx-icon-color: #ecf0f1;
+    -fx-rotate: 0deg; /* Initial state: pointing down */
+    -fx-transition: -fx-rotate 0.2s ease-in-out; /* Smooth rotation transition */
+}
+
+.sidebar-item.expanded .toggle-icon {
+    -fx-rotate: -90deg; /* Rotated state: pointing left (or up, depending on preference) */
+}
+
+/* New: Styling for the ScrollPane's scrollbars to make them less intrusive */
+.scroll-pane {
+    -fx-background-color: transparent; /* Make ScrollPane background transparent */
+}
+
+.scroll-pane .scroll-bar:vertical .thumb,
+.scroll-pane .scroll-bar:horizontal .thumb {
+    -fx-background-color: #5d6d7e; /* Darker gray for thumb */
+    -fx-background-insets: 0;
+    -fx-background-radius: 5px;
+    -fx-opacity: 0.6; /* Make them slightly transparent */
+}
+
+.scroll-pane .scroll-bar:vertical .track,
+.scroll-pane .scroll-bar:horizontal .track {
+    -fx-background-color: #4a5a6a; /* Slightly lighter track color */
+    -fx-background-insets: 0;
+    -fx-background-radius: 5px;
+    -fx-opacity: 0.2; /* Make track very transparent */
+}
+
+.scroll-pane .scroll-bar:vertical .increment-button,
+.scroll-pane .scroll-bar:vertical .decrement-button,
+.scroll-pane .scroll-bar:horizontal .increment-button,
+.scroll-pane .scroll-bar:horizontal .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-pane .scroll-bar .increment-arrow,
+.scroll-pane .scroll-bar .decrement-arrow {
+    -fx-background-color: transparent;
 }

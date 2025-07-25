@@ -1,13 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            prefHeight="400.0" prefWidth="600.0">
+<!-- Removed prefHeight and prefWidth from VBox -->
+<VBox alignment="TOP_LEFT" spacing="20.0" stylesheets="@../../styles/storekeeper/dashboard-content.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.leroy.inventorymanagementfx.controller.storekeeper.DashboardController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <Label styleClass="dashboard-title" text="Storekeeper Dashboard">
+        <font>
+            <Font size="24.0" />
+        </font>
+    </Label>
 
-</AnchorPane>
+    <!-- Inventory Overview Section -->
+    <Label styleClass="section-title" text="Inventory Overview" />
+    <!-- Replaced GridPane with FlowPane for responsive card layout -->
+    <FlowPane hgap="20.0" vgap="20.0" alignment="TOP_LEFT">
+        <children>
+            <VBox styleClass="summary-card">
+                <Label styleClass="card-title" text="Total Items in Stock" />
+                <Label fx:id="totalItemsInStockLabel" styleClass="card-value" text="-" />
+            </VBox>
+            <VBox styleClass="summary-card">
+                <Label styleClass="card-title" text="Items Below Reorder Level" />
+                <Label fx:id="itemsBelowReorderLevelLabel" styleClass="card-value" text="-" />
+            </VBox>
+            <VBox styleClass="summary-card">
+                <Label styleClass="card-title" text="Issued Today" />
+                <Label fx:id="issuedTodayLabel" styleClass="card-value" text="-" />
+            </VBox>
+            <VBox styleClass="summary-card">
+                <Label styleClass="card-title" text="Received Today" />
+                <Label fx:id="receivedTodayLabel" styleClass="card-value" text="-" />
+            </VBox>
+            <VBox styleClass="summary-card">
+                <Label styleClass="card-title" text="Issued This Month" />
+                <Label fx:id="issuedThisMonthLabel" styleClass="card-value" text="-" />
+            </VBox>
+            <VBox styleClass="summary-card">
+                <Label styleClass="card-title" text="Received This Month" />
+                <Label fx:id="receivedThisMonthLabel" styleClass="card-value" text="-" />
+            </VBox>
+            <VBox styleClass="summary-card">
+                <Label styleClass="card-title" text="Total Staff in Dept." />
+                <Label fx:id="totalStaffInDepartmentLabel" styleClass="card-value" text="-" />
+            </VBox>
+            <VBox styleClass="summary-card">
+                <Label styleClass="card-title" text="Total Offices in Dept." />
+                <Label fx:id="totalOfficesInDepartmentLabel" styleClass="card-value" text="-" />
+            </VBox>
+        </children>
+    </FlowPane>
+
+    <!-- Other dashboard sections will go here in subsequent steps -->
+</VBox>

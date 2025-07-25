@@ -13,7 +13,8 @@ public enum StorekeeperPages implements FxmlPage {
     ADD_BATCH("/fxml/storekeeper/add-batch.fxml", "storekeeper-add-batch"),
     REQUESTS("/fxml/storekeeper/storekeeper-requests-view.fxml", "storekeeper-requests-view"),
     TRANSACTION_REPORT("/fxml/storekeeper/transaction-report.fxml", "transaction-report"),
-    USER_REPORT("/fxml/storekeeper/user-report.fxml", "user-report");
+    USER_REPORT("/fxml/storekeeper/user-report.fxml", "user-report"),
+    ISR("/fxml/storekeeper/inventory-summary-report.fxml", "inventory-summary-report");
 
 
     private final String path;

@@ -1,0 +1,60 @@
+/* General Root Styling for the content area */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: #f4f7f6; /* Light gray background for the main content area */
+}
+
+/* Main Content Area Titles */
+.dashboard-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 10px 0;
+}
+
+.section-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+    -fx-padding: 10px 0 5px 0;
+}
+
+/* Summary Cards */
+.summary-card {
+    -fx-background-color: #ffffff;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
+    -fx-padding: 15px;
+    -fx-alignment: CENTER;
+    -fx-min-width: 250px; /* Minimum width for cards */
+    -fx-pref-height: 150px; /* Preferred height for cards */
+    -fx-spacing: 5px;
+}
+
+.card-title {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d; /* Gray text for titles */
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+}
+
+.card-value {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3498db; /* Blue for values */
+    -fx-alignment: CENTER;
+}
+
+/* Specific colors for certain cards (optional, based on meaning) */
+.summary-card.low-stock .card-value {
+    -fx-text-fill: #e74c3c; /* Red for low stock */
+}
+
+.summary-card.received .card-value {
+    -fx-text-fill: #27ae60; /* Green for received */
+}
+
+.summary-card.issued .card-value {
+    -fx-text-fill: #f39c12; /* Orange for issued */
+}

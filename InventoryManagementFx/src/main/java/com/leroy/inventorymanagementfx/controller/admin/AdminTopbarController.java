@@ -14,6 +14,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseButton;
 
 public class AdminTopbarController implements NeedsMainController, HasNotificationCount {
+    @FXML
     private MenuItem profileBtn;
     private MainController mainController;
     

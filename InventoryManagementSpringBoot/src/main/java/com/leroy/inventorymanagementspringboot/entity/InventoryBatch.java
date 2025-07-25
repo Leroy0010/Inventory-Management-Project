@@ -27,7 +27,6 @@ public class InventoryBatch {
     @Column(nullable = false)
     private int quantity;
 
-
     @Column(nullable = false, name = "remaining_quantity")
     private int remainingQuantity;
 

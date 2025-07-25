@@ -1,10 +1,13 @@
 package com.leroy.inventorymanagementspringboot.repository;
 
 import com.leroy.inventorymanagementspringboot.dto.report.UserReportItemDto;
+import com.leroy.inventorymanagementspringboot.entity.Department;
 import com.leroy.inventorymanagementspringboot.entity.InventoryItem;
 import com.leroy.inventorymanagementspringboot.entity.StockTransaction;
+import com.leroy.inventorymanagementspringboot.enums.StockTransactionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 
 import java.sql.Timestamp;
@@ -37,8 +40,10 @@ public interface StockTransactionRepository extends JpaRepository<StockTransacti
     Timestamp getFirstTransactionDate(InventoryItem item);
 
 
-
-
     List<StockTransaction> findByInventoryItem(InventoryItem item);
     List<StockTransaction> findByInventoryItemAndTransactionDateBetween(InventoryItem item, Timestamp start, Timestamp end);
+
+    // New: Count issued transactions between dates for a specific department
+    @Query("SELECT COALESCE(SUM(st.quantity), 0) FROM StockTransaction st WHERE st.transactionType = :type AND st.transactionDate BETWEEN :start AND :end AND st.department = :department")
+    long countTransactionsBetweenAndDepartment(@Param("type") StockTransactionType type, @Param("start") Timestamp start, @Param("end") Timestamp end, @Param("department") Department department);
 }

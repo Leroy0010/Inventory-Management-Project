@@ -65,6 +65,5 @@ public class InventoryBalance {
         this.quantity = i;
         this.totalValue = bigDecimal;
         this.snapshotDate = date;
-
     }
 }

@@ -1,14 +1,15 @@
-2025-07-11 23:02:08,596 INFO com.leroy.inventorymanagementfx.InventoryApplication [main] Inventory Management Application starting up
-2025-07-11 23:02:08,753 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Starting Inventory Management Application
-2025-07-11 23:02:08,795 INFO com.leroy.inventorymanagementfx.security.UserSession [JavaFX Application Thread] Loaded existing session for user Leroy (ID: 3, Role: STOREKEEPER)
-2025-07-11 23:02:08,975 INFO com.leroy.inventorymanagementfx.service.NotificationStompClient [JavaFX Application Thread] Attempting to connect STOMP client to: ws://localhost:8080/ws-notifications
-2025-07-11 23:02:08,977 DEBUG com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Loading main FXML file
-2025-07-11 23:02:09,591 ERROR com.leroy.inventorymanagementfx.service.NotificationStompClient [Thread-3] Failed to connect STOMP client
+2025-07-24 01:21:20,545 INFO com.leroy.inventorymanagementfx.InventoryApplication [main] Inventory Management Application starting up
+2025-07-24 01:21:20,890 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Starting Inventory Management Application
+2025-07-24 01:21:20,953 DEBUG com.leroy.inventorymanagementfx.security.UserSession [JavaFX Application Thread] No existing session file found at user_session.properties
+2025-07-24 01:21:20,953 WARN com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] User ID is 0. WebSocket notifications may not work correctly until a user logs in.
+2025-07-24 01:21:21,581 INFO com.leroy.inventorymanagementfx.service.NotificationStompClient [JavaFX Application Thread] Attempting to connect STOMP client to: ws://localhost:8080/ws-notifications
+2025-07-24 01:21:21,588 DEBUG com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Loading main FXML file
+2025-07-24 01:21:24,028 ERROR com.leroy.inventorymanagementfx.service.NotificationStompClient [Thread-3] Failed to connect STOMP client
 java.util.concurrent.ExecutionException: jakarta.websocket.DeploymentException: Connection failed.
 	at java.base/java.util.concurrent.CompletableFuture.wrapInExecutionException(CompletableFuture.java:347) ~[?:?]
 	at java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:442) ~[?:?]
 	at java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2119) ~[?:?]
-	at com.leroy.inventorymanagementfx.service.NotificationStompClient.lambda$connect$3(NotificationStompClient.java:102) [main/:?]
+	at com.leroy.inventorymanagementfx.service.NotificationStompClient.lambda$connect$0(NotificationStompClient.java:102) [main/:?]
 	at java.base/java.lang.Thread.run(Thread.java:1447) [?:?]
 Caused by: jakarta.websocket.DeploymentException: Connection failed.
 	at org.glassfish.tyrus.client.exception.Exceptions.deploymentException(Exceptions.java:40) ~[tyrus-client-2.2.0.jar:?]
@@ -50,7 +51,7 @@ Caused by: java.net.ConnectException: Connection refused: getsockopt
 	at org.glassfish.grizzly.threadpool.AbstractThreadPool$Worker.doWork(AbstractThreadPool.java:535) ~[grizzly-framework-4.0.2.jar:4.0.2]
 	at org.glassfish.grizzly.threadpool.AbstractThreadPool$Worker.run(AbstractThreadPool.java:515) ~[grizzly-framework-4.0.2.jar:4.0.2]
 	... 1 more
-2025-07-11 23:02:09,591 ERROR com.leroy.inventorymanagementfx.service.NotificationStompClient [SimpleAsyncTaskExecutor-1] STOMP Transport Error: jakarta.websocket.DeploymentException: Connection failed.
+2025-07-24 01:21:24,026 ERROR com.leroy.inventorymanagementfx.service.NotificationStompClient [SimpleAsyncTaskExecutor-1] STOMP Transport Error: jakarta.websocket.DeploymentException: Connection failed.
 java.util.concurrent.CompletionException: jakarta.websocket.DeploymentException: Connection failed.
 	at org.springframework.util.concurrent.FutureUtils.lambda$toSupplier$0(FutureUtils.java:78) [spring-core-6.2.8.jar:6.2.8]
 	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1814) [?:?]
@@ -94,16 +95,119 @@ Caused by: java.net.ConnectException: Connection refused: getsockopt
 	at org.glassfish.grizzly.threadpool.AbstractThreadPool$Worker.doWork(AbstractThreadPool.java:535) ~[grizzly-framework-4.0.2.jar:4.0.2]
 	at org.glassfish.grizzly.threadpool.AbstractThreadPool$Worker.run(AbstractThreadPool.java:515) ~[grizzly-framework-4.0.2.jar:4.0.2]
 	... 1 more
-2025-07-11 23:02:09,696 INFO com.leroy.inventorymanagementfx.controller.MainController [JavaFX Application Thread] MainController initialized. User Role: STOREKEEPER
-2025-07-11 23:02:09,824 ERROR com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Unexpected error during application startup: null
-java.lang.NullPointerException: null
-	at java.base/java.util.Objects.requireNonNull(Objects.java:220) ~[?:?]
-	at com.leroy.inventorymanagementfx.InventoryApplication.start(InventoryApplication.java:61) [main/:?]
-	at javafx.graphics/com.sun.javafx.application.LauncherImpl.lambda$launchApplication1$7(LauncherImpl.java:840) [javafx.graphics.jar:?]
-	at javafx.graphics/com.sun.javafx.application.PlatformImpl.lambda$runAndWait$5(PlatformImpl.java:444) [javafx.graphics.jar:?]
-	at javafx.graphics/com.sun.javafx.application.PlatformImpl.lambda$runLater$4(PlatformImpl.java:419) [javafx.graphics.jar:?]
-	at javafx.graphics/com.sun.glass.ui.InvokeLaterDispatcher$Future.run(InvokeLaterDispatcher.java:95) [javafx.graphics.jar:?]
-	at javafx.graphics/com.sun.glass.ui.win.WinApplication._runLoop(Native Method) [javafx.graphics.jar:?]
-	at javafx.graphics/com.sun.glass.ui.win.WinApplication.lambda$runLoop$0(WinApplication.java:168) [javafx.graphics.jar:?]
+2025-07-24 01:21:26,031 INFO com.leroy.inventorymanagementfx.controller.MainController [JavaFX Application Thread] MainController initialized. User Role: null
+2025-07-24 01:21:26,227 INFO com.leroy.inventorymanagementfx.controller.MainController [JavaFX Application Thread] NotificationStompClient set in MainController.
+2025-07-24 01:21:26,228 WARN com.leroy.inventorymanagementfx.controller.MainController [JavaFX Application Thread] NotificationStompClient set, but topbar not yet loaded. Binding will occur when topbar is available.
+2025-07-24 01:21:27,633 INFO com.leroy.inventorymanagementfx.controller.MainController [JavaFX Application Thread] Successfully loaded view: common-login
+2025-07-24 01:21:29,055 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Application UI initialized successfully
+2025-07-24 01:21:29,608 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Application added to System Tray.
+2025-07-24 01:21:42,087 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] User cancelled close operation
+2025-07-24 01:21:47,219 WARN com.leroy.inventorymanagementfx.controller.GoogleAuthCodeDialogController [JavaFX Application Thread] GoogleAuthCodeDialogueController instantiated with default no-arg constructor. Consider using a ControllerFactory for dependency injection.
+2025-07-24 01:21:57,164 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] User chose to minimize to tray
+2025-07-24 01:21:57,218 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Inventory Management Application is stopping.
+2025-07-24 03:11:17,118 INFO com.leroy.inventorymanagementfx.InventoryApplication [main] Inventory Management Application starting up
+2025-07-24 03:11:17,984 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Starting Inventory Management Application
+2025-07-24 03:11:18,113 DEBUG com.leroy.inventorymanagementfx.security.UserSession [JavaFX Application Thread] No existing session file found at user_session.properties
+2025-07-24 03:11:18,114 WARN com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] User ID is 0. WebSocket notifications may not work correctly until a user logs in.
+2025-07-24 03:11:18,662 INFO com.leroy.inventorymanagementfx.service.NotificationStompClient [JavaFX Application Thread] Attempting to connect STOMP client to: ws://localhost:8080/ws-notifications
+2025-07-24 03:11:18,667 DEBUG com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Loading main FXML file
+2025-07-24 03:11:20,465 ERROR com.leroy.inventorymanagementfx.service.NotificationStompClient [Thread-3] Failed to connect STOMP client
+java.util.concurrent.ExecutionException: jakarta.websocket.DeploymentException: Connection failed.
+	at java.base/java.util.concurrent.CompletableFuture.wrapInExecutionException(CompletableFuture.java:347) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture.reportGet(CompletableFuture.java:442) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2119) ~[?:?]
+	at com.leroy.inventorymanagementfx.service.NotificationStompClient.lambda$connect$0(NotificationStompClient.java:102) [main/:?]
 	at java.base/java.lang.Thread.run(Thread.java:1447) [?:?]
-2025-07-11 23:02:09,831 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Inventory Management Application is stopping.
+Caused by: jakarta.websocket.DeploymentException: Connection failed.
+	at org.glassfish.tyrus.client.exception.Exceptions.deploymentException(Exceptions.java:40) ~[tyrus-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.container.grizzly.client.GrizzlyClientSocket._connect(GrizzlyClientSocket.java:418) ~[tyrus-container-grizzly-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.container.grizzly.client.GrizzlyClientSocket$1.call(GrizzlyClientSocket.java:218) ~[tyrus-container-grizzly-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.container.grizzly.client.GrizzlyClientSocket$1.call(GrizzlyClientSocket.java:214) ~[tyrus-container-grizzly-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.container.grizzly.client.GrizzlyClientSocket.connect(GrizzlyClientSocket.java:232) ~[tyrus-container-grizzly-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.container.grizzly.client.GrizzlyClientContainer.openClientSocket(GrizzlyClientContainer.java:72) ~[tyrus-container-grizzly-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.client.ClientManager$3$1.run(ClientManager.java:614) ~[tyrus-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.client.ClientManager$3.run(ClientManager.java:657) ~[tyrus-client-2.2.0.jar:?]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:545) ~[?:?]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328) ~[?:?]
+	at org.glassfish.tyrus.client.ClientManager$SameThreadExecutorService.execute(ClientManager.java:810) ~[tyrus-client-2.2.0.jar:?]
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:124) ~[?:?]
+	at org.glassfish.tyrus.client.ClientManager.connectToServer(ClientManager.java:460) ~[tyrus-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.client.ClientManager.lambda$connectToServer$2(ClientManager.java:313) ~[tyrus-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.client.ClientManager.tryCatchInterruptedExecutionEx(ClientManager.java:324) ~[tyrus-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.client.ClientManager.connectToServer(ClientManager.java:313) ~[tyrus-client-2.2.0.jar:?]
+	at org.springframework.web.socket.client.standard.StandardWebSocketClient.lambda$executeInternal$0(StandardWebSocketClient.java:175) ~[spring-websocket-6.2.8.jar:6.2.8]
+	at org.springframework.util.concurrent.FutureUtils.lambda$toSupplier$0(FutureUtils.java:74) ~[spring-core-6.2.8.jar:6.2.8]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1814) ~[?:?]
+	... 1 more
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method) ~[?:?]
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:628) ~[?:?]
+	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:1046) ~[?:?]
+	at org.glassfish.grizzly.nio.transport.TCPNIOConnectorHandler.onConnectedAsync(TCPNIOConnectorHandler.java:175) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.transport.TCPNIOConnectorHandler$1.connected(TCPNIOConnectorHandler.java:132) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.transport.TCPNIOConnection.onConnect(TCPNIOConnection.java:220) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.transport.TCPNIOTransport.fireIOEvent(TCPNIOTransport.java:502) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.strategies.AbstractIOStrategy.fireIOEvent(AbstractIOStrategy.java:82) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.strategies.WorkerThreadIOStrategy.run0(WorkerThreadIOStrategy.java:83) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.strategies.WorkerThreadIOStrategy.executeIoEvent(WorkerThreadIOStrategy.java:73) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.strategies.AbstractIOStrategy.executeIoEvent(AbstractIOStrategy.java:66) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.SelectorRunner.iterateKeyEvents(SelectorRunner.java:381) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.SelectorRunner.iterateKeys(SelectorRunner.java:353) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.SelectorRunner.doSelect(SelectorRunner.java:319) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.SelectorRunner.run(SelectorRunner.java:248) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.threadpool.AbstractThreadPool$Worker.doWork(AbstractThreadPool.java:535) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.threadpool.AbstractThreadPool$Worker.run(AbstractThreadPool.java:515) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	... 1 more
+2025-07-24 03:11:20,465 ERROR com.leroy.inventorymanagementfx.service.NotificationStompClient [SimpleAsyncTaskExecutor-1] STOMP Transport Error: jakarta.websocket.DeploymentException: Connection failed.
+java.util.concurrent.CompletionException: jakarta.websocket.DeploymentException: Connection failed.
+	at org.springframework.util.concurrent.FutureUtils.lambda$toSupplier$0(FutureUtils.java:78) [spring-core-6.2.8.jar:6.2.8]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1814) [?:?]
+	at java.base/java.lang.Thread.run(Thread.java:1447) [?:?]
+Caused by: jakarta.websocket.DeploymentException: Connection failed.
+	at org.glassfish.tyrus.client.exception.Exceptions.deploymentException(Exceptions.java:40) ~[tyrus-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.container.grizzly.client.GrizzlyClientSocket._connect(GrizzlyClientSocket.java:418) ~[tyrus-container-grizzly-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.container.grizzly.client.GrizzlyClientSocket$1.call(GrizzlyClientSocket.java:218) ~[tyrus-container-grizzly-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.container.grizzly.client.GrizzlyClientSocket$1.call(GrizzlyClientSocket.java:214) ~[tyrus-container-grizzly-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.container.grizzly.client.GrizzlyClientSocket.connect(GrizzlyClientSocket.java:232) ~[tyrus-container-grizzly-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.container.grizzly.client.GrizzlyClientContainer.openClientSocket(GrizzlyClientContainer.java:72) ~[tyrus-container-grizzly-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.client.ClientManager$3$1.run(ClientManager.java:614) ~[tyrus-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.client.ClientManager$3.run(ClientManager.java:657) ~[tyrus-client-2.2.0.jar:?]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:545) ~[?:?]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328) ~[?:?]
+	at org.glassfish.tyrus.client.ClientManager$SameThreadExecutorService.execute(ClientManager.java:810) ~[tyrus-client-2.2.0.jar:?]
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:124) ~[?:?]
+	at org.glassfish.tyrus.client.ClientManager.connectToServer(ClientManager.java:460) ~[tyrus-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.client.ClientManager.lambda$connectToServer$2(ClientManager.java:313) ~[tyrus-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.client.ClientManager.tryCatchInterruptedExecutionEx(ClientManager.java:324) ~[tyrus-client-2.2.0.jar:?]
+	at org.glassfish.tyrus.client.ClientManager.connectToServer(ClientManager.java:313) ~[tyrus-client-2.2.0.jar:?]
+	at org.springframework.web.socket.client.standard.StandardWebSocketClient.lambda$executeInternal$0(StandardWebSocketClient.java:175) ~[spring-websocket-6.2.8.jar:6.2.8]
+	at org.springframework.util.concurrent.FutureUtils.lambda$toSupplier$0(FutureUtils.java:74) ~[spring-core-6.2.8.jar:6.2.8]
+	... 2 more
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method) ~[?:?]
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:628) ~[?:?]
+	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:1046) ~[?:?]
+	at org.glassfish.grizzly.nio.transport.TCPNIOConnectorHandler.onConnectedAsync(TCPNIOConnectorHandler.java:175) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.transport.TCPNIOConnectorHandler$1.connected(TCPNIOConnectorHandler.java:132) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.transport.TCPNIOConnection.onConnect(TCPNIOConnection.java:220) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.transport.TCPNIOTransport.fireIOEvent(TCPNIOTransport.java:502) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.strategies.AbstractIOStrategy.fireIOEvent(AbstractIOStrategy.java:82) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.strategies.WorkerThreadIOStrategy.run0(WorkerThreadIOStrategy.java:83) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.strategies.WorkerThreadIOStrategy.executeIoEvent(WorkerThreadIOStrategy.java:73) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.strategies.AbstractIOStrategy.executeIoEvent(AbstractIOStrategy.java:66) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.SelectorRunner.iterateKeyEvents(SelectorRunner.java:381) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.SelectorRunner.iterateKeys(SelectorRunner.java:353) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.SelectorRunner.doSelect(SelectorRunner.java:319) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.nio.SelectorRunner.run(SelectorRunner.java:248) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.threadpool.AbstractThreadPool$Worker.doWork(AbstractThreadPool.java:535) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	at org.glassfish.grizzly.threadpool.AbstractThreadPool$Worker.run(AbstractThreadPool.java:515) ~[grizzly-framework-4.0.2.jar:4.0.2]
+	... 1 more
+2025-07-24 03:11:21,532 INFO com.leroy.inventorymanagementfx.controller.MainController [JavaFX Application Thread] MainController initialized. User Role: null
+2025-07-24 03:11:21,979 INFO com.leroy.inventorymanagementfx.controller.MainController [JavaFX Application Thread] NotificationStompClient set in MainController.
+2025-07-24 03:11:21,979 WARN com.leroy.inventorymanagementfx.controller.MainController [JavaFX Application Thread] NotificationStompClient set, but topbar not yet loaded. Binding will occur when topbar is available.
+2025-07-24 03:11:25,579 INFO com.leroy.inventorymanagementfx.controller.MainController [JavaFX Application Thread] Successfully loaded view: common-login
+2025-07-24 03:11:25,666 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Application icon set successfully from: file:/C:/Users/Evans%20Kojo%20Aidoo/Desktop/JavaProjectOriginal/InventoryManagementFx/build/resources/main/static/images/inventoryfxico.ico
+2025-07-24 03:11:27,474 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Application UI initialized successfully
+2025-07-24 03:11:28,430 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Application added to System Tray.
+2025-07-24 03:11:37,128 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] User chose to minimize to tray
+2025-07-24 03:11:37,199 INFO com.leroy.inventorymanagementfx.InventoryApplication [JavaFX Application Thread] Inventory Management Application is stopping.

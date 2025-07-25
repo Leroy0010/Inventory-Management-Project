@@ -14,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.scene.image.Image; // Import Image class
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,7 +59,7 @@ public class InventoryApplication extends Application {
 
             FXMLLoader loader = new FXMLLoader(fxmlLocation);
             Scene scene = new Scene(loader.load());
-            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles/notifications.css")).toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/styles/notification.css").toExternalForm());
 
             // Get the controller instance
             mainController = loader.getController();
@@ -70,7 +71,20 @@ public class InventoryApplication extends Application {
             // Pass the notification client to the MainController
 //            Platform.runLater(() -> mainController.setNotificationStompClient(notificationClient));
 
-            
+            // --- ADD THIS SECTION TO SET THE WINDOW ICON ---
+            try {
+                URL iconUrl = getClass().getResource("/static/images/inventoryfxico.ico"); // Path to your desired icon
+                if (iconUrl != null) {
+                    Image applicationIcon = new Image(iconUrl.toExternalForm());
+                    stage.getIcons().add(applicationIcon);
+                    LOGGER.info("Application icon set successfully from: {}", iconUrl);
+                } else {
+                    LOGGER.warn("Window icon not found at /static/images/ucc-logo.png. Using default icon.");
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to load application icon: {}", e.getMessage(), e);
+            }
+            // --- END OF NEW SECTION ---
 
             stage.setMinWidth(800);
             stage.setMinHeight(750);

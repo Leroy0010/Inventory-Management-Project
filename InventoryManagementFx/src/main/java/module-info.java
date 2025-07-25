@@ -1,56 +1,84 @@
 module com.leroy.inventorymanagementfx {
+
+// JavaFX Modules
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
-    requires javafx.graphics; // Explicitly added, often needed by UI frameworks
+    requires javafx.graphics;
+    requires javafx.swing;
 
+// ControlsFX and other UI libraries
     requires org.controlsfx.controls;
-    requires com.dlsc.formsfx; // Updated to .core if that's what you're using
+    requires com.dlsc.formsfx;
     requires net.synedra.validatorfx;
     requires org.kordamp.ikonli.javafx;
-    requires eu.hansolo.tilesfx;
-    requires com.fasterxml.jackson.annotation;
-    requires jjwt.api;
-    requires org.apache.logging.log4j.core;
-    requires org.apache.logging.log4j;
-    requires java.net.http; // For HttpClient (if you use it for REST)
-    requires com.fasterxml.jackson.databind;
-    requires java.desktop; // For SystemTray, AWT components
     requires org.kordamp.ikonli.fontawesome6;
-    // REMOVE THIS: This is for the old Java-WebSocket client
-    // requires org.java_websocket;
-    requires java.sql; // If you interact with JDBC directly
+    requires eu.hansolo.tilesfx;
 
-    // Spring WebSocket Client Modules
+// Logging (These look correct if the JARs are properly recognized)
+    requires org.apache.logging.log4j;
+    requires org.apache.logging.log4j.core;
+
+// Standard Java Modules
+    requires java.net.http;
+    requires java.desktop;
+    requires java.sql;
+
+// Spring Framework Modules
     requires spring.websocket;
     requires spring.messaging;
     requires spring.context;
+    requires spring.core;
+    requires spring.beans;
+    requires spring.web;
 
-    // Tyrus WebSocket Client Modules - BOTH ARE IMPORTANT
+// Tyrus WebSocket
     requires org.glassfish.tyrus.client;
-    requires org.glassfish.tyrus.container.grizzly.client; // RE-ADDED THIS ONE
-    requires jakarta.websocket.client;
-    requires com.fasterxml.jackson.datatype.jsr310;
-    requires spring.web; // Explicitly require the API module
+    requires org.glassfish.tyrus.container.grizzly.client;
+    requires org.glassfish.tyrus.core;
+    requires org.glassfish.tyrus.spi;
 
-    // Opens and Exports
-    opens com.leroy.inventorymanagementfx to javafx.fxml;
+// Jakarta WebSocket API
+    requires jakarta.websocket;
+    requires jakarta.websocket.client;
+
+// Jackson Modules
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.datatype.jsr310;
+    requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.annotation;
+
+// JWT Modules - use the correct automatic module name
+    requires jjwt.api;
+
+
+// Opens and Exports
+    opens com.leroy.inventorymanagementfx to javafx.fxml, com.fasterxml.jackson.databind, spring.core;
+    opens com.leroy.inventorymanagementfx.controller to javafx.fxml, com.fasterxml.jackson.databind, spring.core;
+    opens com.leroy.inventorymanagementfx.controller.admin to javafx.fxml, com.fasterxml.jackson.databind, spring.core;
+    opens com.leroy.inventorymanagementfx.controller.storekeeper to javafx.fxml, com.fasterxml.jackson.databind, spring.core;
+
+    opens com.leroy.inventorymanagementfx.dto.response to com.fasterxml.jackson.databind, javafx.base;
+    opens com.leroy.inventorymanagementfx.dto.request to com.fasterxml.jackson.databind;
+    opens com.leroy.inventorymanagementfx.dto.report to com.fasterxml.jackson.databind, javafx.base;
+    opens com.leroy.inventorymanagementfx.enums to com.fasterxml.jackson.databind, javafx.base;
+
+    opens com.leroy.inventorymanagementfx.service to org.apache.logging.log4j.core;
+    opens com.leroy.inventorymanagementfx.service.admin to org.apache.logging.log4j.core;
+    opens com.leroy.inventorymanagementfx.service.storekeeper to org.apache.logging.log4j.core;
+    opens com.leroy.inventorymanagementfx.service.staff to org.apache.logging.log4j.core;
+    opens com.leroy.inventorymanagementfx.service.dashboard to org.apache.logging.log4j.core;
+
     exports com.leroy.inventorymanagementfx;
     exports com.leroy.inventorymanagementfx.controller;
-    opens com.leroy.inventorymanagementfx.controller to javafx.fxml;
     exports com.leroy.inventorymanagementfx.interfaces;
     exports com.leroy.inventorymanagementfx.enums;
     exports com.leroy.inventorymanagementfx.service;
     exports com.leroy.inventorymanagementfx.security;
     exports com.leroy.inventorymanagementfx.config;
     exports com.leroy.inventorymanagementfx.service.staff;
-    exports com.leroy.inventorymanagementfx.dto.response; // Make sure this path is correct for your DTOs
+    exports com.leroy.inventorymanagementfx.dto.response;
     exports com.leroy.inventorymanagementfx.dto.request;
     exports com.leroy.inventorymanagementfx.service.storekeeper;
-    exports com.leroy.inventorymanagementfx.service.admin;
-
-    // Add this for Log4j2 to configure itself if it's external to your module
-    // This is a common JPMS issue with logging frameworks
-    opens com.leroy.inventorymanagementfx.service to org.apache.logging.log4j.core; // If you have loggers in service package
-    // Add other packages where you use Log4j2 and need reflection for configuration
+    exports com.leroy.inventorymanagementfx.dto.report;
 }

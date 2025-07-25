@@ -88,7 +88,7 @@ public class GoogleAuthCodeDialogController { // No longer implements NeedsMainC
         authorizationErrorLabel.setVisible(false);
         authorizationErrorLabel.getStyleClass().add("dialog-status-label"); // Add base class
         authorizationErrorLabel.setWrapText(true);
-        authorizationErrorLabel.setStyle("-fx-max-height: auto;");
+//        authorizationErrorLabel.setStyle("-fx-max-height: auto;");
         // Ensure buttons are enabled initially
         submitAuthorizationCodeButton.setDisable(false);
         openBrowserButton.setDisable(false);
@@ -235,7 +235,7 @@ public class GoogleAuthCodeDialogController { // No longer implements NeedsMainC
                                     errorMessage = error; // Fallback to error if description is empty
                                 } else {
                                     errorMessage = "Error: " + response.statusCode() + " - " + response.body(); // Fallback if no specific fields
-                                }; // Extract message from error JSON
+                                } // Extract message from error JSON
                             } catch (JsonProcessingException e) {
                                 // Fallback if error body is not JSON
                                 errorMessage = "Error: " + response.statusCode() + " ," + response.body();

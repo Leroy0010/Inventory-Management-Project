@@ -40,7 +40,7 @@ public class AdminSidebarController implements NeedsMainController, SidebarHasNo
         }
         
         // Set initial selection
-        setSelectedButton(dashboardBtn);
+        setSelectedButton(addDepartmentBtn);
     }
 
     private void handleButtonSelection(Button clickedButton) {

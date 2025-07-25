@@ -50,9 +50,9 @@ public class InventoryItemController {
 
     @GetMapping("/get-all-department")
     @PreAuthorize("hasAnyAuthority('STOREKEEPER', 'STAFF')")
-    public ResponseEntity<Optional<List<InventoryItemResponseDto>>> getInventoryItemsByDepartment(@AuthenticationPrincipal UserDetails user
+    public ResponseEntity<Optional<List<InventoryItemNameAndIdResponseDto>>> getInventoryItemsByDepartment(@AuthenticationPrincipal UserDetails user
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(inventoryItemService.getItemsByDepartment(user));
+        return ResponseEntity.status(HttpStatus.OK).body(inventoryItemService.getInventoryItemNameAndId(user));
     }
 
     @DeleteMapping

@@ -26,7 +26,7 @@
     -fx-text-fill: #333333;
     -fx-padding: 0 0 20px 0; /* More space below title */
     -fx-alignment: CENTER; /* Ensure title is centered */
-    -fx-max-width: 1.7976931348623157E308; /* Allow it to expand */
+    -fx-max-width: 100000; /* Allow it to expand */
 }
 
 /* Instruction labels within VBoxes */

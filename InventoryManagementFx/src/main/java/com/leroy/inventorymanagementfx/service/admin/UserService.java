@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leroy.inventorymanagementfx.config.Config;
 import com.leroy.inventorymanagementfx.dto.request.CreateStaffRequest;
 import com.leroy.inventorymanagementfx.dto.request.CreateStoreKeeperRequest;
+import com.leroy.inventorymanagementfx.dto.request.UpdatePasswordRequest; // New import
 import com.leroy.inventorymanagementfx.dto.response.User;
 import com.leroy.inventorymanagementfx.security.AuthTokenHolder;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +17,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class UserService {
@@ -81,7 +83,7 @@ public class UserService {
             String office) {
 
         CreateStaffRequest request = new CreateStaffRequest(email.trim(), firstName.trim(), lastName.trim(), password.trim(), office);
-        
+
         try {
             String json = objectMapper.writeValueAsString(request);
             logger.debug("Payload: {}", json);
@@ -122,11 +124,11 @@ public class UserService {
                     if (response.statusCode() == 200) {
                         try {
                             // Use Jackson to unwrap Optional<List<String>>
-                                return objectMapper.convertValue(
-                                        objectMapper.readTree(response.body()),
-                                        objectMapper.getTypeFactory().constructCollectionType(List.class, String.class)
-                                );
-                                
+                            return objectMapper.convertValue(
+                                    objectMapper.readTree(response.body()),
+                                    objectMapper.getTypeFactory().constructCollectionType(List.class, String.class)
+                            );
+
                         } catch (Exception e) {
                             logger.error("Failed to parse response: {}", e.getMessage());
                         }
@@ -165,6 +167,32 @@ public class UserService {
                     logger.error("Network or service error fetching user profile: {}", ex.getMessage(), ex);
                     return null; // Return null on network/service exception
                 });
+    }
+
+    /**
+     * Sends a request to the backend to change the user's password.
+     * @param request The UpdatePasswordRequest DTO containing old and new passwords.
+     * @return A CompletableFuture representing the HTTP response.
+     */
+    public CompletableFuture<HttpResponse<String>> changePassword(UpdatePasswordRequest request) {
+        try {
+            String json = objectMapper.writeValueAsString(request);
+            logger.debug("Change Password Payload: {}", json);
+
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(BACKEND_URL + "/api/users/change-password"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + AuthTokenHolder.getJwtToken())
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            logger.info("Sending password change request.");
+
+            return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
+        } catch (JsonProcessingException e) {
+            logger.error("Error creating change password JSON payload", e);
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     /**

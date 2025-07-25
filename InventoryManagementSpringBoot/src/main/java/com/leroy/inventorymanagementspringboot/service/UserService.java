@@ -1,3 +1,4 @@
+// UserService.java
 package com.leroy.inventorymanagementspringboot.service;
 
 import com.leroy.inventorymanagementspringboot.annotation.Auditable;
@@ -21,8 +22,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors; // Added import
+import java.util.stream.IntStream;
 
 @Service
 public class UserService implements UserServiceInterface {
@@ -35,6 +39,10 @@ public class UserService implements UserServiceInterface {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+";
+    private static final int PASSWORD_LENGTH = 12;
+    private static final SecureRandom random = new SecureRandom();
+
     public UserService(UserRepository userRepository, RoleRepository roleRepository,
                        OfficeRepository officeRepository, DepartmentRepository departmentRepository,
                        UserMapper userMapper, PasswordEncoder passwordEncoder, EmailService emailService) {
@@ -45,6 +53,16 @@ public class UserService implements UserServiceInterface {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+    }
+
+    /**
+     * Generates a random, secure password.
+     * @return A randomly generated password string.
+     */
+    private String generateRandomPassword() {
+        return IntStream.range(0, PASSWORD_LENGTH)
+                .mapToObj(i -> String.valueOf(CHARACTERS.charAt(random.nextInt(CHARACTERS.length()))))
+                .collect(Collectors.joining());
     }
 
     @Override
@@ -64,7 +82,6 @@ public class UserService implements UserServiceInterface {
 
         switch (targetRole.getName()) {
             case "ADMIN" -> {
-
                 if (registrationDto.getDepartmentName() != null) {
                     throw new IllegalArgumentException("Admin users do not belong to a specific department.");
                 }
@@ -86,19 +103,18 @@ public class UserService implements UserServiceInterface {
                     throw new IllegalArgumentException("Invalid role specified: " + registrationDto.getRoleName());
         }
 
-
+        String generatedPassword = generateRandomPassword(); // Generate random password
         User user = userMapper.toUser(registrationDto); // Use mapper for basic field mapping
         user.setRole(targetRole); // Set fetched Role
         user.setDepartment(department); // Set fetched Department (will be null for ADMIN)
         user.setOffice(null);
         user.setActive(true);
-        // Set a fake/temporary password. The user will be prompted to reset it.
-        user.setPassword(passwordEncoder.encode("temporary_password_to_be_reset"));
+        user.setPassword(passwordEncoder.encode(generatedPassword)); // Encode and set the generated password
 
         User savedUser = userRepository.save(user);
 
-        // Send a notification that the account is created and they need to use forgot password
-        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName());
+        // Send a notification that the account is created and they need to use change password
+        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName(), generatedPassword);
 
         return savedUser;
     }
@@ -131,19 +147,18 @@ public class UserService implements UserServiceInterface {
                         "Office '" + registrationDto.getOfficeName() + "' not found within your department '" + storekeeper.getDepartment().getName() + "'"
                 ));
 
+        String generatedPassword = generateRandomPassword(); // Generate random password
         User user = userMapper.toStaffUser(registrationDto); // Use mapper for basic field mapping
         user.setRole(staffRole); // Set fetched Role (STAFF)
         user.setOffice(targetOffice); // Set fetched Office
         user.setDepartment(null); // Explicitly null for Staff
         user.setActive(true);
-
-        // Set a fake/temporary password. The user will be prompted to reset it.
-        user.setPassword(passwordEncoder.encode("temporary_password_to_be_reset"));
+        user.setPassword(passwordEncoder.encode(generatedPassword)); // Encode and set the generated password
 
         User savedUser = userRepository.save(user);
 
-        // Send a notification that the account is created and they need to use forgot password
-        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName());
+        // Send a notification that the account is created and they need to use change password
+        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName(), generatedPassword);
 
         return savedUser;
     }
@@ -173,37 +188,33 @@ public class UserService implements UserServiceInterface {
             value.setActive(staff.isActive());
             userRepository.save(value);
         });
-
-
     }
 
     public Optional<List<String>> fetchGeneralNotificationServiceUsersEmails(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new  EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (user.getRole().getName().equals("ADMIN")) {
             return userRepository.findAllByIdNot(user.getId())
-                    .map(users -> users.stream().map(User::getEmail).toList());
+                    .map(users -> users.stream().map(User::getEmail).collect(Collectors.toList())); // Use toList()
         } else if (user.getRole().getName().equals("STOREKEEPER")){
-                return userRepository.findAllByOffice_DepartmentAndIdNot(user.getDepartment(), user.getId())
-                        .map(users -> users.stream().map(User::getEmail).toList());
+            return userRepository.findAllByOffice_DepartmentAndIdNot(user.getDepartment(), user.getId())
+                    .map(users -> users.stream().map(User::getEmail).collect(Collectors.toList())); // Use toList()
         } else throw new SecurityException("Only ADMIN or STOREKEEPER roles can be found.");
     }
 
-
     public UserResponseDto fetchUserDetails(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new  EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         return userMapper.toUserResponseDto(user);
     }
 
     public void changePassword(UpdatePasswordRequest updatePasswordRequest, UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new  EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setPassword(passwordEncoder.encode(updatePasswordRequest.getNewPassword()));
         userRepository.save(user);
-
     }
 
     public Optional<List<UserEmailAndIdDto>> getEmailsAndIds(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new  EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         if (!user.getRole().getName().equals("STOREKEEPER"))
             throw new IllegalStateException("Only storekeepers are allowed.");
 
@@ -215,11 +226,6 @@ public class UserService implements UserServiceInterface {
         var users = userRepository.findAllByOffice_Department(department);
 
         return users
-                .map(userdto -> userdto.stream().map(userMapper::toUserEmailAndIdDto).toList());
-
+                .map(userdto -> userdto.stream().map(userMapper::toUserEmailAndIdDto).collect(Collectors.toList())); // Use toList()
     }
-
-
-
-
 }

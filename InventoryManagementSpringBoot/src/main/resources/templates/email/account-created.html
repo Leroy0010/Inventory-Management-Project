@@ -10,6 +10,16 @@
         .content { padding: 20px; }
         .footer { font-size: 0.9em; text-align: center; margin-top: 20px; color: #777; }
         .important { color: #dc3545; font-weight: bold; }
+        .password-box {
+            background-color: #e9ecef;
+            border: 1px dashed #ced4da;
+            padding: 10px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 1.1em;
+            text-align: center;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -20,8 +30,11 @@
     <div class="content">
         <p>Dear <span th:text="${userName}">User</span>,</p>
         <p>Your account for the Inventory Management Application has been successfully created.</p>
-        <p>For security purposes, you will need to set your password before you can log in.</p>
-        <p class="important">Please use the "Forgot Password" option on the login page to set your initial password.</p>
+        <p>Your temporary password is:</p>
+        <div class="password-box">
+            <strong th:text="${generatedPassword}">[Generated Password]</strong>
+        </div>
+        <p class="important">For security purposes, we strongly recommend that you change this password immediately after your first login using the "Change Password" feature in your profile settings.</p>
         <p>Best regards,<br>The Inventory Management Team</p>
     </div>
     <div class="footer">
