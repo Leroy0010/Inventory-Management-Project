@@ -28,7 +28,7 @@ This system supports multi-role access (Admin, Staff, Storekeeper) with authenti
 
 ### 👨‍💼 Admin
 
-* Manage users, roles, and departments
+* Manage users - other admins and storekeepers, roles, and departments
 
 ### 👷 Staff
 
