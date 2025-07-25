@@ -8,6 +8,12 @@ WORKDIR /app
 # If pom.xml doesn't change, this layer will be cached
 COPY pom.xml .
 
+# Copy the Maven wrapper files and script
+# The `.` ensures it copies `mvnw`, `mvnw.cmd` and the entire `.mvn` directory
+COPY .mvn .mvn/
+COPY mvnw .
+COPY mvnw.cmd .
+
 # Copy the source code
 COPY src ./src
 
