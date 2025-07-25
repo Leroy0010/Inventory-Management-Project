@@ -9,14 +9,20 @@ WORKDIR /app
 COPY pom.xml .
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 64990917076ee8a455f83426a646799b8b7dd57f
 # Copy the Maven wrapper files and script
 # The `.` ensures it copies `mvnw`, `mvnw.cmd` and the entire `.mvn` directory
 COPY .mvn .mvn/
 COPY mvnw .
 COPY mvnw.cmd .
 
+<<<<<<< HEAD
 =======
 >>>>>>> 30a27d015f8590971b5039ff1ebf2d3bc48b8276
+=======
+>>>>>>> 64990917076ee8a455f83426a646799b8b7dd57f
 # Copy the source code
 COPY src ./src
 
