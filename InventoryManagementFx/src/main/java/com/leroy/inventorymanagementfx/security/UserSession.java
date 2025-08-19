@@ -14,7 +14,7 @@ import java.util.Properties;
 public final class UserSession {
     private static final Logger logger = LogManager.getLogger(UserSession.class);
     private static final String SESSION_FILE = "user_session.properties";
-    private static final Path SESSION_FILE_PATH = Paths.get(SESSION_FILE);
+    private static final Path SESSION_FILE_PATH = Paths.get(SESSION_FILE) != null ? Paths.get(SESSION_FILE) : getSessionFilePath();
     private static final long SESSION_VALID_DURATION_MS = 24 * 60 * 60 * 1000L; // 24 hours
 
 
@@ -131,6 +131,33 @@ public final class UserSession {
             logger.info("User session cleared");
         });
     }
+
+    // Example for getting application data directory
+    private static Path getSessionFilePath() {
+        String os = System.getProperty("os.name").toLowerCase();
+        Path appDataDir;
+
+        if (os.contains("win")) {
+            appDataDir = Paths.get(System.getenv("APPDATA"), "InventoryManagementFx");
+        } else if (os.contains("mac")) {
+            appDataDir = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "InventoryManagementFx");
+        } else { // Linux/Unix
+            appDataDir = Paths.get(System.getProperty("user.home"), ".config", "InventoryManagementFx");
+            // Or if you prefer ~/.local/share
+            // appDataDir = Paths.get(System.getProperty("user.home"), ".local", "share", "InventoryManagementFx");
+        }
+
+        try {
+            Files.createDirectories(appDataDir); // Ensure the directory exists
+        } catch (IOException e) {
+            logger.error("Failed to create application data directory: {}", appDataDir, e);
+            // Fallback to current directory or throw a runtime exception if critical
+            return Paths.get("user_session.properties"); // Fallback
+        }
+        return appDataDir.resolve("user_session.properties");
+    }
+    
+
     
 
     public StringProperty firstNameProperty() {

@@ -29,6 +29,7 @@ public class TransactionReportService {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(BACKEND_URL + "/api/reports/transactions"))
                 .header("Authorization", "Bearer " + AuthTokenHolder.getJwtToken())
+                .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 

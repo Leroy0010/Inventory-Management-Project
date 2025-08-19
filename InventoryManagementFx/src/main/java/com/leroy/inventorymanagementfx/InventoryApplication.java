@@ -212,7 +212,7 @@ public class InventoryApplication extends Application {
             switch (action) {
                 case LOGOUT:
                     LOGGER.info("User chose to logout before closing");
-                    authService.logout();
+                    mainController.logout();
                     if (notificationClient != null) {
                         notificationClient.disconnect();
                     }

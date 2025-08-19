@@ -296,9 +296,9 @@ public class MainController implements Initializable {
             return CommonPages.LOGIN;
         }
         return switch (role) {
-            case "ADMIN" -> AdminPages.DASHBOARD;
+            case "ADMIN" -> AdminPages.CREATE_DEPARTMENT;
             case "STOREKEEPER" -> StorekeeperPages.DASHBOARD;
-            default -> StaffPages.DASHBOARD;
+            default -> StaffPages.INVENTORY_ITEMS;
         };
     }
 

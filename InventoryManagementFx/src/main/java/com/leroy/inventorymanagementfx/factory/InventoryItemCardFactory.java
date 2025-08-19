@@ -19,6 +19,8 @@ public class InventoryItemCardFactory {
         // Set image
         if (item.getImagePath() != null && !item.getImagePath().isEmpty()) {
             card.setItemImage(item.getImagePath());
+            System.out.println(item.getImagePath());
+            System.out.println(item.getReorderLevel());
         }
 
         // Set view type (storekeeper or staff)

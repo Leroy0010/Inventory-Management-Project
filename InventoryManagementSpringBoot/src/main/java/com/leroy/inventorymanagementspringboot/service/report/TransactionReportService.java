@@ -6,6 +6,8 @@ import com.leroy.inventorymanagementspringboot.enums.StockTransactionType;
 import com.leroy.inventorymanagementspringboot.mapper.TransactionMapper;
 import com.leroy.inventorymanagementspringboot.repository.*;
 import com.leroy.inventorymanagementspringboot.servicei.TransactionReportServiceInterface;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,19 +22,22 @@ public class TransactionReportService implements TransactionReportServiceInterfa
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryBalanceRepository inventoryBalanceRepository;
     private final TransactionMapper transactionMapper;
+    private final UserRepository userRepository;
 
     public TransactionReportService(StockTransactionRepository stockTransactionRepository,
                                     InventoryItemRepository inventoryItemRepository,
                                     InventoryBalanceRepository inventoryBalanceRepository,
-                                    TransactionMapper transactionMapper) {
+                                    TransactionMapper transactionMapper, UserRepository userRepository) {
         this.stockTransactionRepository = stockTransactionRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.inventoryBalanceRepository = inventoryBalanceRepository;
         this.transactionMapper = transactionMapper;
+        this.userRepository = userRepository;
     }
 
     @Override
-    public TransactionReportDto generateReport(TransactionReportRequest request, User storekeeper) {
+    public TransactionReportDto generateReport(TransactionReportRequest request, UserDetails userDetails) {
+        User storekeeper = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new UsernameNotFoundException("Username not found."));
         // Validate request
         validateRequest(request);
 

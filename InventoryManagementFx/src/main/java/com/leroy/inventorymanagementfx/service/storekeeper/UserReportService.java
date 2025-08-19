@@ -27,6 +27,7 @@ public class UserReportService {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(BACKEND_URL + "/api/reports/user"))
                 .header("Authorization", "Bearer " + AuthTokenHolder.getJwtToken())
+                .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 

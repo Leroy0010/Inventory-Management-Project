@@ -376,6 +376,7 @@ public class InventoryItemsController implements Initializable {
                     this::handleAddToCart
                     
             );
+            
             gridItemsContainer.getChildren().add(card);
         });
     }
@@ -399,6 +400,10 @@ public class InventoryItemsController implements Initializable {
                     try {
                         if (response.statusCode() == 200) {
                             InventoryItemResponse[] items = objectMapper.readValue(response.body(), InventoryItemResponse[].class);
+                            logger.info(response.body());
+                            for(InventoryItemResponse item: items)
+                                logger.info(item.toString());
+                                
                             allItems.setAll(items);
 
                             // Re-apply current filter and sort

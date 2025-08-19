@@ -335,9 +335,9 @@ public class LoginController implements NeedsMainController {
     // Helper method copied from MainController (or provided by a shared utility)
     private FxmlPage getDefaultPage(String role) {
         return switch (role) {
-            case "ADMIN" -> AdminPages.DASHBOARD;
+            case "ADMIN" -> AdminPages.CREATE_DEPARTMENT;
             case "STOREKEEPER" -> StorekeeperPages.DASHBOARD;
-            default  -> StaffPages.DASHBOARD;
+            default  -> StaffPages.INVENTORY_ITEMS;
             // Assuming CommonPages.LOGIN is where you are now, need a default dashboard or error
         };
         

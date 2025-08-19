@@ -38,4 +38,11 @@ public class InventoryItemResponse {
     public int getReorderLevel() { return reorderLevel; }
     public String getDescription() { return description; }
     public int getQuantity() { return quantity; }
+
+
+    @Override
+    public String toString() {
+        return "Id: " + getId() + "Name: " + getName() + "Path" + getImagePath()
+                + "Reorder Level" + getReorderLevel();
+     }
 }

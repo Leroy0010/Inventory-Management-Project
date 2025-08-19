@@ -29,7 +29,6 @@ public class AdminSidebarController implements NeedsMainController, SidebarHasNo
                 if (icon != null) {
                     icon.setIconSize(18);
                 }
-
                 // Add style class for selection management
                 button.getStyleClass().add("selectable-sidebar-item");
 

@@ -8,21 +8,28 @@ public class InventoryItemDto {
     private Integer id;
     private String name;
     private String description; // ADDED THIS FIELD
+    private String unit;
+    private String imagePath;
+    private int reorderLevel;
+    private int quantity;
 
-    // Default constructor for Jackson
-    public InventoryItemDto() {
-    }
+    public InventoryItemDto(){}
 
     // Updated constructor to include description
-    public InventoryItemDto(Integer id, String name, String description) {
+    public InventoryItemDto(Integer id, String name, String description, String unit, String imagePath, int reorderLevel, int quantity) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.unit = unit;
+        this.imagePath = imagePath;
+        this.reorderLevel = reorderLevel;
+        this.quantity = quantity;
     }
 
     public InventoryItemDto(Integer id, String name) {
         this.id = id;
         this.name = name;
+        
     }
 
     // Getters
@@ -55,5 +62,37 @@ public class InventoryItemDto {
     @Override
     public String toString() {
         return name; // This is what will be displayed in the ComboBox by default
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public int getReorderLevel() {
+        return reorderLevel;
+    }
+
+    public void setReorderLevel(int reorderLevel) {
+        this.reorderLevel = reorderLevel;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 }

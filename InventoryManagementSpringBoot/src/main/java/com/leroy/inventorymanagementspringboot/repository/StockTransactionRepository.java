@@ -31,10 +31,10 @@ public interface StockTransactionRepository extends JpaRepository<StockTransacti
     FROM StockTransaction st
     WHERE st.transactionType = 'RECEIVED'
       AND st.request.user.id = :userId
-      AND FUNCTION('YEAR', st.transactionDate) = :year
+      AND EXTRACT(YEAR FROM st.transactionDate) = :year
     GROUP BY st.inventoryItem.id, st.inventoryItem.name, st.inventoryItem.unit
 """)
-    List<UserReportItemDto> getUserReportItems(Integer userId, int year);
+    List<UserReportItemDto> getUserReportItems(@Param("userId") Integer userId, @Param("year") int year);
 
     @Query("SELECT MIN(st.transactionDate) FROM StockTransaction st WHERE st.inventoryItem = :item")
     Timestamp getFirstTransactionDate(InventoryItem item);

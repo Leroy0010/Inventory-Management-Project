@@ -192,6 +192,7 @@ public class InventoryItemCardController extends VBox {
 
 
     public void setItemImage(String imagePath) {
+        logger.info("Image path: {}", imagePath);
         try {
             String fullPath;
             if (imagePath.startsWith("http") || imagePath.startsWith("file:")) {
@@ -203,6 +204,7 @@ public class InventoryItemCardController extends VBox {
 
 
             Image image = new Image(fullPath);
+            logger.info("Image: {}", fullPath);
             itemImageView.setImage(image);
         } catch (Exception e) {
             logger.error("Error loading image: {}", imagePath, e);

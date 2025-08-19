@@ -17,6 +17,8 @@ import com.leroy.inventorymanagementspringboot.mapper.UserMapper;
 import com.leroy.inventorymanagementspringboot.repository.*;
 import com.leroy.inventorymanagementspringboot.servicei.UserServiceInterface;
 import jakarta.persistence.EntityNotFoundException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,7 @@ public class UserService implements UserServiceInterface {
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+";
     private static final int PASSWORD_LENGTH = 12;
     private static final SecureRandom random = new SecureRandom();
+    private static final Logger logger = LogManager.getLogger(UserService.class);
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository,
                        OfficeRepository officeRepository, DepartmentRepository departmentRepository,
@@ -159,6 +162,7 @@ public class UserService implements UserServiceInterface {
 
         // Send a notification that the account is created and they need to use change password
         emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName(), generatedPassword);
+        logger.info("password: {}", generatedPassword);
 
         return savedUser;
     }
