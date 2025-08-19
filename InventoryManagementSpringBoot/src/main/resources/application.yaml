@@ -39,7 +39,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: dennis.aidoo@stu.ucc.edu.gh
-    password: shgc bnbl dxah ogbe
+    password:
     properties:
       mail:
         smtp:
