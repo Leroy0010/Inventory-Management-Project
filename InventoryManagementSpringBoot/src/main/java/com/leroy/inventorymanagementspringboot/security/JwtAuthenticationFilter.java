@@ -1,6 +1,7 @@
 package com.leroy.inventorymanagementspringboot.security;
 
 
+import com.leroy.inventorymanagementspringboot.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,12 +25,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final CookieUtil cookieUtil;
 
     private final Logger logger =  LogManager.getLogger(JwtAuthenticationFilter.class);
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, CookieUtil cookieUtil) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
+        this.cookieUtil = cookieUtil;
     }
 
     @Override
@@ -38,48 +41,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        final String jwt;
-        final String userEmail;
+        
+        // Try to get JWT from cookie first, then fallback to Authorization header
+        String jwt = cookieUtil.getJwtFromCookie(request).orElse(null);
+        
+        // Fallback to Authorization header if no cookie
+        if (jwt == null) {
+            final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                jwt = authHeader.substring(7);
+            }
+        }
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("❌ No Authorization header or bad format");
-            logger.error("NO Authorization header or bad format");
+        if (jwt == null) {
+            logger.debug("No JWT token found in cookies or Authorization header");
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-//        System.out.println("🔐 JWT Received: " + jwt);
         logger.debug("JWT Received: {}", jwt);
 
         try {
-            userEmail = jwtUtil.extractUsername(jwt);
-//            System.out.println("📧 Extracted username: " + userEmail);
+            final String userEmail = jwtUtil.extractUsername(jwt);
             logger.debug("Extracted username: {}", userEmail);
-        } catch (Exception e) {
-            System.out.println("❌ Failed to extract username from token: " + e.getMessage());
-            logger.error("Failed to extract username from token: " + e.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
-            return;
-        }
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            if (jwtUtil.isTokenValid(jwt, userDetails)) {
-                System.out.println("✅ Token is valid. Setting authentication.");
-                logger.debug("Token is valid. Setting authentication.");
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            } else {
-                System.out.println("❌ Token is invalid for user: " + userEmail);
-                logger.error("Invalid token");
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                if (jwtUtil.isTokenValid(jwt, userDetails)) {
+                    logger.debug("Token is valid. Setting authentication.");
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else {
+                    logger.warn("Token is invalid for user: {}", userEmail);
+                }
             }
+        } catch (Exception e) {
+            logger.error("Failed to extract username from token: {}", e.getMessage());
+            // Don't send error response here, let the request continue
+            // The authentication will fail naturally if the token is invalid
         }
 
         filterChain.doFilter(request, response);

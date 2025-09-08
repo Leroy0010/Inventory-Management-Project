@@ -1,0 +1,67 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-refresh-tokens-table
+      author: system
+      changes:
+        - createTable:
+            tableName: refresh_tokens
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: token
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_refresh_tokens_user_id
+                    references: users(id)
+                    onDelete: CASCADE
+              - column:
+                  name: expires_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_revoked
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                    defaultValueBoolean: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                    defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                    defaultValueComputed: CURRENT_TIMESTAMP
+            indexes:
+              - index:
+                  name: idx_refresh_tokens_token
+                  columns:
+                    - column:
+                        name: token
+              - index:
+                  name: idx_refresh_tokens_user_id
+                  columns:
+                    - column:
+                        name: user_id
+              - index:
+                  name: idx_refresh_tokens_expires_at
+                  columns:
+                    - column:
+                        name: expires_at

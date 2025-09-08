@@ -27,6 +27,9 @@ public class JwtUtil {
 
     @Value("${jwt.expiration}")
     private long jwtExpirationMs;
+    
+    @Value("${jwt.refresh.expiration}")
+    private long refreshTokenExpirationMs;
 
     private static final String JWT_ALGORITHM = "HS512"; // Keep HS512 as your chosen algorithm
 
@@ -85,6 +88,27 @@ public class JwtUtil {
 //        System.out.println("Validating token for user: " + username + ". Expected: " + userDetails.getUsername());
         logger.debug("Validating token for user: {}. Expected: {}", username, userDetails.getUsername());
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+    
+    /**
+     * Generate a refresh token (simple UUID-based token, not JWT)
+     */
+    public String generateRefreshToken() {
+        return java.util.UUID.randomUUID().toString();
+    }
+    
+    /**
+     * Get refresh token expiration time in seconds
+     */
+    public int getRefreshTokenExpirationSeconds() {
+        return (int) (refreshTokenExpirationMs / 1000);
+    }
+    
+    /**
+     * Get JWT token expiration time in seconds
+     */
+    public int getJwtExpirationSeconds() {
+        return (int) (jwtExpirationMs / 1000);
     }
 
     private boolean isTokenExpired(String token) {

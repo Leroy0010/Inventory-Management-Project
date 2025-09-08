@@ -61,7 +61,19 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 86400000
+  expiration: 86400000  # 24 hours in milliseconds
+  refresh:
+    expiration: 604800000  # 7 days in milliseconds
+    max-tokens-per-user: 5
+  cookie:
+    name: jwt
+    refresh:
+      name: refreshToken
+    domain: ""
+    path: /
+    secure: true
+    http-only: true
+    same-site: Strict
 
 server:
   servlet:

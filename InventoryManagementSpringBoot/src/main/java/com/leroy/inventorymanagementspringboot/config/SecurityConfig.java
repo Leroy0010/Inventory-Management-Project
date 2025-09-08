@@ -19,7 +19,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler; // Import this
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import java.util.Arrays;
 
@@ -57,11 +60,22 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CsrfTokenRepository csrfTokenRepository() {
+        CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        tokenRepository.setCookiePath("/");
+        tokenRepository.setCookieName("XSRF-TOKEN");
+        return tokenRepository;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository())
+                        .ignoringRequestMatchers("/api/auth/login", "/api/auth/google", "/api/auth/refresh", "/api/auth/logout")
+                )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/authenticate", "/api/auth/google").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/google", "/api/auth/refresh", "/api/auth/logout").permitAll()
                         .requestMatchers("/api/departments/**").hasAnyAuthority("ADMIN", "STOREKEEPER")
                         .anyRequest().authenticated()
                 )
