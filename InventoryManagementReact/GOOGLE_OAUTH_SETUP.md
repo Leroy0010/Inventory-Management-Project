@@ -21,13 +21,13 @@ This guide explains how to set up Google OAuth authentication for the Inventory 
 1. In the Google Cloud Console, go to "APIs & Services" > "OAuth consent screen"
 2. Choose "External" user type (unless you have a Google Workspace account)
 3. Fill in the required information:
-   - App name: "Inventory Management System"
-   - User support email: your email
-   - Developer contact information: your email
+    - App name: "Inventory Management System"
+    - User support email: your email
+    - Developer contact information: your email
 4. Add scopes:
-   - `openid`
-   - `profile`
-   - `email`
+    - `openid`
+    - `profile`
+    - `email`
 5. Add test users (for development)
 
 ### 3. Create OAuth 2.0 Credentials
@@ -36,8 +36,8 @@ This guide explains how to set up Google OAuth authentication for the Inventory 
 2. Click "Create Credentials" > "OAuth 2.0 Client IDs"
 3. Choose "Web application"
 4. Set authorized redirect URIs:
-   - `http://localhost:5173` (for development)
-   - `https://yourdomain.com` (for production)
+    - `http://localhost:5173` (for development)
+    - `https://yourdomain.com` (for production)
 5. Copy the Client ID
 
 ### 4. Configure Environment Variables
@@ -60,8 +60,10 @@ Edit `src/config/google-oauth.ts` and replace the placeholder client ID:
 
 ```typescript
 export const GOOGLE_OAUTH_CONFIG = {
-  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || 'your-actual-client-id.apps.googleusercontent.com',
-  // ... rest of config
+    clientId:
+        import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+        'your-actual-client-id.apps.googleusercontent.com',
+    // ... rest of config
 };
 ```
 
@@ -76,15 +78,15 @@ To toggle between modes, edit `src/config/google-oauth.ts`:
 
 ```typescript
 export const DEV_GOOGLE_OAUTH = {
-  enabled: true, // Set to false for production
-  mockUser: {
-    id: 'google-123456789',
-    email: 'user@gmail.com',
-    firstName: 'Google',
-    lastName: 'User',
-    avatar: 'https://via.placeholder.com/150',
-    verified: true
-  }
+    enabled: true, // Set to false for production
+    mockUser: {
+        id: 'google-123456789',
+        email: 'user@gmail.com',
+        firstName: 'Google',
+        lastName: 'User',
+        avatar: 'https://via.placeholder.com/150',
+        verified: true,
+    },
 };
 ```
 
