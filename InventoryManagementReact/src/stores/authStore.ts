@@ -1,36 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { devtools } from 'zustand/middleware';
+import type { User } from '@/types/auth';
 
-// Types
-export interface User {
-    id: number;
-    email: string;
-    firstName: string;
-    lastName: string;
-    fullName: string;
-    role: Role;
-    office?: Office;
-    department: Department;
-    active: boolean;
-}
 
-export interface Role {
-    id: number;
-    name: 'ADMIN' | 'STOREKEEPER' | 'STAFF';
-    description?: string;
-}
 
-export interface Office {
-    id: number;
-    name: string;
-    location?: string;
-}
-
-export interface Department {
-    id: number;
-    name: string;
-}
 
 export interface AuthState {
     user: User | null;

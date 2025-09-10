@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +12,8 @@ import {
 import { Eye, CheckCircle, XCircle, Clock, User, Package } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import type { RequestResponseDto, RequestStatus } from '@/types/request';
+import type { Role } from '@/types/auth';
+import { formatDate, getStatusBadgeVariant } from '@/lib/request-utils';
 
 interface RequestTableProps {
     requests: RequestResponseDto[];
@@ -21,23 +22,8 @@ interface RequestTableProps {
     onReject?: (request: RequestResponseDto) => void;
     onFulfill?: (request: RequestResponseDto) => void;
     isUpdating: boolean;
-    userRole: 'STAFF' | 'STOREKEEPER' | 'ADMIN';
+    userRole: Role["name"];
 }
-
-const getStatusBadgeVariant = (status: RequestStatus) => {
-    switch (status) {
-        case 'PENDING':
-            return 'secondary';
-        case 'APPROVED':
-            return 'default';
-        case 'FULFILLED':
-            return 'default';
-        case 'REJECTED':
-            return 'destructive';
-        default:
-            return 'secondary';
-    }
-};
 
 const getStatusIcon = (status: RequestStatus) => {
     switch (status) {
@@ -54,6 +40,7 @@ const getStatusIcon = (status: RequestStatus) => {
     }
 };
 
+
 export default function RequestTable({
     requests,
     onViewDetails,
@@ -65,15 +52,6 @@ export default function RequestTable({
 }: RequestTableProps) {
     const { hasPermission } = usePermissions();
 
-    const formatDate = (date: Date) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
 
     const getActionButtons = (request: RequestResponseDto) => {
         const buttons = [];
@@ -188,6 +166,7 @@ export default function RequestTable({
                                 <TableCell>
                                     <Badge variant={getStatusBadgeVariant(request.status)}>
                                         <div className="flex items-center space-x-1">
+                                            
                                             {getStatusIcon(request.status)}
                                             <span>{request.status}</span>
                                         </div>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +9,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Plus, Minus, Trash2, ShoppingCart, RefreshCw } from 'lucide-react';
+import { Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import type { CartItem } from '@/types/cart';
 
