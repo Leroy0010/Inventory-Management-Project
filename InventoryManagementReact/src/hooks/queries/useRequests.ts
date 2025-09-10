@@ -1,67 +1,79 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-    requestApi,
-    type CreateRequestDto,
-    type ApproveRequestDto,
-    type RequestFulfillmentDto,
-} from '@/api/requests';
+import { requestApi } from '@/api/requests';
+import { toast } from 'sonner';
+import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
 
-// Query Keys
+// Query keys
 export const requestKeys = {
     all: ['requests'] as const,
-    list: () => [...requestKeys.all, 'list'] as const,
-    userRequests: () => [...requestKeys.all, 'user'] as const,
-    request: (id: number) => [...requestKeys.all, 'detail', id] as const,
+    lists: () => [...requestKeys.all, 'list'] as const,
+    list: (filters: string) => [...requestKeys.lists(), { filters }] as const,
+    details: () => [...requestKeys.all, 'detail'] as const,
+    detail: (id: number) => [...requestKeys.details(), id] as const,
 };
 
-// Custom hook for request queries and mutations
-export function useRequestQueries() {
+// Request queries
+export const useRequestQueries = () => {
     const queryClient = useQueryClient();
-
-    // Get all requests (for storekeepers/admins)
-    const requestsQuery = useQuery({
-        queryKey: requestKeys.list(),
-        queryFn: requestApi.getRequests,
-        staleTime: 1 * 60 * 1000, // 1 minute
-    });
 
     // Get user's requests
     const userRequestsQuery = useQuery({
-        queryKey: requestKeys.userRequests(),
+        queryKey: requestKeys.lists(),
         queryFn: requestApi.getUserRequests,
-        staleTime: 1 * 60 * 1000, // 1 minute
+        staleTime: 30000, // 30 seconds
+        refetchOnWindowFocus: false,
     });
 
     // Get request by ID
-    const useRequestQuery = (id: number) =>
-        useQuery({
-            queryKey: requestKeys.request(id),
-            queryFn: () => requestApi.getRequestById(id),
-            enabled: !!id,
-        });
+    const getRequestByIdQuery = (id: number) => useQuery({
+        queryKey: requestKeys.detail(id),
+        queryFn: () => requestApi.getRequestById(id),
+        enabled: !!id,
+        staleTime: 30000,
+    });
+
+    // Submit cart as request mutation
+    const submitCartAsRequestMutation = useMutation({
+        mutationFn: requestApi.submitCartAsRequest,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: requestKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: ['cart'] });
+            toast.success(`Request submitted successfully! Request ID: ${data.id}`);
+        },
+        onError: (error: unknown) => {
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            toast.error(`Failed to submit request: ${friendlyMessage}`);
+        },
+    });
 
     // Create request mutation
     const createRequestMutation = useMutation({
         mutationFn: requestApi.createRequest,
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: requestKeys.userRequests(),
-            });
-            queryClient.invalidateQueries({ queryKey: requestKeys.list() });
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: requestKeys.lists() });
+            toast.success(`Request created successfully! Request ID: ${data.id}`);
+        },
+        onError: (error: unknown) => {
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            toast.error(`Failed to create request: ${friendlyMessage}`);
         },
     });
 
-    // Approve request mutation
-    const approveRequestMutation = useMutation({
-        mutationFn: requestApi.approveRequest,
+    // Approve or reject request mutation
+    const approveOrRejectRequestMutation = useMutation({
+        mutationFn: requestApi.approveOrRejectRequest,
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: requestKeys.list() });
-            queryClient.invalidateQueries({
-                queryKey: requestKeys.userRequests(),
-            });
-            queryClient.invalidateQueries({
-                queryKey: requestKeys.request(data.requestId),
-            });
+            queryClient.invalidateQueries({ queryKey: requestKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: requestKeys.detail(data.id) });
+            const action = data.status === 'APPROVED' ? 'approved' : 'rejected';
+            toast.success(`Request ${action} successfully!`);
+        },
+        onError: (error: unknown) => {
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            toast.error(`Failed to process request: ${friendlyMessage}`);
         },
     });
 
@@ -69,25 +81,26 @@ export function useRequestQueries() {
     const fulfillRequestMutation = useMutation({
         mutationFn: requestApi.fulfillRequest,
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: requestKeys.list() });
-            queryClient.invalidateQueries({
-                queryKey: requestKeys.userRequests(),
-            });
-            queryClient.invalidateQueries({
-                queryKey: requestKeys.request(data.requestId),
-            });
+            queryClient.invalidateQueries({ queryKey: requestKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: requestKeys.detail(data.id) });
+            toast.success('Request fulfilled successfully!');
+        },
+        onError: (error: unknown) => {
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            toast.error(`Failed to fulfill request: ${friendlyMessage}`);
         },
     });
 
     return {
         // Queries
-        requestsQuery,
         userRequestsQuery,
-        useRequestQuery,
-
+        getRequestByIdQuery,
+        
         // Mutations
+        submitCartAsRequestMutation,
         createRequestMutation,
-        approveRequestMutation,
+        approveOrRejectRequestMutation,
         fulfillRequestMutation,
     };
-}
+};

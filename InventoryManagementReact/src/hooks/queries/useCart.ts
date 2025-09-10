@@ -85,6 +85,7 @@ export const useCartQueries = () => {
         mutationFn: cartApi.submitCartAsRequest,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: cartKeys.items() });
+            queryClient.invalidateQueries({ queryKey: ['requests'] });
             toast.success(`Request submitted successfully! Request ID: ${data.id}`);
         },
         onError: (error: unknown) => {

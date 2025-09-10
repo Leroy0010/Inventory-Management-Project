@@ -24,7 +24,7 @@ const AddDepartment = React.lazy(() => import('@/pages/admin/AddDepartment'));
 const StaffDashboard = React.lazy(() => import('@/pages/Dashboard'));
 // const StaffInventoryItems = React.lazy(() => import('@/pages/InventoryItems'));
 const StaffCart = React.lazy(() => import('@/pages/staff/Cart'));
-const StaffRequests = React.lazy(() => import('@/pages/Requests'));
+const StaffRequests = React.lazy(() => import('@/pages/staff/MyRequests'));
 
 // Storekeeper pages
 const StorekeeperDashboard = React.lazy(() => import('@/pages/Dashboard'));
@@ -42,7 +42,7 @@ const InventoryItems = React.lazy(() => import('@/pages/InventoryItems'));
 const InventoryItemDetails = React.lazy(
     () => import('@/pages/InventoryItemDetails')
 );
-const Requests = React.lazy(() => import('@/pages/Requests'));
+const StorekeeperRequests = React.lazy(() => import('@/pages/storekeeper/ManageRequests'));
 const TransactionReport = React.lazy(
     () => import('@/pages/storekeeper/TransactionReport')
 );
@@ -347,7 +347,7 @@ const router = createBrowserRouter([
                         <ProtectedRoute
                             requiredPermissions={[Permission.VIEW_REQUESTS]}
                         >
-                            <Requests />
+                            <StorekeeperRequests />
                         </ProtectedRoute>
                     </Suspense>
                 ),
