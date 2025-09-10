@@ -100,14 +100,14 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
                                         ? itemNames.find(
                                               (itemName) => itemName === value
                                           )
-                                        : 'Select itemName...'}
+                                        : 'Select item name...'}
                                     <ChevronsUpDown className="opacity-50" />
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-[200px] p-0">
                                 <Command>
                                     <CommandInput
-                                        placeholder="Search itemName..."
+                                        placeholder="Search item name..."
                                         className="h-9"
                                     />
                                     <CommandList>

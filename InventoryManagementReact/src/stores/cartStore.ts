@@ -1,31 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import type { CartItem, CartItemRequestDto } from '@/types/cart';
 
 // Types
-export interface CartItem {
-    id: number;
-    inventoryItem: InventoryItem;
-    quantity: number;
-    addedAt: string;
-}
-
-export interface InventoryItem {
-    id: number;
-    name: string;
-    description: string;
-    unit: string;
-    department: Department;
-}
-
-export interface Department {
-    id: number;
-    name: string;
-}
-
-export interface CartItemRequestDto {
-    itemId: number;
-    quantity: number;
-}
 
 export interface CartState {
     items: CartItem[];
