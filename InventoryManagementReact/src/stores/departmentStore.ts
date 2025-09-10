@@ -1,16 +1,15 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type { Department } from "@/types/department";
-
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type { Department } from '@/types/department';
 
 export interface DepartmentState {
-    departments: Department[]
+    departments: Department[];
     isLoading: boolean;
-    error: string | null
+    error: string | null;
 }
 
 export interface DepartmentActions {
-      // Departments management
+    // Departments management
     fetchDepartments: () => Promise<void>;
     createDepartment: (name: string) => Promise<Department>;
     updateDepartment: (id: number, name: string) => Promise<Department>;
@@ -19,17 +18,15 @@ export interface DepartmentActions {
     // Error handling
     setError: (error: string | null) => void;
     clearError: () => void;
-
 }
 
 export type DepartmentStore = DepartmentState & DepartmentActions;
 
-
 const initialState: DepartmentState = {
     departments: [],
     isLoading: false,
-    error: null
-}
+    error: null,
+};
 
 export const useDepartmentStore = create<DepartmentStore>()(
     devtools(
@@ -196,4 +193,4 @@ export const useDepartmentStore = create<DepartmentStore>()(
             name: 'department-store',
         }
     )
-)
+);

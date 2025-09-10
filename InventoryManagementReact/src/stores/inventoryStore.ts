@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type { InventoryItem, CreateInventoryItemDto, UpdateInventoryItemDto } from '@/types/inventoryItem';
-
-
-
+import type {
+    InventoryItem,
+    CreateInventoryItemDto,
+    UpdateInventoryItemDto,
+} from '@/types/inventoryItem';
 
 export interface InventoryState {
     items: InventoryItem[];
@@ -23,7 +24,6 @@ export interface InventoryActions {
     createItem: (item: CreateInventoryItemDto) => Promise<InventoryItem>;
     updateItem: (item: UpdateInventoryItemDto) => Promise<InventoryItem>;
     deleteItem: (id: number) => Promise<void>;
-
 
     // Filters and search
     setFilters: (filters: Partial<InventoryState['filters']>) => void;
@@ -226,7 +226,6 @@ export const useInventoryStore = create<InventoryStore>()(
                 }
             },
 
-            
             // Set filters
             setFilters: (filters) => {
                 set((state) => ({

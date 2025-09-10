@@ -1,33 +1,30 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type { InventoryBatch, CreateBatchDto } from "@/types/inventoryBatch";
-
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type { InventoryBatch, CreateBatchDto } from '@/types/inventoryBatch';
 
 export interface InventoryBatchState {
-    batches: InventoryBatch[]
+    batches: InventoryBatch[];
     isLoading: boolean;
-    error: string | null
+    error: string | null;
 }
 
 export interface InventoryBatchActions {
     // Batches management
-        fetchBatches: () => Promise<void>;
-        createBatch: (batch: CreateBatchDto) => Promise<InventoryBatch>;
-    
-        // Error handling
-        setError: (error: string | null) => void;
-        clearError: () => void;
+    fetchBatches: () => Promise<void>;
+    createBatch: (batch: CreateBatchDto) => Promise<InventoryBatch>;
 
+    // Error handling
+    setError: (error: string | null) => void;
+    clearError: () => void;
 }
 
 export type InventoryBatchStore = InventoryBatchState & InventoryBatchActions;
 
-
 const initialState: InventoryBatchState = {
     batches: [],
     isLoading: false,
-    error: null
-}
+    error: null,
+};
 
 export const useInventoryBatchStore = create<InventoryBatchStore>()(
     devtools(
@@ -101,7 +98,7 @@ export const useInventoryBatchStore = create<InventoryBatchStore>()(
                 }
             },
 
-                    // Set error
+            // Set error
             setError: (error) => {
                 set({ error });
             },
@@ -115,4 +112,4 @@ export const useInventoryBatchStore = create<InventoryBatchStore>()(
             name: 'inventory-batch-store',
         }
     )
-)
+);
