@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '@/api/cart';
 import { toast } from 'sonner';
+import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
 
 // Query keys
 export const cartKeys = {
@@ -28,8 +29,10 @@ export const useCartQueries = () => {
             queryClient.invalidateQueries({ queryKey: cartKeys.items() });
             toast.success('Item added to cart');
         },
-        onError: (error: Error) => {
-            toast.error(`Failed to add item: ${error.message}`);
+        onError: (error: unknown) => {
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            toast.error(`Failed to add item: ${friendlyMessage}`);
         },
     });
 
@@ -41,8 +44,10 @@ export const useCartQueries = () => {
             queryClient.invalidateQueries({ queryKey: cartKeys.items() });
             toast.success('Item removed from cart');
         },
-        onError: (error: Error) => {
-            toast.error(`Failed to remove item: ${error.message}`);
+        onError: (error: unknown) => {
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            toast.error(`Failed to remove item: ${friendlyMessage}`);
         },
     });
 
@@ -54,8 +59,10 @@ export const useCartQueries = () => {
             queryClient.invalidateQueries({ queryKey: cartKeys.items() });
             toast.success('Cart updated');
         },
-        onError: (error: Error) => {
-            toast.error(`Failed to update cart: ${error.message}`);
+        onError: (error: unknown) => {
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            toast.error(`Failed to update cart: ${friendlyMessage}`);
         },
     });
 
@@ -66,8 +73,10 @@ export const useCartQueries = () => {
             queryClient.invalidateQueries({ queryKey: cartKeys.items() });
             toast.success('Cart cleared');
         },
-        onError: (error: Error) => {
-            toast.error(`Failed to clear cart: ${error.message}`);
+        onError: (error: unknown) => {
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            toast.error(`Failed to clear cart: ${friendlyMessage}`);
         },
     });
 
@@ -78,8 +87,10 @@ export const useCartQueries = () => {
             queryClient.invalidateQueries({ queryKey: cartKeys.items() });
             toast.success(`Request submitted successfully! Request ID: ${data.id}`);
         },
-        onError: (error: Error) => {
-            toast.error(`Failed to submit request: ${error.message}`);
+        onError: (error: unknown) => {
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            toast.error(`Failed to submit request: ${friendlyMessage}`);
         },
     });
 

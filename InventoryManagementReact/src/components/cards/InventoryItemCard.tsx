@@ -15,6 +15,8 @@ import {
 import { cn } from '@/lib/utils';
 import type { InventoryItemResponseDto } from '@/types/inventoryItem';
 import { useCartQueries } from '@/hooks/queries/useCart';
+import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
+import { toast } from 'sonner';
 
 interface InventoryItemCardProps {
     item: InventoryItemResponseDto;
@@ -44,8 +46,17 @@ export default function InventoryItemCard({
         if (onAddToCart) {
             onAddToCart(item);
         } else {
-            // Default cart functionality
-            addItemMutation.mutate({ itemId: item.id, quantity: 1 });
+            // Default cart functionality with error handling
+            addItemMutation.mutate(
+                { itemId: item.id, quantity: 1 },
+                {
+                    onError: (error: unknown) => {
+                        const apiError = formatApiError(error);
+                        const friendlyMessage = getFriendlyErrorMessage(apiError);
+                        toast.error(`Failed to add ${item.name} to cart: ${friendlyMessage}`);
+                    },
+                }
+            );
         }
     };
 
