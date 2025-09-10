@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
     Table,
@@ -22,190 +21,125 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
     ShoppingCart,
     Plus,
     Minus,
     Trash2,
     Package,
-    DollarSign,
     CheckCircle,
     AlertCircle,
+    RefreshCw,
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
-
-interface CartItem {
-    id: string;
-    inventoryItemId: string;
-    name: string;
-    description: string;
-    sku: string;
-    quantity: number;
-    availableQuantity: number;
-    unitPrice: number;
-    totalPrice: number;
-    notes?: string;
-}
-
-interface Cart {
-    id: string;
-    items: CartItem[];
-    totalItems: number;
-    totalAmount: number;
-    createdAt: string;
-    updatedAt: string;
-}
+import { useCartQueries } from '@/hooks/queries/useCart';
+import type { CartItem } from '@/types/cart';
 
 export default function Cart() {
     const { hasPermission } = usePermissions();
-    const [cart, setCart] = useState<Cart | null>(null);
     const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
     const [checkoutNotes, setCheckoutNotes] = useState('');
-    const [loading, setLoading] = useState(true);
 
-    // Mock data - replace with actual API calls
-    useEffect(() => {
-        const mockCart: Cart = {
-            id: '1',
-            items: [
-                {
-                    id: '1',
-                    inventoryItemId: 'inv-1',
-                    name: 'A4 Paper Sheets',
-                    description: 'White A4 paper, 80gsm',
-                    sku: 'PAPER-A4-001',
-                    quantity: 5,
-                    availableQuantity: 100,
-                    unitPrice: 12.5,
-                    totalPrice: 62.5,
-                    notes: 'For office printing',
-                },
-                {
-                    id: '2',
-                    inventoryItemId: 'inv-2',
-                    name: 'Blue Ballpoint Pens',
-                    description: 'Standard blue ink ballpoint pens',
-                    sku: 'PEN-BLUE-001',
-                    quantity: 10,
-                    availableQuantity: 200,
-                    unitPrice: 1.25,
-                    totalPrice: 12.5,
-                    notes: 'For daily use',
-                },
-                {
-                    id: '3',
-                    inventoryItemId: 'inv-3',
-                    name: 'Stapler',
-                    description: 'Heavy-duty stapler with staples',
-                    sku: 'STAPLER-001',
-                    quantity: 2,
-                    availableQuantity: 15,
-                    unitPrice: 25.0,
-                    totalPrice: 50.0,
-                    notes: 'For document binding',
-                },
-            ],
-            totalItems: 17,
-            totalAmount: 125.0,
-            createdAt: '2024-01-20T10:30:00Z',
-            updatedAt: '2024-01-20T14:45:00Z',
-        };
+    const {
+        cartItemsQuery,
+        addItemMutation,
+        removeItemMutation,
+        updateItemMutation,
+        clearCartMutation,
+        submitCartAsRequestMutation,
+    } = useCartQueries();
 
-        setCart(mockCart);
-        setLoading(false);
-    }, []);
+    const cartItems = cartItemsQuery.data || [];
+    const isLoading = cartItemsQuery.isLoading;
+    const error = cartItemsQuery.error;
 
-    const updateItemQuantity = (itemId: string, newQuantity: number) => {
-        if (!cart) return;
+    // Calculate totals
+    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+    const updateItemQuantity = (itemId: number, newQuantity: number) => {
         if (newQuantity <= 0) {
             removeItem(itemId);
             return;
         }
 
-        const updatedItems = cart.items.map((item) => {
-            if (item.id === itemId) {
-                const updatedItem = {
-                    ...item,
-                    quantity: Math.min(newQuantity, item.availableQuantity),
-                    totalPrice:
-                        Math.min(newQuantity, item.availableQuantity) *
-                        item.unitPrice,
-                };
-                return updatedItem;
-            }
-            return item;
-        });
-
-        const totalItems = updatedItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-        );
-        const totalAmount = updatedItems.reduce(
-            (sum, item) => sum + item.totalPrice,
-            0
-        );
-
-        setCart({
-            ...cart,
-            items: updatedItems,
-            totalItems,
-            totalAmount,
-        });
+        updateItemMutation.mutate({ itemId, quantity: newQuantity });
     };
 
-    const removeItem = (itemId: string) => {
-        if (!cart) return;
-
-        const updatedItems = cart.items.filter((item) => item.id !== itemId);
-        const totalItems = updatedItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-        );
-        const totalAmount = updatedItems.reduce(
-            (sum, item) => sum + item.totalPrice,
-            0
-        );
-
-        setCart({
-            ...cart,
-            items: updatedItems,
-            totalItems,
-            totalAmount,
-        });
+    const removeItem = (itemId: number) => {
+        const item = cartItems.find(item => item.itemId === itemId);
+        if (item) {
+            removeItemMutation.mutate({ itemId, quantity: item.quantity });
+        }
     };
 
-    const handleCheckout = () => {
-        if (!cart || cart.items.length === 0) return;
+    const handleClearCart = () => {
+        clearCartMutation.mutate();
+    };
 
-        // TODO: Implement API call
-        console.log('Checking out cart:', {
-            cartId: cart.id,
-            items: cart.items,
-            notes: checkoutNotes,
-        });
+    const handleSubmitRequest = () => {
+        if (cartItems.length === 0) return;
 
+        submitCartAsRequestMutation.mutate();
         setIsCheckoutDialogOpen(false);
         setCheckoutNotes('');
-
-        // Clear cart after successful checkout
-        setCart({
-            ...cart,
-            items: [],
-            totalItems: 0,
-            totalAmount: 0,
-        });
     };
 
-    if (loading) {
+    const handleRefreshCart = () => {
+        cartItemsQuery.refetch();
+    };
+
+    if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <Skeleton className="h-8 w-48 mb-2" />
+                        <Skeleton className="h-4 w-64" />
+                    </div>
+                    <Skeleton className="h-10 w-32" />
+                </div>
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="space-y-4">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <div key={i} className="flex items-center space-x-4">
+                                    <Skeleton className="h-12 w-12 rounded" />
+                                    <div className="space-y-2 flex-1">
+                                        <Skeleton className="h-4 w-3/4" />
+                                        <Skeleton className="h-3 w-1/2" />
+                                    </div>
+                                    <Skeleton className="h-8 w-20" />
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         );
     }
 
-    if (!cart || cart.items.length === 0) {
+    if (error) {
+        return (
+            <div className="space-y-6">
+                <div className="text-center py-12">
+                    <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        Error Loading Cart
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        {error.message}
+                    </p>
+                    <Button onClick={handleRefreshCart}>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Try Again
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    if (cartItems.length === 0) {
         return (
             <div className="space-y-6">
                 <div>
@@ -254,17 +188,25 @@ export default function Cart() {
                 </div>
                 <div className="flex items-center space-x-4">
                     <Badge variant="secondary" className="text-sm">
-                        {cart.totalItems} items
+                        {totalItems} items
                     </Badge>
+                    <Button
+                        variant="outline"
+                        onClick={handleRefreshCart}
+                        disabled={isLoading}
+                    >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
                     {hasPermission('CHECKOUT_CART') && (
                         <Dialog
                             open={isCheckoutDialogOpen}
                             onOpenChange={setIsCheckoutDialogOpen}
                         >
                             <DialogTrigger asChild>
-                                <Button>
+                                <Button disabled={submitCartAsRequestMutation.isPending}>
                                     <CheckCircle className="mr-2 h-4 w-4" />
-                                    Checkout
+                                    Submit Request
                                 </Button>
                             </DialogTrigger>
                             <DialogContent>
@@ -279,29 +221,23 @@ export default function Cart() {
                                     <div className="space-y-2">
                                         <Label>Items Summary</Label>
                                         <div className="max-h-40 overflow-y-auto space-y-2">
-                                            {cart.items.map((item) => (
+                                            {cartItems.map((item) => (
                                                 <div
                                                     key={item.id}
                                                     className="flex justify-between text-sm"
                                                 >
                                                     <span>
-                                                        {item.name} x
-                                                        {item.quantity}
+                                                        {item.itemName} x {item.quantity}
                                                     </span>
                                                     <span>
-                                                        $
-                                                        {item.totalPrice.toFixed(
-                                                            2
-                                                        )}
+                                                        {item.unit}
                                                     </span>
                                                 </div>
                                             ))}
                                         </div>
                                         <div className="border-t pt-2 flex justify-between font-semibold">
-                                            <span>Total</span>
-                                            <span>
-                                                ${cart.totalAmount.toFixed(2)}
-                                            </span>
+                                            <span>Total Items</span>
+                                            <span>{totalItems}</span>
                                         </div>
                                     </div>
                                     <div>
@@ -325,11 +261,22 @@ export default function Cart() {
                                         onClick={() =>
                                             setIsCheckoutDialogOpen(false)
                                         }
+                                        disabled={submitCartAsRequestMutation.isPending}
                                     >
                                         Cancel
                                     </Button>
-                                    <Button onClick={handleCheckout}>
-                                        Submit Request
+                                    <Button 
+                                        onClick={handleSubmitRequest}
+                                        disabled={submitCartAsRequestMutation.isPending}
+                                    >
+                                        {submitCartAsRequestMutation.isPending ? (
+                                            <>
+                                                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            'Submit Request'
+                                        )}
                                     </Button>
                                 </DialogFooter>
                             </DialogContent>
@@ -351,54 +298,49 @@ export default function Cart() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Item</TableHead>
-                                        <TableHead>SKU</TableHead>
+                                        <TableHead>ID</TableHead>
+                                        <TableHead>Item ID</TableHead>
+                                        <TableHead>Item Name</TableHead>
                                         <TableHead>Quantity</TableHead>
-                                        <TableHead>Unit Price</TableHead>
-                                        <TableHead>Total</TableHead>
                                         <TableHead className="text-right">
                                             Actions
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {cart.items.map((item) => (
+                                    {cartItems.map((item) => (
                                         <TableRow key={item.id}>
                                             <TableCell>
-                                                <div>
-                                                    <div className="font-medium">
-                                                        {item.name}
-                                                    </div>
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {item.description}
-                                                    </div>
-                                                    {item.notes && (
-                                                        <div className="text-xs text-blue-600 mt-1">
-                                                            Note: {item.notes}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant="outline">
-                                                    {item.sku}
+                                                <Badge variant="secondary">
+                                                    {item.id}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>
+                                                <Badge variant="outline">
+                                                    {item.itemId}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="font-medium">
+                                                    {item.itemName}
+                                                </div>
+                                                <div className="text-sm text-muted-foreground">
+                                                    {item.unit}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
                                                 <div className="flex items-center space-x-2">
-                                                    {hasPermission(
-                                                        'REMOVE_FROM_CART'
-                                                    ) && (
+                                                    {hasPermission('REMOVE_FROM_CART') && (
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
                                                             onClick={() =>
                                                                 updateItemQuantity(
-                                                                    item.id,
-                                                                    item.quantity -
-                                                                        1
+                                                                    item.itemId,
+                                                                    item.quantity - 1
                                                                 )
                                                             }
+                                                            disabled={updateItemMutation.isPending}
                                                         >
                                                             <Minus className="h-3 w-3" />
                                                         </Button>
@@ -406,63 +348,30 @@ export default function Cart() {
                                                     <span className="w-8 text-center">
                                                         {item.quantity}
                                                     </span>
-                                                    {hasPermission(
-                                                        'ADD_TO_CART'
-                                                    ) && (
+                                                    {hasPermission('ADD_TO_CART') && (
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
                                                             onClick={() =>
                                                                 updateItemQuantity(
-                                                                    item.id,
-                                                                    item.quantity +
-                                                                        1
+                                                                    item.itemId,
+                                                                    item.quantity + 1
                                                                 )
                                                             }
-                                                            disabled={
-                                                                item.quantity >=
-                                                                item.availableQuantity
-                                                            }
+                                                            disabled={updateItemMutation.isPending}
                                                         >
                                                             <Plus className="h-3 w-3" />
                                                         </Button>
                                                     )}
                                                 </div>
-                                                <div className="text-xs text-muted-foreground mt-1">
-                                                    Available:{' '}
-                                                    {item.availableQuantity}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center space-x-1">
-                                                    <DollarSign className="h-3 w-3" />
-                                                    <span>
-                                                        {item.unitPrice.toFixed(
-                                                            2
-                                                        )}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center space-x-1 font-medium">
-                                                    <DollarSign className="h-3 w-3" />
-                                                    <span>
-                                                        {item.totalPrice.toFixed(
-                                                            2
-                                                        )}
-                                                    </span>
-                                                </div>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                {hasPermission(
-                                                    'REMOVE_FROM_CART'
-                                                ) && (
+                                                {hasPermission('REMOVE_FROM_CART') && (
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        onClick={() =>
-                                                            removeItem(item.id)
-                                                        }
+                                                        onClick={() => removeItem(item.itemId)}
+                                                        disabled={removeItemMutation.isPending}
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
@@ -479,19 +388,43 @@ export default function Cart() {
                 <div className="space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Order Summary</CardTitle>
+                            <CardTitle>Cart Summary</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex justify-between">
-                                <span>Items ({cart.totalItems})</span>
-                                <span>${cart.totalAmount.toFixed(2)}</span>
+                                <span>Total Items</span>
+                                <span>{totalItems}</span>
                             </div>
-                            <div className="border-t pt-4">
-                                <div className="flex justify-between text-lg font-semibold">
-                                    <span>Total</span>
-                                    <span>${cart.totalAmount.toFixed(2)}</span>
-                                </div>
+                            <div className="flex justify-between">
+                                <span>Unique Items</span>
+                                <span>{cartItems.length}</span>
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Cart Actions</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            <Button
+                                variant="outline"
+                                onClick={handleClearCart}
+                                disabled={clearCartMutation.isPending || cartItems.length === 0}
+                                className="w-full"
+                            >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                {clearCartMutation.isPending ? 'Clearing...' : 'Clear Cart'}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={handleRefreshCart}
+                                disabled={isLoading}
+                                className="w-full"
+                            >
+                                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                                Refresh Cart
+                            </Button>
                         </CardContent>
                     </Card>
 

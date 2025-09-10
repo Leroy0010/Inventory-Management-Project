@@ -4,6 +4,7 @@ export interface CartItem {
     itemName: string;
     imageUrl: string;
     quantity: number;
+    unit: string;
 }
 
 

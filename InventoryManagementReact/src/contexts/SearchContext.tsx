@@ -96,16 +96,6 @@ const applicationData: SearchResult[] = [
         keywords: ['staff', 'dashboard', 'employee', 'tools'],
         permissions: ['VIEW_DASHBOARD'],
     },
-    // {
-    //     id: 'staff-inventory',
-    //     title: 'Browse Inventory',
-    //     description: 'View and browse available inventory items',
-    //     category: 'page',
-    //     path: '/staff-inventory-items',
-    //     icon: 'Package',
-    //     keywords: ['inventory', 'browse', 'items', 'products', 'staff'],
-    //     permissions: ['VIEW_INVENTORY'],
-    // },
     {
         id: 'cart',
         title: 'Shopping Cart',

@@ -10,9 +10,11 @@ import {
     Package,
     AlertTriangle,
     CheckCircle2,
+    RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { InventoryItemResponseDto } from '@/types/inventoryItem';
+import { useCartQueries } from '@/hooks/queries/useCart';
 
 interface InventoryItemCardProps {
     item: InventoryItemResponseDto;
@@ -34,14 +36,16 @@ export default function InventoryItemCard({
     className,
 }: InventoryItemCardProps) {
     const [isHovered, setIsHovered] = useState(false);
-    const [isInCart, setIsInCart] = useState(false);
+    const { addItemMutation } = useCartQueries();
 
     const needsReorder = item.quantity <= item.reorderLevel;
 
     const handleAddToCart = () => {
         if (onAddToCart) {
             onAddToCart(item);
-            setIsInCart(true);
+        } else {
+            // Default cart functionality
+            addItemMutation.mutate({ itemId: item.id, quantity: 1 });
         }
     };
 
@@ -187,18 +191,13 @@ export default function InventoryItemCard({
                         // Staff Add to Cart Button
                         <Button
                             onClick={handleAddToCart}
-                            disabled={isInCart}
-                            className={cn(
-                                'w-full',
-                                isInCart
-                                    ? 'bg-green-600 hover:bg-green-600 cursor-not-allowed'
-                                    : 'bg-green-500 hover:bg-green-600'
-                            )}
+                            disabled={addItemMutation.isPending}
+                            className="w-full bg-green-500 hover:bg-green-600"
                         >
-                            {isInCart ? (
+                            {addItemMutation.isPending ? (
                                 <>
-                                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                                    In Cart
+                                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                    Adding...
                                 </>
                             ) : (
                                 <>
