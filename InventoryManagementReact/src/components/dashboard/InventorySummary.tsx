@@ -8,7 +8,8 @@ import {
 } from '@/components/ui/card';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { LoadingOverlay } from '@/components/ui/progress';
-import { useInventoryQueries } from '@/hooks/queries/useInventory';
+import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
+import { useInventoryBalanceQueries } from '@/hooks/queries/useInventoryBalance';
 import { Package, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -17,7 +18,8 @@ interface InventorySummaryProps {
 }
 
 export function InventorySummary({ className }: InventorySummaryProps) {
-    const { itemsQuery, balanceQuery } = useInventoryQueries();
+    const { itemsQuery } = useInventoryItemQueries();
+    const { balanceQuery } = useInventoryBalanceQueries();
 
     // Calculate summary statistics
     const summary = React.useMemo(() => {

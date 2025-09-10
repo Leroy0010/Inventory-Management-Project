@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useInventoryQueries } from '@/hooks/queries/useInventory';
+import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -33,7 +33,7 @@ export default function InventoryItemDetails() {
     const { user } = useAuthStore();
     const [isInCart, setIsInCart] = useState(false);
 
-    const { useItemQuery, deleteItemMutation } = useInventoryQueries();
+    const { useItemQuery, deleteItemMutation } = useInventoryItemQueries();
     const itemQuery = useItemQuery(Number(id));
 
     // Determine if user is storekeeper

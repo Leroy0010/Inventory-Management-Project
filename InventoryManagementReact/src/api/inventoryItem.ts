@@ -79,4 +79,56 @@ export const inventoryApi = {
             throw new Error(handleApiError(error));
         }
     },
+
+    // Departments
+    getDepartments: async (): Promise<any[]> => {
+        try {
+            return await api.get<any[]>('/api/departments');
+        } catch (error) {
+            throw new Error(handleApiError(error));
+        }
+    },
+
+    createDepartment: async (name: string): Promise<any> => {
+        try {
+            return await api.post<any>('/api/departments', { name });
+        } catch (error) {
+            throw new Error(handleApiError(error));
+        }
+    },
+
+    updateDepartment: async (id: number, name: string): Promise<any> => {
+        try {
+            return await api.put<any>(`/api/departments/${id}`, { name });
+        } catch (error) {
+            throw new Error(handleApiError(error));
+        }
+    },
+
+    deleteDepartment: async (id: number): Promise<void> => {
+        try {
+            await api.delete(`/api/departments/${id}`);
+        } catch (error) {
+            throw new Error(handleApiError(error));
+        }
+    },
+
+    // Inventory Balance
+    getInventoryBalance: async (): Promise<any> => {
+        try {
+            return await api.get<any>('/api/inventory/balance');
+        } catch (error) {
+            throw new Error(handleApiError(error));
+        }
+    },
+
+    // Stock Transactions
+    getStockTransactions: async (): Promise<any[]> => {
+        try {
+            return await api.get<any[]>('/api/stock-transactions');
+        } catch (error) {
+            throw new Error(handleApiError(error));
+        }
+    },
+
 };

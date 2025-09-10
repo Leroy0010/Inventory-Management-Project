@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useInventoryQueries } from '@/hooks/queries/useInventory';
+import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +39,7 @@ export default function InventoryItems() {
         useState<InventoryItemResponseDto | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-    const { itemsQuery, deleteItemMutation } = useInventoryQueries();
+    const { itemsQuery, deleteItemMutation } = useInventoryItemQueries();
 
     // Determine if user is storekeeper
     const isStorekeeper = user?.role.name === 'STOREKEEPER';

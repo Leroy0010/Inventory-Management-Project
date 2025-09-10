@@ -1,56 +1,83 @@
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Layers, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useBatchQueries } from '@/hooks/queries/useBatch';
+import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
+import BatchHeader from '@/components/batch/BatchHeader';
+import BatchTable from '@/components/batch/BatchTable';
+import BatchEmpty from '@/components/batch/BatchEmpty';
+import BatchError from '@/components/batch/BatchError';
+import BatchSkeleton from '@/components/batch/BatchSkeleton';
 
 export default function Batch() {
     const navigate = useNavigate();
+    const { batchesQuery } = useBatchQueries();
+
+    const batches = batchesQuery.data || [];
+    const isLoading = batchesQuery.isLoading;
+    const error = batchesQuery.error;
+
+    const handleRefresh = () => {
+        batchesQuery.refetch();
+    };
+
+    const handleCreateBatch = () => {
+        navigate('/storekeeper/add-batch');
+    };
+
+    // Loading state
+    if (isLoading) {
+        return <BatchSkeleton />;
+    }
+
+    // Error state
+    if (error) {
+        const apiError = formatApiError(error);
+        const friendlyMessage = getFriendlyErrorMessage(apiError);
+        
+        return (
+            <div className="space-y-6">
+                <BatchHeader
+                    title="Inventory Batches"
+                    totalBatches={0}
+                    isLoading={isLoading}
+                    onRefresh={handleRefresh}
+                    onCreateBatch={handleCreateBatch}
+                />
+                <BatchError
+                    errorMessage={friendlyMessage}
+                    onRetry={handleRefresh}
+                />
+            </div>
+        );
+    }
+
+    // Empty state
+    if (batches.length === 0) {
+        return (
+            <div className="space-y-6">
+                <BatchHeader
+                    title="Inventory Batches"
+                    totalBatches={0}
+                    isLoading={isLoading}
+                    onRefresh={handleRefresh}
+                    onCreateBatch={handleCreateBatch}
+                />
+                <BatchEmpty onCreateBatch={handleCreateBatch} />
+            </div>
+        );
+    }
+
+    // Main view
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground">
-                        Batch Management
-                    </h1>
-                    <p className="text-muted-foreground">
-                        Manage inventory batches and groups
-                    </p>
-                </div>
-                <Button
-                    onClick={() => navigate('/batch/add')}
-                    className="cursor-pointer"
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Batch
-                </Button>
-            </div>
+            <BatchHeader
+                title="Inventory Batches"
+                totalBatches={batches.length}
+                isLoading={isLoading}
+                onRefresh={handleRefresh}
+                onCreateBatch={handleCreateBatch}
+            />
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Layers className="w-5 h-5" />
-                        Batches
-                    </CardTitle>
-                    <CardDescription>
-                        View and manage all inventory batches
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-center py-8 text-muted-foreground">
-                        <Layers className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p>No batches found</p>
-                        <p className="text-sm">
-                            Add your first batch to get started
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
+            <BatchTable batches={batches} isLoading={isLoading} />
         </div>
     );
 }

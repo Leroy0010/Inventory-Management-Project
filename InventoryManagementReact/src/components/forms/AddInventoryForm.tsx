@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,8 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { useInventoryQueries } from '@/hooks/queries/useInventory';
-import { useNavigate } from 'react-router-dom';
+import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
+import { useDepartmentQueries } from '@/hooks/queries/useDepartments';
+// import { useNavigate } from 'react-router-dom';
 import { Package, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -65,12 +66,13 @@ const addInventorySchema = z.object({
 type AddInventoryFormData = z.infer<typeof addInventorySchema>;
 
 export default function AddInventoryForm({ className }: AddInventoryFormProps) {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Queries
-    const { departmentsQuery, createItemMutation } = useInventoryQueries();
+    const { departmentsQuery } = useDepartmentQueries();
+    const { createItemMutation } = useInventoryItemQueries();
 
     const {
         register,
@@ -130,7 +132,7 @@ export default function AddInventoryForm({ className }: AddInventoryFormProps) {
             setSelectedImage(null);
 
             // Navigate to inventory list
-            navigate('/storekeeper/inventory-items');
+            // navigate('/inventory-items');
         } catch (error) {
             console.error('Error creating inventory item:', error);
             toast.error(
