@@ -8,6 +8,9 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useOfficeQueries } from '@/hooks/queries/useOffice';
+import { useUserQueries } from '@/hooks/queries/useUser';
+import { toast } from 'sonner';
 import {
     Command,
     CommandEmpty,
@@ -35,31 +38,55 @@ const addStaffSchema = z.object({
 type AddStaffFormData = z.infer<typeof addStaffSchema>;
 
 export default function AddStaffForm({ className }: AddStaffFormProps) {
-    const [offices, setOffices] = useState<string[]>([
-        'Budget and Treasury Section',
-        'Student Accounts Section',
-        'Payroll Section',
-        'Final Account Section',
-        'Cash Office',
-    ]);
-
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState('');
+
+    // Queries
+    const { officeNamesQuery } = useOfficeQueries();
+    const { createStaffMutation } = useUserQueries();
+
+    // Get office names from API
+    const offices = officeNamesQuery.data || [];
 
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
+        setValue: setFormValue,
+        reset,
     } = useForm<AddStaffFormData>({
         resolver: zodResolver(addStaffSchema),
+        defaultValues: {
+            email: '',
+            firstName: '',
+            lastName: '',
+            office: '',
+        },
     });
+
+    // Handle form submission
+    const onSubmit = async (data: AddStaffFormData) => {
+        try {
+            await createStaffMutation.mutateAsync({
+                email: data.email,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                officeName: data.office,
+            });
+            reset();
+            setValue('');
+            toast.success('Staff member created successfully!');
+        } catch (error) {
+            console.error('Error creating staff member:', error);
+        }
+    };
 
     return (
         <Card className={className}>
             <CardContent>
                 <form
                     className="space-y-4"
-                    onSubmit={handleSubmit(console.log)}
+                    onSubmit={handleSubmit(onSubmit)}
                 >
                     <div>
                         <Label htmlFor="email">Email</Label>
@@ -144,12 +171,9 @@ export default function AddStaffForm({ className }: AddStaffFormProps) {
                                                     onSelect={(
                                                         currentValue
                                                     ) => {
-                                                        setValue(
-                                                            currentValue ===
-                                                                value
-                                                                ? ''
-                                                                : currentValue
-                                                        );
+                                                        const selectedValue = currentValue === value ? '' : currentValue;
+                                                        setValue(selectedValue);
+                                                        setFormValue('office', selectedValue);
                                                         setOpen(false);
                                                     }}
                                                 >

@@ -20,7 +20,7 @@ export default function Batch() {
     };
 
     const handleCreateBatch = () => {
-        navigate('/storekeeper/add-batch');
+        navigate('/batch/add');
     };
 
     // Loading state

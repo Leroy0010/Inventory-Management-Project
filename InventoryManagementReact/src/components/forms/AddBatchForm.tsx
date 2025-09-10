@@ -4,6 +4,9 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { cn } from '@/lib/utils';
+import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
+import { useBatchQueries } from '@/hooks/queries/useBatch';
+import { toast } from 'sonner';
 import {
     Command,
     CommandEmpty,
@@ -58,31 +61,54 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState('');
 
-    const [itemNames, setItemNames] = useState<string[]>([
-        'A4 Sheet',
-        'Black Pen',
-        'Blue Pen',
-        'Arc File',
-        'White Envelope',
-        '26A Toner',
-        '59A Toner',
-        'Red Pen',
-    ]);
+    // Queries
+    const { itemsQuery } = useInventoryItemQueries();
+    const { createBatchMutation } = useBatchQueries();
+
+    // Get item names from API
+    const itemNames = itemsQuery.data?.map(item => item.name) || [];
 
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
+        setValue: setFormValue,
+        reset,
     } = useForm<AddBatchFormData>({
         resolver: zodResolver(addBatchSchema),
+        defaultValues: {
+            itemName: '',
+            quantity: 1,
+            totalPrice: 0,
+            supplierName: '',
+            invoiceId: '',
+        },
     });
+
+    // Handle form submission
+    const onSubmit = async (data: AddBatchFormData) => {
+        try {
+            await createBatchMutation.mutateAsync({
+                itemName: data.itemName,
+                quantity: data.quantity,
+                totalPrice: data.totalPrice,
+                supplierName: data.supplierName || undefined,
+                invoiceId: data.invoiceId || undefined,
+            });
+            reset();
+            setValue('');
+            toast.success('Batch created successfully!');
+        } catch (error) {
+            console.error('Error creating batch:', error);
+        }
+    };
 
     return (
         <Card className={className}>
             <CardContent>
                 <form
                     className="space-y-4"
-                    onSubmit={handleSubmit(console.log)}
+                    onSubmit={handleSubmit(onSubmit)}
                 >
                     <div>
                         <Label htmlFor="itemName" className="mb-1">
@@ -122,12 +148,9 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
                                                     onSelect={(
                                                         currentValue
                                                     ) => {
-                                                        setValue(
-                                                            currentValue ===
-                                                                value
-                                                                ? ''
-                                                                : currentValue
-                                                        );
+                                                        const selectedValue = currentValue === value ? '' : currentValue;
+                                                        setValue(selectedValue);
+                                                        setFormValue('itemName', selectedValue);
                                                         setOpen(false);
                                                     }}
                                                 >

@@ -1,4 +1,4 @@
-import type { Office } from './office';
+import type { OfficeResponseDto } from './office';
 import type { Department } from './department';
 
 export interface LoginRequest {
@@ -17,7 +17,7 @@ export interface User {
     lastName: string;
     fullName: string;
     role: Role;
-    office: Office;
+    office: OfficeResponseDto;
     department?: Department;
     // active: boolean;
 }

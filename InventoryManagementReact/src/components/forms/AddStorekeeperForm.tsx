@@ -7,6 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Check, ChevronsUpDown } from 'lucide-react';
+import { useDepartmentQueries } from '@/hooks/queries/useDepartments';
+import { useUserQueries } from '@/hooks/queries/useUser';
+import { toast } from 'sonner';
 import {
     Command,
     CommandEmpty,
@@ -37,30 +40,55 @@ interface AddStorekeeperFormProps {
 export default function AddStorekeeperForm({
     className,
 }: AddStorekeeperFormProps) {
-    const [departments, setDepartments] = useState<string[]>([
-        'Finance Department',
-        'IT Department',
-        'Human Resources',
-        'Operations',
-    ]);
-
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState('');
+
+    // Queries
+    const { departmentsQuery } = useDepartmentQueries();
+    const { createStorekeeperMutation } = useUserQueries();
+
+    // Get department names from API
+    const departments = departmentsQuery.data?.map(dept => dept.name) || [];
 
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
+        setValue: setFormValue,
+        reset,
     } = useForm<AddStorekeeperFormData>({
         resolver: zodResolver(addStorekeeperSchema),
+        defaultValues: {
+            email: '',
+            firstName: '',
+            lastName: '',
+            departmentName: '',
+        },
     });
+
+    // Handle form submission
+    const onSubmit = async (data: AddStorekeeperFormData) => {
+        try {
+            await createStorekeeperMutation.mutateAsync({
+                email: data.email,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                departmentName: data.departmentName,
+            });
+            reset();
+            setValue('');
+            toast.success('Storekeeper created successfully!');
+        } catch (error) {
+            console.error('Error creating storekeeper:', error);
+        }
+    };
 
     return (
         <Card className={`${className}`}>
             <CardContent>
                 <form
                     className="space-y-4"
-                    onSubmit={handleSubmit(console.log)}
+                    onSubmit={handleSubmit(onSubmit)}
                 >
                     <div>
                         <Label htmlFor="email">Email</Label>
@@ -145,12 +173,9 @@ export default function AddStorekeeperForm({
                                                     onSelect={(
                                                         currentValue
                                                     ) => {
-                                                        setValue(
-                                                            currentValue ===
-                                                                value
-                                                                ? ''
-                                                                : currentValue
-                                                        );
+                                                        const selectedValue = currentValue === value ? '' : currentValue;
+                                                        setValue(selectedValue);
+                                                        setFormValue('departmentName', selectedValue);
                                                         setOpen(false);
                                                     }}
                                                 >

@@ -9,8 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
-import { useDepartmentQueries } from '@/hooks/queries/useDepartments';
-// import { useNavigate } from 'react-router-dom';
 import { Package, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -71,7 +69,6 @@ export default function AddInventoryForm({ className }: AddInventoryFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Queries
-    const { departmentsQuery } = useDepartmentQueries();
     const { createItemMutation } = useInventoryItemQueries();
 
     const {
@@ -327,8 +324,7 @@ export default function AddInventoryForm({ className }: AddInventoryFormProps) {
                                 type="submit"
                                 disabled={
                                     isSubmitting ||
-                                    !isValid ||
-                                    departmentsQuery.isLoading
+                                    !isValid
                                 }
                                 className="min-w-[120px]"
                             >
