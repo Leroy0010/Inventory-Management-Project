@@ -12,7 +12,9 @@ export interface SearchContextType {
     setIsSearchOpen: (open: boolean) => void;
 }
 
-export const SearchContext = createContext<SearchContextType | undefined>(undefined);
+export const SearchContext = createContext<SearchContextType | undefined>(
+    undefined
+);
 
 export function useSearch() {
     const context = useContext(SearchContext);

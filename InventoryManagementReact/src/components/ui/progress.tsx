@@ -28,7 +28,10 @@ interface LoadingSpinnerProps {
     className?: string;
 }
 
-export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) {
+export function LoadingSpinner({
+    size = 'md',
+    className,
+}: LoadingSpinnerProps) {
     const sizeClasses = {
         sm: 'h-4 w-4',
         md: 'h-6 w-6',
@@ -54,11 +57,11 @@ interface LoadingOverlayProps {
     className?: string;
 }
 
-export function LoadingOverlay({ 
-    isLoading, 
-    children, 
-    message = 'Loading...', 
-    className 
+export function LoadingOverlay({
+    isLoading,
+    children,
+    message = 'Loading...',
+    className,
 }: LoadingOverlayProps) {
     return (
         <div className={cn('relative', className)}>
@@ -67,7 +70,9 @@ export function LoadingOverlay({
                 <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
                     <div className="flex flex-col items-center space-y-2">
                         <LoadingSpinner size="lg" />
-                        <p className="text-sm text-muted-foreground">{message}</p>
+                        <p className="text-sm text-muted-foreground">
+                            {message}
+                        </p>
                     </div>
                 </div>
             )}
@@ -76,19 +81,20 @@ export function LoadingOverlay({
 }
 
 // Loading button component
-interface LoadingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface LoadingButtonProps
+    extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     isLoading?: boolean;
     loadingText?: string;
     children: React.ReactNode;
 }
 
-export function LoadingButton({ 
-    isLoading = false, 
-    loadingText = 'Loading...', 
-    children, 
+export function LoadingButton({
+    isLoading = false,
+    loadingText = 'Loading...',
+    children,
     disabled,
     className,
-    ...props 
+    ...props
 }: LoadingButtonProps) {
     return (
         <button

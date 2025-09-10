@@ -12,13 +12,13 @@ export function useAuthTokens() {
         token,
         refreshToken,
         hasTokens: !!(token && refreshToken),
-        
+
         // Token actions
         setTokens,
         clearTokens,
-        
+
         // Helper methods
-        getAuthHeader: () => token ? `Bearer ${token}` : null,
+        getAuthHeader: () => (token ? `Bearer ${token}` : null),
         isTokenExpired: (tokenToCheck?: string) => {
             if (!tokenToCheck) return true;
             try {

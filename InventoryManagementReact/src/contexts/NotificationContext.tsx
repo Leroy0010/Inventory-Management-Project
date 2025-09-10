@@ -42,8 +42,8 @@ function notificationReducer(
                 notifications: [action.payload, ...state.notifications],
                 unreadCount: state.unreadCount + 1,
             };
-        case 'REMOVE_NOTIFICATION':
-            { const notificationToRemove = state.notifications.find(
+        case 'REMOVE_NOTIFICATION': {
+            const notificationToRemove = state.notifications.find(
                 (n) => n.id === action.payload
             );
             return {
@@ -55,7 +55,8 @@ function notificationReducer(
                     notificationToRemove && !notificationToRemove.isRead
                         ? state.unreadCount - 1
                         : state.unreadCount,
-            }; }
+            };
+        }
         case 'MARK_AS_READ':
             return {
                 ...state,

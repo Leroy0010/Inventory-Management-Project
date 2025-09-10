@@ -7,6 +7,7 @@ This guide demonstrates the complete implementation of a modern React applicatio
 ## 🎯 Key Features Implemented
 
 ### ✅ **Authentication System**
+
 - **TanStack Query Integration**: All API calls use React Query mutations and queries
 - **Zustand Store**: Simplified auth state management
 - **Form Validation**: React Hook Form + Zod schemas
@@ -14,12 +15,14 @@ This guide demonstrates the complete implementation of a modern React applicatio
 - **Loading States**: Proper loading indicators
 
 ### ✅ **Data Fetching Architecture**
+
 - **Query Hooks**: Custom hooks for each entity (auth, inventory, requests)
 - **Caching**: Automatic caching and background refetching
 - **Optimistic Updates**: Immediate UI updates with rollback on error
 - **Error Boundaries**: Graceful error handling
 
 ### ✅ **Loading States & UI Components**
+
 - **Skeleton Loaders**: Pre-built skeleton components for different use cases
 - **Progress Indicators**: Loading spinners and overlays
 - **Data Tables**: Reusable table component with sorting, filtering, pagination
@@ -28,32 +31,34 @@ This guide demonstrates the complete implementation of a modern React applicatio
 ## 🏛️ Architecture Layers
 
 ### 1. **API Layer** (`/api`)
+
 ```typescript
 // Centralized API client with interceptors
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true, // HTTP-only cookies
-  timeout: 10000,
+    baseURL: API_BASE_URL,
+    withCredentials: true, // HTTP-only cookies
+    timeout: 10000,
 });
 
 // Automatic token refresh on 401 errors
 apiClient.interceptors.response.use(
-  response => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      await refreshToken();
-      return retryRequest(originalRequest);
+    (response) => response,
+    async (error) => {
+        if (error.response?.status === 401) {
+            await refreshToken();
+            return retryRequest(originalRequest);
+        }
     }
-  }
 );
 ```
 
 ### 2. **Query Hooks** (`/hooks/queries`)
+
 ```typescript
 // Custom hooks for each entity
 export function useAuthQueries() {
   const queryClient = useQueryClient();
-  
+
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
@@ -61,29 +66,31 @@ export function useAuthQueries() {
       queryClient.invalidateQueries({ queryKey: authKeys.profile() });
     },
   });
-  
+
   return { loginMutation, profileQuery, ... };
 }
 ```
 
 ### 3. **State Management** (`/stores`)
+
 ```typescript
 // Simplified Zustand stores
 export const useAuthStore = create<AuthStore>()(
-  persist(
-    (set) => ({
-      user: null,
-      isAuthenticated: false,
-      error: null,
-      setUser: (user) => set({ user, isAuthenticated: true }),
-      clearUser: () => set({ user: null, isAuthenticated: false }),
-    }),
-    { name: 'auth-storage' }
-  )
+    persist(
+        (set) => ({
+            user: null,
+            isAuthenticated: false,
+            error: null,
+            setUser: (user) => set({ user, isAuthenticated: true }),
+            clearUser: () => set({ user: null, isAuthenticated: false }),
+        }),
+        { name: 'auth-storage' }
+    )
 );
 ```
 
 ### 4. **UI Components** (`/components`)
+
 ```typescript
 // Reusable data table with full functionality
 <DataTable
@@ -110,10 +117,10 @@ graph TD
     F --> G[Response]
     G --> H[Query Cache]
     H --> I[Component Re-render]
-    
+
     J[Error] --> K[Error Boundary]
     K --> L[User Feedback]
-    
+
     M[Loading] --> N[Skeleton UI]
     N --> O[Better UX]
 ```
@@ -159,24 +166,26 @@ src/
 ## 🚀 Usage Examples
 
 ### **1. Authentication Flow**
+
 ```typescript
 // In LoginForm component
 const { loginMutation, googleLoginMutation } = useAuthQueries();
 
 const onSubmit = async (data: LoginFormData) => {
-  try {
-    await loginMutation.mutateAsync({ 
-      email: data.email, 
-      password: data.password 
-    });
-    navigate('/dashboard');
-  } catch (error) {
-    // Error handled by mutation
-  }
+    try {
+        await loginMutation.mutateAsync({
+            email: data.email,
+            password: data.password,
+        });
+        navigate('/dashboard');
+    } catch (error) {
+        // Error handled by mutation
+    }
 };
 ```
 
 ### **2. Data Fetching with Loading States**
+
 ```typescript
 // In InventoryItems component
 const { itemsQuery, deleteItemMutation } = useInventoryQueries();
@@ -197,20 +206,22 @@ return (
 ```
 
 ### **3. Optimistic Updates**
+
 ```typescript
 // In query hook
 const deleteItemMutation = useMutation({
-  mutationFn: inventoryApi.deleteItem,
-  onSuccess: () => {
-    // Invalidate and refetch data
-    queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
-  },
+    mutationFn: inventoryApi.deleteItem,
+    onSuccess: () => {
+        // Invalidate and refetch data
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
+    },
 });
 ```
 
 ## 🎨 UI Components
 
 ### **DataTable Features**
+
 - ✅ **Sorting**: Click column headers to sort
 - ✅ **Filtering**: Built-in filter dropdowns
 - ✅ **Search**: Real-time search across specified fields
@@ -221,6 +232,7 @@ const deleteItemMutation = useMutation({
 - ✅ **Responsive**: Mobile-friendly design
 
 ### **Loading Components**
+
 - ✅ **SkeletonCard**: For card layouts
 - ✅ **SkeletonTable**: For table layouts
 - ✅ **SkeletonList**: For list layouts
@@ -231,6 +243,7 @@ const deleteItemMutation = useMutation({
 ## 🔧 Configuration
 
 ### **TanStack Query Setup**
+
 ```typescript
 // In App.tsx
 <QueryClientProvider client={queryClient}>
@@ -240,32 +253,36 @@ const deleteItemMutation = useMutation({
 ```
 
 ### **Query Client Configuration**
+
 ```typescript
 // In lib/queryClient.ts
 export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 30_000,
-      refetchOnWindowFocus: false,
+    defaultOptions: {
+        queries: {
+            retry: 1,
+            staleTime: 30_000,
+            refetchOnWindowFocus: false,
+        },
     },
-  },
 });
 ```
 
 ## 📊 Performance Optimizations
 
 ### **1. Query Caching**
+
 - Automatic caching of API responses
 - Background refetching for fresh data
 - Stale-while-revalidate strategy
 
 ### **2. Component Optimization**
+
 - React.memo for expensive components
 - useMemo for calculated values
 - useCallback for event handlers
 
 ### **3. Bundle Optimization**
+
 - Code splitting with lazy loading
 - Tree shaking for unused code
 - Optimized imports
@@ -273,11 +290,13 @@ export const queryClient = new QueryClient({
 ## 🧪 Testing Strategy
 
 ### **Unit Tests**
+
 - Query hooks with MSW (Mock Service Worker)
 - Component testing with React Testing Library
 - Store testing with Zustand testing utilities
 
 ### **Integration Tests**
+
 - Full authentication flow
 - Data table interactions
 - Form submissions
@@ -285,12 +304,14 @@ export const queryClient = new QueryClient({
 ## 🚀 Next Steps
 
 ### **Immediate**
+
 1. **Add More Pages**: Implement remaining CRUD pages
 2. **Error Boundaries**: Add global error handling
 3. **Notifications**: Implement toast notifications
 4. **Testing**: Add comprehensive test coverage
 
 ### **Advanced Features**
+
 1. **Real-time Updates**: WebSocket integration
 2. **Offline Support**: Service worker implementation
 3. **Advanced Filtering**: Multi-column filters
@@ -299,26 +320,31 @@ export const queryClient = new QueryClient({
 ## 📚 Best Practices Demonstrated
 
 ### **1. Single Responsibility Principle**
+
 - Each component has one clear purpose
 - Query hooks handle only data fetching
 - Stores manage only state
 
 ### **2. Clean Architecture**
+
 - Clear separation of concerns
 - Dependency inversion
 - Testable components
 
 ### **3. Type Safety**
+
 - Full TypeScript coverage
 - Proper interface definitions
 - Generic components
 
 ### **4. Error Handling**
+
 - Centralized error management
 - User-friendly error messages
 - Graceful degradation
 
 ### **5. Performance**
+
 - Efficient re-renders
 - Optimized queries
 - Lazy loading

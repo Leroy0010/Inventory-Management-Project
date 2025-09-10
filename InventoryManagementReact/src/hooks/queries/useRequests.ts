@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { requestApi, type CreateRequestDto, type ApproveRequestDto, type RequestFulfillmentDto } from '@/api/requests';
+import {
+    requestApi,
+    type CreateRequestDto,
+    type ApproveRequestDto,
+    type RequestFulfillmentDto,
+} from '@/api/requests';
 
 // Query Keys
 export const requestKeys = {
@@ -28,17 +33,20 @@ export function useRequestQueries() {
     });
 
     // Get request by ID
-    const useRequestQuery = (id: number) => useQuery({
-        queryKey: requestKeys.request(id),
-        queryFn: () => requestApi.getRequestById(id),
-        enabled: !!id,
-    });
+    const useRequestQuery = (id: number) =>
+        useQuery({
+            queryKey: requestKeys.request(id),
+            queryFn: () => requestApi.getRequestById(id),
+            enabled: !!id,
+        });
 
     // Create request mutation
     const createRequestMutation = useMutation({
         mutationFn: requestApi.createRequest,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: requestKeys.userRequests() });
+            queryClient.invalidateQueries({
+                queryKey: requestKeys.userRequests(),
+            });
             queryClient.invalidateQueries({ queryKey: requestKeys.list() });
         },
     });
@@ -48,8 +56,12 @@ export function useRequestQueries() {
         mutationFn: requestApi.approveRequest,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: requestKeys.list() });
-            queryClient.invalidateQueries({ queryKey: requestKeys.userRequests() });
-            queryClient.invalidateQueries({ queryKey: requestKeys.request(data.requestId) });
+            queryClient.invalidateQueries({
+                queryKey: requestKeys.userRequests(),
+            });
+            queryClient.invalidateQueries({
+                queryKey: requestKeys.request(data.requestId),
+            });
         },
     });
 
@@ -58,8 +70,12 @@ export function useRequestQueries() {
         mutationFn: requestApi.fulfillRequest,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: requestKeys.list() });
-            queryClient.invalidateQueries({ queryKey: requestKeys.userRequests() });
-            queryClient.invalidateQueries({ queryKey: requestKeys.request(data.requestId) });
+            queryClient.invalidateQueries({
+                queryKey: requestKeys.userRequests(),
+            });
+            queryClient.invalidateQueries({
+                queryKey: requestKeys.request(data.requestId),
+            });
         },
     });
 
@@ -68,7 +84,7 @@ export function useRequestQueries() {
         requestsQuery,
         userRequestsQuery,
         useRequestQuery,
-        
+
         // Mutations
         createRequestMutation,
         approveRequestMutation,

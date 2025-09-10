@@ -1,4 +1,4 @@
-import React, {  useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePermissionCheck } from '@/hooks/usePermissionCheck';
 import type { SearchContextType } from '@/hooks/useSerach';
@@ -16,8 +16,6 @@ export interface SearchResult {
     keywords: string[];
     permissions?: string[];
 }
-
-
 
 // Application search data
 const applicationData: SearchResult[] = [
@@ -59,10 +57,10 @@ const applicationData: SearchResult[] = [
     },
     {
         id: 'create-storekeeper',
-        title: 'Create Storekeeper',
+        title: 'Add Storekeeper',
         description: 'Add new storekeeper accounts',
         category: 'page',
-        path: '/staff/create-storekeeper',
+        path: '/admin/add-storekeeper',
         icon: 'UserPlus',
         keywords: ['create', 'storekeeper', 'add', 'user', 'account', 'admin'],
         permissions: ['CREATE_STOREKEEPER'],
@@ -73,8 +71,17 @@ const applicationData: SearchResult[] = [
         description: 'Create a new department in the organization',
         category: 'page',
         path: '/departments/add',
-        icon: 'BuildingPlus',
-        keywords: ['add', 'department', 'create', 'new', 'organization', 'admin', 'directorate', 'section'],
+        icon: 'Building2',
+        keywords: [
+            'add',
+            'department',
+            'create',
+            'new',
+            'organization',
+            'admin',
+            'directorate',
+            'section',
+        ],
         permissions: ['ADD_DEPARTMENT'],
     },
 
@@ -89,16 +96,16 @@ const applicationData: SearchResult[] = [
         keywords: ['staff', 'dashboard', 'employee', 'tools'],
         permissions: ['VIEW_DASHBOARD'],
     },
-    {
-        id: 'staff-inventory',
-        title: 'Browse Inventory',
-        description: 'View and browse available inventory items',
-        category: 'page',
-        path: '/staff-inventory-items',
-        icon: 'Package',
-        keywords: ['inventory', 'browse', 'items', 'products', 'staff'],
-        permissions: ['VIEW_INVENTORY'],
-    },
+    // {
+    //     id: 'staff-inventory',
+    //     title: 'Browse Inventory',
+    //     description: 'View and browse available inventory items',
+    //     category: 'page',
+    //     path: '/staff-inventory-items',
+    //     icon: 'Package',
+    //     keywords: ['inventory', 'browse', 'items', 'products', 'staff'],
+    //     permissions: ['VIEW_INVENTORY'],
+    // },
     {
         id: 'cart',
         title: 'Shopping Cart',
@@ -128,7 +135,7 @@ const applicationData: SearchResult[] = [
         category: 'page',
         path: '/storekeeper-dashboard',
         icon: 'LayoutDashboard',
-        keywords: ['storekeeper', 'dashboard', 'management',],
+        keywords: ['storekeeper', 'dashboard', 'management'],
         permissions: ['VIEW_DASHBOARD'],
     },
     {
@@ -151,16 +158,16 @@ const applicationData: SearchResult[] = [
         keywords: ['add', 'staff', 'create', 'new', 'user', 'employee'],
         permissions: ['ADD_STAFF'],
     },
-    {
-        id: 'inventory-management',
-        title: 'Inventory Management',
-        description: 'Manage inventory items and stock',
-        category: 'page',
-        path: '/inventory',
-        icon: 'Package',
-        keywords: ['inventory', 'management', 'stock', 'items', 'products'],
-        permissions: ['VIEW_INVENTORY'],
-    },
+    // {
+    //     id: 'inventory-management',
+    //     title: 'Inventory Management',
+    //     description: 'Manage inventory items and stock',
+    //     category: 'page',
+    //     path: '/inventory',
+    //     icon: 'Package',
+    //     keywords: ['inventory', 'management', 'stock', 'items', 'products'],
+    //     permissions: ['VIEW_INVENTORY'],
+    // },
     {
         id: 'add-inventory',
         title: 'Add Inventory',
@@ -218,7 +225,15 @@ const applicationData: SearchResult[] = [
         category: 'page',
         path: '/inventory-items',
         icon: 'Package2',
-        keywords: ['inventory', 'items', 'products', 'stock', 'view'],
+        keywords: [
+            'inventory',
+            'items',
+            'products',
+            'stock',
+            'view',
+            'staff',
+            'storekeeper',
+        ],
         permissions: ['VIEW_INVENTORY'],
     },
     {
@@ -344,7 +359,9 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
             .filter((item) => {
                 // Check permissions
                 if (item.permissions && item.permissions.length > 0) {
-                    const hasPermission = canAccess(item.permissions as Permission[]);
+                    const hasPermission = canAccess(
+                        item.permissions as Permission[]
+                    );
                     if (!hasPermission) return false;
                 }
 
@@ -402,13 +419,9 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         setIsSearchOpen,
     };
 
-    
-
     return (
         <SearchContext.Provider value={value}>
             {children}
         </SearchContext.Provider>
     );
 }
-
-

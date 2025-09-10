@@ -54,7 +54,9 @@ export function useAuthQueries() {
             queryClient.invalidateQueries({ queryKey: authKeys.profile() });
         },
         onError: (error) => {
-            setError(error instanceof Error ? error.message : 'Google login failed');
+            setError(
+                error instanceof Error ? error.message : 'Google login failed'
+            );
         },
     });
 
@@ -98,19 +100,30 @@ export function useAuthQueries() {
             queryClient.invalidateQueries({ queryKey: authKeys.profile() });
         },
         onError: (error) => {
-            setError(error instanceof Error ? error.message : 'Profile update failed');
+            setError(
+                error instanceof Error ? error.message : 'Profile update failed'
+            );
         },
     });
 
     // Change password mutation
     const changePasswordMutation = useMutation({
-        mutationFn: ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) =>
-            authApi.changePassword(currentPassword, newPassword),
+        mutationFn: ({
+            currentPassword,
+            newPassword,
+        }: {
+            currentPassword: string;
+            newPassword: string;
+        }) => authApi.changePassword(currentPassword, newPassword),
         onSuccess: () => {
             clearError();
         },
         onError: (error) => {
-            setError(error instanceof Error ? error.message : 'Password change failed');
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : 'Password change failed'
+            );
         },
     });
 
@@ -121,26 +134,37 @@ export function useAuthQueries() {
             clearError();
         },
         onError: (error) => {
-            setError(error instanceof Error ? error.message : 'Password reset request failed');
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : 'Password reset request failed'
+            );
         },
     });
 
     // Reset password mutation
     const resetPasswordMutation = useMutation({
-        mutationFn: ({ token, newPassword }: { token: string; newPassword: string }) =>
-            authApi.resetPassword(token, newPassword),
+        mutationFn: ({
+            token,
+            newPassword,
+        }: {
+            token: string;
+            newPassword: string;
+        }) => authApi.resetPassword(token, newPassword),
         onSuccess: () => {
             clearError();
         },
         onError: (error) => {
-            setError(error instanceof Error ? error.message : 'Password reset failed');
+            setError(
+                error instanceof Error ? error.message : 'Password reset failed'
+            );
         },
     });
 
     return {
         // Queries
         profileQuery,
-        
+
         // Mutations
         loginMutation,
         googleLoginMutation,

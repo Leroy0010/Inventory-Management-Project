@@ -1,6 +1,10 @@
 import { api, handleApiError } from './client';
-import type { LoginRequest, LoginResponse, RefreshResponse, User } from '@/types/auth';
-
+import type {
+    LoginRequest,
+    LoginResponse,
+    RefreshResponse,
+    User,
+} from '@/types/auth';
 
 // Auth API functions
 export const authApi = {

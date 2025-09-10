@@ -1,14 +1,11 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Card,
-    CardContent,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
@@ -50,9 +47,12 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
     const onSubmit = async (data: LoginFormData) => {
         try {
             clearError();
-            await loginMutation.mutateAsync({ email: data.email, password: data.password });
+            await loginMutation.mutateAsync({
+                email: data.email,
+                password: data.password,
+            });
             onSuccess?.();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             // Error is handled by the mutation
         }
@@ -63,7 +63,7 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
             clearError();
             await googleLoginMutation.mutateAsync(googleToken);
             onSuccess?.();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             // Error is handled by the mutation
         }
@@ -71,7 +71,6 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
 
     return (
         <Card className={className}>
-
             <CardContent className="space-y-4">
                 {/* Error Alert */}
                 {error && (
@@ -79,7 +78,6 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                         <AlertDescription>{error}</AlertDescription>
                     </Alert>
                 )}
-
 
                 {/* Login Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -110,7 +108,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder="Enter your password"
                                 {...register('password')}
-                                disabled={isSubmitting || loginMutation.isPending}
+                                disabled={
+                                    isSubmitting || loginMutation.isPending
+                                }
                                 className={
                                     errors.password
                                         ? 'border-red-500 pr-10'
@@ -123,7 +123,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                                 size="icon"
                                 className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent cursor-pointer"
                                 onClick={() => setShowPassword(!showPassword)}
-                                disabled={isSubmitting || loginMutation.isPending}
+                                disabled={
+                                    isSubmitting || loginMutation.isPending
+                                }
                             >
                                 {showPassword ? (
                                     <EyeOff className="h-4 w-4 text-muted-foreground" />

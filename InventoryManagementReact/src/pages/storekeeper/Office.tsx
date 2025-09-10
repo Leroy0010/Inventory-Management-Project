@@ -7,8 +7,10 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Building, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Office() {
+    const navigate = useNavigate();
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -20,7 +22,10 @@ export default function Office() {
                         Manage your office locations and branches
                     </p>
                 </div>
-                <Button>
+                <Button
+                    onClick={() => navigate('/office/add')}
+                    className="cursor-pointer"
+                >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Office
                 </Button>

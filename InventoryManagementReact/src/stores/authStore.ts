@@ -45,11 +45,11 @@ export interface AuthActions {
     setUser: (user: User | null) => void;
     updateUser: (updates: Partial<User>) => void;
     clearUser: () => void;
-    
+
     // Token management
     setTokens: (token: string, refreshToken: string) => void;
     clearTokens: () => void;
-    
+
     // Error management
     setError: (error: string | null) => void;
     clearError: () => void;

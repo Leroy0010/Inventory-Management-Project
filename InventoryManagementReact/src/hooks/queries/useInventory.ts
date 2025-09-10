@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { inventoryApi, type CreateInventoryItemDto, type UpdateInventoryItemDto, type CreateBatchDto } from '@/api/inventory';
+import {
+    inventoryApi,
+    type CreateInventoryItemDto,
+    type UpdateInventoryItemDto,
+    type CreateBatchDto,
+} from '@/api/inventoryItem';
 
 // Query Keys
 export const inventoryKeys = {
@@ -24,11 +29,12 @@ export function useInventoryQueries() {
     });
 
     // Get inventory item by ID
-    const useItemQuery = (id: number) => useQuery({
-        queryKey: inventoryKeys.item(id),
-        queryFn: () => inventoryApi.getItemById(id),
-        enabled: !!id,
-    });
+    const useItemQuery = (id: number) =>
+        useQuery({
+            queryKey: inventoryKeys.item(id),
+            queryFn: () => inventoryApi.getItemById(id),
+            enabled: !!id,
+        });
 
     // Get departments
     const departmentsQuery = useQuery({
@@ -60,10 +66,18 @@ export function useInventoryQueries() {
 
     // Create inventory item mutation
     const createItemMutation = useMutation({
-        mutationFn: inventoryApi.createItem,
+        mutationFn: ({
+            item,
+            imageFile,
+        }: {
+            item: CreateInventoryItemDto;
+            imageFile?: File;
+        }) => inventoryApi.createItem(item, imageFile),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
-            queryClient.invalidateQueries({ queryKey: inventoryKeys.balance() });
+            queryClient.invalidateQueries({
+                queryKey: inventoryKeys.balance(),
+            });
         },
     });
 
@@ -72,8 +86,12 @@ export function useInventoryQueries() {
         mutationFn: inventoryApi.updateItem,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
-            queryClient.invalidateQueries({ queryKey: inventoryKeys.item(data.id) });
-            queryClient.invalidateQueries({ queryKey: inventoryKeys.balance() });
+            queryClient.invalidateQueries({
+                queryKey: inventoryKeys.item(data.id),
+            });
+            queryClient.invalidateQueries({
+                queryKey: inventoryKeys.balance(),
+            });
         },
     });
 
@@ -82,7 +100,9 @@ export function useInventoryQueries() {
         mutationFn: inventoryApi.deleteItem,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: inventoryKeys.items() });
-            queryClient.invalidateQueries({ queryKey: inventoryKeys.balance() });
+            queryClient.invalidateQueries({
+                queryKey: inventoryKeys.balance(),
+            });
         },
     });
 
@@ -90,15 +110,20 @@ export function useInventoryQueries() {
     const createDepartmentMutation = useMutation({
         mutationFn: inventoryApi.createDepartment,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: inventoryKeys.departments() });
+            queryClient.invalidateQueries({
+                queryKey: inventoryKeys.departments(),
+            });
         },
     });
 
     // Update department mutation
     const updateDepartmentMutation = useMutation({
-        mutationFn: ({ id, name }: { id: number; name: string }) => inventoryApi.updateDepartment(id, name),
+        mutationFn: ({ id, name }: { id: number; name: string }) =>
+            inventoryApi.updateDepartment(id, name),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: inventoryKeys.departments() });
+            queryClient.invalidateQueries({
+                queryKey: inventoryKeys.departments(),
+            });
         },
     });
 
@@ -106,7 +131,9 @@ export function useInventoryQueries() {
     const deleteDepartmentMutation = useMutation({
         mutationFn: inventoryApi.deleteDepartment,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: inventoryKeys.departments() });
+            queryClient.invalidateQueries({
+                queryKey: inventoryKeys.departments(),
+            });
         },
     });
 
@@ -114,9 +141,15 @@ export function useInventoryQueries() {
     const createBatchMutation = useMutation({
         mutationFn: inventoryApi.createBatch,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: inventoryKeys.batches() });
-            queryClient.invalidateQueries({ queryKey: inventoryKeys.balance() });
-            queryClient.invalidateQueries({ queryKey: inventoryKeys.transactions() });
+            queryClient.invalidateQueries({
+                queryKey: inventoryKeys.batches(),
+            });
+            queryClient.invalidateQueries({
+                queryKey: inventoryKeys.balance(),
+            });
+            queryClient.invalidateQueries({
+                queryKey: inventoryKeys.transactions(),
+            });
         },
     });
 
@@ -128,7 +161,7 @@ export function useInventoryQueries() {
         batchesQuery,
         balanceQuery,
         transactionsQuery,
-        
+
         // Mutations
         createItemMutation,
         updateItemMutation,

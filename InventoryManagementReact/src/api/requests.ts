@@ -115,18 +115,28 @@ export const requestApi = {
     },
 
     // Approve or reject request
-    approveRequest: async (approval: ApproveRequestDto): Promise<ApproveRequestDto> => {
+    approveRequest: async (
+        approval: ApproveRequestDto
+    ): Promise<ApproveRequestDto> => {
         try {
-            return await api.put<ApproveRequestDto>('/api/requests/approve', approval);
+            return await api.put<ApproveRequestDto>(
+                '/api/requests/approve',
+                approval
+            );
         } catch (error) {
             throw new Error(handleApiError(error));
         }
     },
 
     // Fulfill request
-    fulfillRequest: async (fulfillment: RequestFulfillmentDto): Promise<RequestFulfillmentDto> => {
+    fulfillRequest: async (
+        fulfillment: RequestFulfillmentDto
+    ): Promise<RequestFulfillmentDto> => {
         try {
-            return await api.post<RequestFulfillmentDto>('/api/requests/fulfil', fulfillment);
+            return await api.post<RequestFulfillmentDto>(
+                '/api/requests/fulfil',
+                fulfillment
+            );
         } catch (error) {
             throw new Error(handleApiError(error));
         }

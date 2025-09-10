@@ -94,7 +94,9 @@ export function DataTable<T extends Record<string, any>>({
     const [sortField, setSortField] = useState<keyof T | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
-    const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
+    const [activeFilters, setActiveFilters] = useState<Record<string, string>>(
+        {}
+    );
 
     // Filter and search data
     const filteredData = useMemo(() => {
@@ -105,7 +107,10 @@ export function DataTable<T extends Record<string, any>>({
             result = result.filter((item) =>
                 searchFields.some((field) => {
                     const value = item[field];
-                    return value?.toString().toLowerCase().includes(searchTerm.toLowerCase());
+                    return value
+                        ?.toString()
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase());
                 })
             );
         }
@@ -189,7 +194,12 @@ export function DataTable<T extends Record<string, any>>({
     // Error state
     if (error) {
         return (
-            <div className={cn('flex items-center justify-center p-8', className)}>
+            <div
+                className={cn(
+                    'flex items-center justify-center p-8',
+                    className
+                )}
+            >
                 <div className="text-center">
                     <p className="text-destructive mb-2">Error loading data</p>
                     <p className="text-sm text-muted-foreground">{error}</p>
@@ -221,15 +231,22 @@ export function DataTable<T extends Record<string, any>>({
                                 <Select
                                     key={filter.key}
                                     value={activeFilters[filter.key] || ''}
-                                    onValueChange={(value) => handleFilterChange(filter.key, value)}
+                                    onValueChange={(value) =>
+                                        handleFilterChange(filter.key, value)
+                                    }
                                 >
                                     <SelectTrigger className="w-40">
-                                        <SelectValue placeholder={filter.label} />
+                                        <SelectValue
+                                            placeholder={filter.label}
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="">All</SelectItem>
                                         {filter.options.map((option) => (
-                                            <SelectItem key={option.value} value={option.value}>
+                                            <SelectItem
+                                                key={option.value}
+                                                value={option.value}
+                                            >
                                                 {option.label}
                                             </SelectItem>
                                         ))}
@@ -259,18 +276,27 @@ export function DataTable<T extends Record<string, any>>({
                                     key={String(column.key)}
                                     className={cn(
                                         column.className,
-                                        sortable && column.sortable !== false && 'cursor-pointer hover:bg-muted/50'
+                                        sortable &&
+                                            column.sortable !== false &&
+                                            'cursor-pointer hover:bg-muted/50'
                                     )}
                                     style={{ width: column.width }}
-                                    onClick={() => column.sortable !== false && handleSort(column.key as keyof T)}
+                                    onClick={() =>
+                                        column.sortable !== false &&
+                                        handleSort(column.key as keyof T)
+                                    }
                                 >
                                     <div className="flex items-center space-x-1">
                                         <span>{column.header}</span>
-                                        {sortable && column.sortable !== false && sortField === column.key && (
-                                            <span className="text-xs">
-                                                {sortDirection === 'asc' ? '↑' : '↓'}
-                                            </span>
-                                        )}
+                                        {sortable &&
+                                            column.sortable !== false &&
+                                            sortField === column.key && (
+                                                <span className="text-xs">
+                                                    {sortDirection === 'asc'
+                                                        ? '↑'
+                                                        : '↓'}
+                                                </span>
+                                            )}
                                     </div>
                                 </TableHead>
                             ))}
@@ -279,8 +305,13 @@ export function DataTable<T extends Record<string, any>>({
                     <TableBody>
                         {paginatedData.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="text-center py-8">
-                                    <p className="text-muted-foreground">{emptyMessage}</p>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="text-center py-8"
+                                >
+                                    <p className="text-muted-foreground">
+                                        {emptyMessage}
+                                    </p>
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -288,7 +319,8 @@ export function DataTable<T extends Record<string, any>>({
                                 <TableRow
                                     key={index}
                                     className={cn(
-                                        onRowClick && 'cursor-pointer hover:bg-muted/50'
+                                        onRowClick &&
+                                            'cursor-pointer hover:bg-muted/50'
                                     )}
                                     onClick={() => onRowClick?.(item)}
                                 >
@@ -313,8 +345,14 @@ export function DataTable<T extends Record<string, any>>({
             {pagination && totalPages > 1 && (
                 <div className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground">
-                        Showing {Math.min((currentPage - 1) * pageSize + 1, filteredData.length)} to{' '}
-                        {Math.min(currentPage * pageSize, filteredData.length)} of {filteredData.length} entries
+                        Showing{' '}
+                        {Math.min(
+                            (currentPage - 1) * pageSize + 1,
+                            filteredData.length
+                        )}{' '}
+                        to{' '}
+                        {Math.min(currentPage * pageSize, filteredData.length)}{' '}
+                        of {filteredData.length} entries
                     </div>
                     <div className="flex items-center space-x-2">
                         <Button

@@ -7,10 +7,7 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Skeleton({ className, ...props }: SkeletonProps) {
     return (
         <div
-            className={cn(
-                'animate-pulse rounded-md bg-muted',
-                className
-            )}
+            className={cn('animate-pulse rounded-md bg-muted', className)}
             {...props}
         />
     );
@@ -29,7 +26,13 @@ export function SkeletonCard({ className }: { className?: string }) {
     );
 }
 
-export function SkeletonTable({ rows = 5, columns = 4 }: { rows?: number; columns?: number }) {
+export function SkeletonTable({
+    rows = 5,
+    columns = 4,
+}: {
+    rows?: number;
+    columns?: number;
+}) {
     return (
         <div className="space-y-3">
             {Array.from({ length: rows }).map((_, i) => (

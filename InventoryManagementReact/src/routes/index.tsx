@@ -17,32 +17,31 @@ const RequestDetails = React.lazy(
 // Admin pages
 const AdminDashboard = React.lazy(() => import('@/pages/Dashboard'));
 const Departments = React.lazy(() => import('@/pages/admin/Departments'));
-const CreateStorekeeper = React.lazy(
-    () => import('@/pages/admin/CreateStorekeeper')
-);
-const AddDepartment = React.lazy(
-    () => import('@/pages/admin/AddDepartment')
-);
+const AddStorekeeper = React.lazy(() => import('@/pages/admin/AddStorekeeper'));
+const AddDepartment = React.lazy(() => import('@/pages/admin/AddDepartment'));
 
 // Staff pages
 const StaffDashboard = React.lazy(() => import('@/pages/Dashboard'));
-const StaffInventoryItems = React.lazy(() => import('@/pages/InventoryItems'));
+// const StaffInventoryItems = React.lazy(() => import('@/pages/InventoryItems'));
 const StaffCart = React.lazy(() => import('@/pages/staff/Cart'));
 const StaffRequests = React.lazy(() => import('@/pages/Requests'));
 
 // Storekeeper pages
 const StorekeeperDashboard = React.lazy(() => import('@/pages/Dashboard'));
-const Staff = React.lazy(() => import('@/pages/Staff'));
+const Staff = React.lazy(() => import('@/pages/storekeeper/Staff'));
 const AddStaff = React.lazy(() => import('@/pages/storekeeper/AddStaff'));
-const Inventory = React.lazy(() => import('@/pages/Inventory'));
+// const Inventory = React.lazy(() => import('@/pages/Inventory'));
 const AddInventory = React.lazy(
     () => import('@/pages/storekeeper/AddInventory')
 );
-const Office = React.lazy(() => import('@/pages/Office'));
+const Office = React.lazy(() => import('@/pages/storekeeper/Office'));
 const AddOffice = React.lazy(() => import('@/pages/storekeeper/AddOffice'));
-const Batch = React.lazy(() => import('@/pages/Batch'));
+const Batch = React.lazy(() => import('@/pages/storekeeper/Batch'));
 const AddBatch = React.lazy(() => import('@/pages/storekeeper/AddBatch'));
 const InventoryItems = React.lazy(() => import('@/pages/InventoryItems'));
+const InventoryItemDetails = React.lazy(
+    () => import('@/pages/InventoryItemDetails')
+);
 const Requests = React.lazy(() => import('@/pages/Requests'));
 const TransactionReport = React.lazy(
     () => import('@/pages/storekeeper/TransactionReport')
@@ -66,6 +65,12 @@ const Settings = React.lazy(() => import('@/pages/Settings'));
 //     () => import('@/components/SidebarStyleDemo')
 // );
 // const SearchDemo = React.lazy(() => import('@/components/SearchDemo'));
+const ImageUploadDemo = React.lazy(
+    () => import('@/components/ImageUploadDemo')
+);
+const InventoryCardDemo = React.lazy(
+    () => import('@/components/InventoryCardDemo')
+);
 
 // Loading component
 const PageLoader = () => (
@@ -128,15 +133,13 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'admin/create-storekeeper',
+                path: 'admin/add-storekeeper',
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
-                            requiredPermissions={[
-                                Permission.CREATE_STOREKEEPER,
-                            ]}
+                            requiredPermissions={[Permission.ADD_STOREKEEPER]}
                         >
-                            <CreateStorekeeper />
+                            <AddStorekeeper />
                         </ProtectedRoute>
                     </Suspense>
                 ),
@@ -146,9 +149,7 @@ const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
-                            requiredPermissions={[
-                                Permission.ADD_DEPARTMENT,
-                            ]}
+                            requiredPermissions={[Permission.ADD_DEPARTMENT]}
                         >
                             <AddDepartment />
                         </ProtectedRoute>
@@ -169,18 +170,18 @@ const router = createBrowserRouter([
                     </Suspense>
                 ),
             },
-            {
-                path: 'staff-inventory-items',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <ProtectedRoute
-                            requiredPermissions={[Permission.VIEW_INVENTORY]}
-                        >
-                            <StaffInventoryItems />
-                        </ProtectedRoute>
-                    </Suspense>
-                ),
-            },
+            // {
+            //     path: 'staff-inventory-items',
+            //     element: (
+            //         <Suspense fallback={<PageLoader />}>
+            //             <ProtectedRoute
+            //                 requiredPermissions={[Permission.VIEW_INVENTORY]}
+            //             >
+            //                 <StaffInventoryItems />
+            //             </ProtectedRoute>
+            //         </Suspense>
+            //     ),
+            // },
             {
                 path: 'cart',
                 element: (
@@ -243,18 +244,18 @@ const router = createBrowserRouter([
                     </Suspense>
                 ),
             },
-            {
-                path: 'inventory',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <ProtectedRoute
-                            requiredPermissions={[Permission.VIEW_INVENTORY]}
-                        >
-                            <Inventory />
-                        </ProtectedRoute>
-                    </Suspense>
-                ),
-            },
+            // {
+            //     path: 'inventory',
+            //     element: (
+            //         <Suspense fallback={<PageLoader />}>
+            //             <ProtectedRoute
+            //                 requiredPermissions={[Permission.VIEW_INVENTORY]}
+            //             >
+            //                 <Inventory />
+            //             </ProtectedRoute>
+            //         </Suspense>
+            //     ),
+            // },
             {
                 path: 'inventory/add',
                 element: (
@@ -323,6 +324,18 @@ const router = createBrowserRouter([
                             requiredPermissions={[Permission.VIEW_INVENTORY]}
                         >
                             <InventoryItems />
+                        </ProtectedRoute>
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'inventory-items/:id',
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <ProtectedRoute
+                            requiredPermissions={[Permission.VIEW_INVENTORY]}
+                        >
+                            <InventoryItemDetails />
                         </ProtectedRoute>
                     </Suspense>
                 ),
@@ -481,6 +494,22 @@ const router = createBrowserRouter([
             //         </Suspense>
             //     ),
             // },
+            {
+                path: 'dev/image-upload-demo',
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <ImageUploadDemo />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'dev/inventory-card-demo',
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <InventoryCardDemo />
+                    </Suspense>
+                ),
+            },
         ],
     },
     {

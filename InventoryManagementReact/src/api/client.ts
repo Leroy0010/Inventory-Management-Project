@@ -1,5 +1,5 @@
 import axios, {
-   type  AxiosInstance,
+    type AxiosInstance,
     type AxiosRequestConfig,
     type AxiosResponse,
     AxiosError,

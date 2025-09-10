@@ -28,7 +28,6 @@ export interface Role {
     description?: string;
 }
 
-
 export interface LoginResponse {
     user: User;
     message: string;
