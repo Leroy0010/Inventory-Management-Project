@@ -11,8 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronRight, Users, Package, TrendingUp, User } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { UserReportItemDto, UserReportSummary } from '@/types/userReport';
+import type { UserReportSummary } from '@/types/userReport';
 
 interface UserReportTableProps {
     data: UserReportSummary[] | null;
@@ -58,7 +57,7 @@ const UserSummaryRow = ({
                     </div>
                 </TableCell>
                 <TableCell>
-                    <Badge variant="secondary">{summary.departmentName}</Badge>
+                    <Badge variant="secondary">{summary.officeName}</Badge>
                 </TableCell>
                 <TableCell className="text-right font-mono">
                     {summary.totalItemsReceived.toLocaleString()}
@@ -233,12 +232,12 @@ export default function UserReportTable({ data, isLoading, searchTerm }: UserRep
                 <div className="border rounded-lg">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>User</TableHead>
-                                <TableHead>Department</TableHead>
-                                <TableHead className="text-right">Items Received</TableHead>
-                                <TableHead className="text-right">Total Quantity</TableHead>
-                            </TableRow>
+                        <TableRow>
+                            <TableHead>User</TableHead>
+                            <TableHead>Office</TableHead>
+                            <TableHead className="text-right">Items Received</TableHead>
+                            <TableHead className="text-right">Total Quantity</TableHead>
+                        </TableRow>
                         </TableHeader>
                         <TableBody>
                             {data.map((summary, index) => (

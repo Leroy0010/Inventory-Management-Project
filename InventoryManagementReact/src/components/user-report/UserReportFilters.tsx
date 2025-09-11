@@ -14,14 +14,12 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Search, Filter, X, SortAsc, SortDesc } from 'lucide-react';
-import { useDepartmentQueries } from '@/hooks/queries/useDepartments';
 import type { UserReportFilters } from '@/types/userReport';
 
 const filterSchema = z.object({
     search: z.string().optional(),
     year: z.number().min(2000).max(2100).optional(),
-    departmentId: z.number().optional(),
-    sortBy: z.enum(['inventoryName', 'quantityReceived', 'inventoryCode']).optional(),
+    sortBy: z.enum(['userName', 'quantityReceived', 'inventoryCode']).optional(),
     sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
@@ -34,9 +32,9 @@ interface UserReportFiltersProps {
 }
 
 const SORT_OPTIONS = [
-    { value: 'inventoryName', label: 'Inventory Name' },
+    { value: 'userName', label: 'User Name' },
     { value: 'quantityReceived', label: 'Quantity Received' },
-    { value: 'inventoryCode', label: 'Inventory Code' },
+    { value: 'inventoryCode', label: 'User ID' },
 ];
 
 const SORT_ORDER_OPTIONS = [
@@ -49,8 +47,6 @@ export default function UserReportFilters({
     onClearFilters,
     isLoading = false,
 }: UserReportFiltersProps) {
-    // Get departments for dropdown
-    const { departmentsQuery } = useDepartmentQueries();
 
     const {
         register,
@@ -64,8 +60,7 @@ export default function UserReportFilters({
         defaultValues: {
             search: '',
             year: new Date().getFullYear(),
-            departmentId: undefined,
-            sortBy: 'inventoryName',
+            sortBy: 'userName',
             sortOrder: 'asc',
         },
     });
@@ -80,7 +75,6 @@ export default function UserReportFilters({
         const filters: UserReportFilters = {
             search: data.search || undefined,
             year: data.year,
-            departmentId: data.departmentId,
             sortBy: data.sortBy,
             sortOrder: data.sortOrder,
         };
@@ -151,30 +145,6 @@ export default function UserReportFilters({
                             )}
                         </div>
 
-                        {/* Department Selection */}
-                        <div className="space-y-2">
-                            <Label htmlFor="departmentId">Department</Label>
-                            <Select
-                                value={watchedValues.departmentId?.toString() || ''}
-                                onValueChange={(value) =>
-                                    setValue('departmentId', value ? parseInt(value) : undefined)
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select department" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {departmentsQuery.data?.map((dept) => (
-                                        <SelectItem key={dept.id} value={dept.id.toString()}>
-                                            {dept.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.departmentId && (
-                                <p className="text-sm text-red-600">{errors.departmentId.message}</p>
-                            )}
-                        </div>
 
                         {/* Sort By */}
                         <div className="space-y-2">
@@ -182,7 +152,7 @@ export default function UserReportFilters({
                             <Select
                                 value={watchedValues.sortBy || ''}
                                 onValueChange={(value) =>
-                                    setValue('sortBy', value as 'inventoryName' | 'quantityReceived' | 'inventoryCode')
+                                    setValue('sortBy', value as 'userName' | 'quantityReceived' | 'inventoryCode')
                                 }
                             >
                                 <SelectTrigger>

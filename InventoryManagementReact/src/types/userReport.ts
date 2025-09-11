@@ -8,14 +8,12 @@ export interface UserReportItemDto {
 export interface UserReportRequest {
     userId?: number;
     year?: number;
-    departmentId?: number; // For filtering by department
 }
 
 export interface UserReportFilters {
     search?: string; // Search by user name or email
     year?: number;
-    departmentId?: number;
-    sortBy?: 'inventoryName' | 'quantityReceived' | 'inventoryCode';
+    sortBy?: 'userName' | 'quantityReceived' | 'inventoryCode';
     sortOrder?: 'asc' | 'desc';
 }
 
@@ -23,7 +21,7 @@ export interface UserReportSummary {
     userId: number;
     userName: string;
     userEmail: string;
-    departmentName: string;
+    officeName: string; // Changed from departmentName to officeName
     totalItemsReceived: number;
     totalQuantityReceived: number;
     items: UserReportItemDto[];
