@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { useTransactionReportQueries } from '@/hooks/queries/useTransactionReport';
 import TransactionReportFilters from '@/components/transaction-report/TransactionReportFilters';
 import TransactionReportTable from '@/components/transaction-report/TransactionReportTable';
-import type { TransactionReportRequest, TransactionReport } from '@/types/reports';
+import type {
+    TransactionReportRequest,
+    TransactionReport,
+} from '@/types/transactionReports';
 
 export default function TransactionReport() {
     const [report, setReport] = useState<TransactionReport | null>(null);
@@ -30,9 +33,12 @@ export default function TransactionReport() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Transaction Report</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        Transaction Report
+                    </h1>
                     <p className="text-muted-foreground">
-                        Generate detailed transaction reports for inventory items
+                        Generate detailed transaction reports for inventory
+                        items
                     </p>
                 </div>
             </div>
@@ -43,10 +49,7 @@ export default function TransactionReport() {
                 isLoading={isLoading}
             />
 
-            <TransactionReportTable
-                report={report}
-                isLoading={isLoading}
-            />
+            <TransactionReportTable report={report} isLoading={isLoading} />
         </div>
     );
 }

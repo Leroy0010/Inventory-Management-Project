@@ -2,12 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { transactionReportApi } from '@/api/transactionReport';
 import { toast } from 'sonner';
 import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
-import type { TransactionReportRequest } from '@/types/reports';
+import type { TransactionReportRequest } from '@/types/transactionReports';
 
 // Query keys for transaction report operations
 export const transactionReportKeys = {
     all: ['transaction-reports'] as const,
-    report: (request: TransactionReportRequest) => [...transactionReportKeys.all, 'report', request] as const,
+    report: (request: TransactionReportRequest) =>
+        [...transactionReportKeys.all, 'report', request] as const,
 };
 
 // Transaction Report queries and mutations
@@ -19,16 +20,15 @@ export const useTransactionReportQueries = () => {
         mutationFn: transactionReportApi.generateReport,
         onSuccess: (data) => {
             // Cache the report data
-            queryClient.setQueryData(
-                transactionReportKeys.report(data),
-                data
-            );
+            queryClient.setQueryData(transactionReportKeys.report(data), data);
             toast.success('Transaction report generated successfully!');
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to generate transaction report: ${friendlyMessage}`);
+            toast.error(
+                `Failed to generate transaction report: ${friendlyMessage}`
+            );
         },
     });
 
@@ -37,4 +37,3 @@ export const useTransactionReportQueries = () => {
         generateReportMutation,
     };
 };
-

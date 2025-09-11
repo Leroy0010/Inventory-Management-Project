@@ -17,7 +17,10 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Filter, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
-import type { TransactionReportRequest, StockTransactionType } from '@/types/reports';
+import type {
+    TransactionReportRequest,
+    StockTransactionType,
+} from '@/types/transactionReports';
 
 const filterSchema = z.object({
     itemId: z.number().optional(),
@@ -98,7 +101,9 @@ export default function TransactionReportFilters({
             year: data.year,
             month: data.month,
             transactionType: data.transactionType,
-            startDate: startDate ? startDate.toISOString().split('T')[0] : undefined,
+            startDate: startDate
+                ? startDate.toISOString().split('T')[0]
+                : undefined,
             endDate: endDate ? endDate.toISOString().split('T')[0] : undefined,
         };
 
@@ -126,7 +131,10 @@ export default function TransactionReportFilters({
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <form onSubmit={handleSubmit(handleApplyFilters)} className="space-y-4">
+                <form
+                    onSubmit={handleSubmit(handleApplyFilters)}
+                    className="space-y-4"
+                >
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Item Selection */}
                         <div className="space-y-2">
@@ -134,7 +142,10 @@ export default function TransactionReportFilters({
                             <Select
                                 value={watchedValues.itemId?.toString() || ''}
                                 onValueChange={(value) =>
-                                    setValue('itemId', value ? parseInt(value) : undefined)
+                                    setValue(
+                                        'itemId',
+                                        value ? parseInt(value) : undefined
+                                    )
                                 }
                             >
                                 <SelectTrigger>
@@ -142,14 +153,19 @@ export default function TransactionReportFilters({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {itemsQuery.data?.map((item) => (
-                                        <SelectItem key={item.id} value={item.id.toString()}>
+                                        <SelectItem
+                                            key={item.id}
+                                            value={item.id.toString()}
+                                        >
                                             {item.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.itemId && (
-                                <p className="text-sm text-red-600">{errors.itemId.message}</p>
+                                <p className="text-sm text-red-600">
+                                    {errors.itemId.message}
+                                </p>
                             )}
                         </div>
 
@@ -159,7 +175,10 @@ export default function TransactionReportFilters({
                             <Select
                                 value={watchedValues.year?.toString() || ''}
                                 onValueChange={(value) =>
-                                    setValue('year', value ? parseInt(value) : undefined)
+                                    setValue(
+                                        'year',
+                                        value ? parseInt(value) : undefined
+                                    )
                                 }
                             >
                                 <SelectTrigger>
@@ -167,14 +186,19 @@ export default function TransactionReportFilters({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {years.map((year) => (
-                                        <SelectItem key={year} value={year.toString()}>
+                                        <SelectItem
+                                            key={year}
+                                            value={year.toString()}
+                                        >
                                             {year}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.year && (
-                                <p className="text-sm text-red-600">{errors.year.message}</p>
+                                <p className="text-sm text-red-600">
+                                    {errors.year.message}
+                                </p>
                             )}
                         </div>
 
@@ -184,7 +208,10 @@ export default function TransactionReportFilters({
                             <Select
                                 value={watchedValues.month?.toString() || ''}
                                 onValueChange={(value) =>
-                                    setValue('month', value ? parseInt(value) : undefined)
+                                    setValue(
+                                        'month',
+                                        value ? parseInt(value) : undefined
+                                    )
                                 }
                             >
                                 <SelectTrigger>
@@ -192,24 +219,34 @@ export default function TransactionReportFilters({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {MONTHS.map((month) => (
-                                        <SelectItem key={month.value} value={month.value.toString()}>
+                                        <SelectItem
+                                            key={month.value}
+                                            value={month.value.toString()}
+                                        >
                                             {month.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.month && (
-                                <p className="text-sm text-red-600">{errors.month.message}</p>
+                                <p className="text-sm text-red-600">
+                                    {errors.month.message}
+                                </p>
                             )}
                         </div>
 
                         {/* Transaction Type */}
                         <div className="space-y-2">
-                            <Label htmlFor="transactionType">Transaction Type</Label>
+                            <Label htmlFor="transactionType">
+                                Transaction Type
+                            </Label>
                             <Select
                                 value={watchedValues.transactionType || ''}
                                 onValueChange={(value) =>
-                                    setValue('transactionType', value as StockTransactionType)
+                                    setValue(
+                                        'transactionType',
+                                        value as StockTransactionType
+                                    )
                                 }
                             >
                                 <SelectTrigger>
@@ -217,14 +254,19 @@ export default function TransactionReportFilters({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {TRANSACTION_TYPES.map((type) => (
-                                        <SelectItem key={type.value} value={type.value}>
+                                        <SelectItem
+                                            key={type.value}
+                                            value={type.value}
+                                        >
                                             {type.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.transactionType && (
-                                <p className="text-sm text-red-600">{errors.transactionType.message}</p>
+                                <p className="text-sm text-red-600">
+                                    {errors.transactionType.message}
+                                </p>
                             )}
                         </div>
 

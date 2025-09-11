@@ -10,9 +10,19 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight, FileText, TrendingUp, TrendingDown } from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronRight,
+    FileText,
+    TrendingUp,
+    TrendingDown,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { TransactionReport, TransactionDto, StockTransactionType } from '@/types/reports';
+import type {
+    TransactionReport,
+    TransactionDto,
+    StockTransactionType,
+} from '@/types/transactionReports';
 import { format } from 'date-fns';
 
 // Date formatting functions using date-fns
@@ -40,14 +50,20 @@ const getTransactionTypeBadge = (type: StockTransactionType) => {
     switch (type) {
         case 'RECEIVED':
             return (
-                <Badge variant="default" className="bg-green-100 text-green-800">
+                <Badge
+                    variant="default"
+                    className="bg-green-100 text-green-800"
+                >
                     <TrendingUp className="mr-1 h-3 w-3" />
                     Received
                 </Badge>
             );
         case 'ISSUED':
             return (
-                <Badge variant="destructive" className="bg-red-100 text-red-800">
+                <Badge
+                    variant="destructive"
+                    className="bg-red-100 text-red-800"
+                >
                     <TrendingDown className="mr-1 h-3 w-3" />
                     Issued
                 </Badge>
@@ -107,36 +123,56 @@ const TransactionRow = ({ transaction }: { transaction: TransactionDto }) => {
                         <div className="p-4 space-y-2">
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <span className="font-medium text-muted-foreground">Date:</span>
+                                    <span className="font-medium text-muted-foreground">
+                                        Date:
+                                    </span>
                                     <span className="ml-2">
                                         {formatDateTime(transaction.date)}
                                     </span>
                                 </div>
                                 <div>
-                                    <span className="font-medium text-muted-foreground">Time:</span>
+                                    <span className="font-medium text-muted-foreground">
+                                        Time:
+                                    </span>
                                     <span className="ml-2">
                                         {formatTime(transaction.date)}
                                     </span>
                                 </div>
                                 {transaction.supplier && (
                                     <div>
-                                        <span className="font-medium text-muted-foreground">Supplier:</span>
-                                        <span className="ml-2">{transaction.supplier}</span>
+                                        <span className="font-medium text-muted-foreground">
+                                            Supplier:
+                                        </span>
+                                        <span className="ml-2">
+                                            {transaction.supplier}
+                                        </span>
                                     </div>
                                 )}
                                 {transaction.invoiceId && (
                                     <div>
-                                        <span className="font-medium text-muted-foreground">Invoice ID:</span>
-                                        <span className="ml-2 font-mono">{transaction.invoiceId}</span>
+                                        <span className="font-medium text-muted-foreground">
+                                            Invoice ID:
+                                        </span>
+                                        <span className="ml-2 font-mono">
+                                            {transaction.invoiceId}
+                                        </span>
                                     </div>
                                 )}
                                 <div>
-                                    <span className="font-medium text-muted-foreground">Receiver:</span>
-                                    <span className="ml-2">{transaction.receiver}</span>
+                                    <span className="font-medium text-muted-foreground">
+                                        Receiver:
+                                    </span>
+                                    <span className="ml-2">
+                                        {transaction.receiver}
+                                    </span>
                                 </div>
                                 <div>
-                                    <span className="font-medium text-muted-foreground">Balance:</span>
-                                    <span className="ml-2 font-mono">{transaction.balance.toLocaleString()}</span>
+                                    <span className="font-medium text-muted-foreground">
+                                        Balance:
+                                    </span>
+                                    <span className="ml-2 font-mono">
+                                        {transaction.balance.toLocaleString()}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -147,7 +183,10 @@ const TransactionRow = ({ transaction }: { transaction: TransactionDto }) => {
     );
 };
 
-export default function TransactionReportTable({ report, isLoading }: TransactionReportTableProps) {
+export default function TransactionReportTable({
+    report,
+    isLoading,
+}: TransactionReportTableProps) {
     if (isLoading) {
         return (
             <Card>
@@ -180,7 +219,10 @@ export default function TransactionReportTable({ report, isLoading }: Transactio
                 <CardContent>
                     <div className="text-center py-8 text-muted-foreground">
                         <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p>No report data available. Apply filters to generate a report.</p>
+                        <p>
+                            No report data available. Apply filters to generate
+                            a report.
+                        </p>
                     </div>
                 </CardContent>
             </Card>
@@ -223,35 +265,44 @@ export default function TransactionReportTable({ report, isLoading }: Transactio
                             {report.totalIssued.toLocaleString()}
                         </div>
                     </div>
-                    <div className={cn(
-                        "p-4 rounded-lg",
-                        report.netChange >= 0 
-                            ? "bg-blue-50 dark:bg-blue-950" 
-                            : "bg-orange-50 dark:bg-orange-950"
-                    )}>
+                    <div
+                        className={cn(
+                            'p-4 rounded-lg',
+                            report.netChange >= 0
+                                ? 'bg-blue-50 dark:bg-blue-950'
+                                : 'bg-orange-50 dark:bg-orange-950'
+                        )}
+                    >
                         <div className="flex items-center gap-2">
-                            <FileText className={cn(
-                                "h-5 w-5",
-                                report.netChange >= 0 
-                                    ? "text-blue-600" 
-                                    : "text-orange-600"
-                            )} />
-                            <span className={cn(
-                                "text-sm font-medium",
-                                report.netChange >= 0 
-                                    ? "text-blue-800 dark:text-blue-200" 
-                                    : "text-orange-800 dark:text-orange-200"
-                            )}>
+                            <FileText
+                                className={cn(
+                                    'h-5 w-5',
+                                    report.netChange >= 0
+                                        ? 'text-blue-600'
+                                        : 'text-orange-600'
+                                )}
+                            />
+                            <span
+                                className={cn(
+                                    'text-sm font-medium',
+                                    report.netChange >= 0
+                                        ? 'text-blue-800 dark:text-blue-200'
+                                        : 'text-orange-800 dark:text-orange-200'
+                                )}
+                            >
                                 Net Change
                             </span>
                         </div>
-                        <div className={cn(
-                            "text-2xl font-bold",
-                            report.netChange >= 0 
-                                ? "text-blue-900 dark:text-blue-100" 
-                                : "text-orange-900 dark:text-orange-100"
-                        )}>
-                            {report.netChange >= 0 ? '+' : ''}{report.netChange.toLocaleString()}
+                        <div
+                            className={cn(
+                                'text-2xl font-bold',
+                                report.netChange >= 0
+                                    ? 'text-blue-900 dark:text-blue-100'
+                                    : 'text-orange-900 dark:text-orange-100'
+                            )}
+                        >
+                            {report.netChange >= 0 ? '+' : ''}
+                            {report.netChange.toLocaleString()}
                         </div>
                     </div>
                 </div>
@@ -264,17 +315,26 @@ export default function TransactionReportTable({ report, isLoading }: Transactio
                                 <TableRow>
                                     <TableHead>Date</TableHead>
                                     <TableHead>Type</TableHead>
-                                    <TableHead className="text-right">Quantity</TableHead>
-                                    <TableHead className="text-right">Balance</TableHead>
+                                    <TableHead className="text-right">
+                                        Quantity
+                                    </TableHead>
+                                    <TableHead className="text-right">
+                                        Balance
+                                    </TableHead>
                                     <TableHead>Supplier</TableHead>
                                     <TableHead>Invoice ID</TableHead>
                                     <TableHead>Receiver</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {report.transactions.map((transaction, index) => (
-                                    <TransactionRow key={index} transaction={transaction} />
-                                ))}
+                                {report.transactions.map(
+                                    (transaction, index) => (
+                                        <TransactionRow
+                                            key={index}
+                                            transaction={transaction}
+                                        />
+                                    )
+                                )}
                             </TableBody>
                         </Table>
                     </div>

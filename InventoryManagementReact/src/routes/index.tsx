@@ -4,6 +4,7 @@ import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Permission } from '@/types';
 
+
 // Lazy load pages for better performance
 // Common pages
 const Login = React.lazy(() => import('@/pages/auth/Login'));
@@ -46,7 +47,12 @@ const StorekeeperRequests = React.lazy(() => import('@/pages/storekeeper/ManageR
 const TransactionReport = React.lazy(
     () => import('@/pages/storekeeper/TransactionReport')
 );
-const UserReport = React.lazy(() => import('@/pages/storekeeper/UserReport'));
+const UserReport = React.lazy(
+    () => import('@/pages/storekeeper/UserReport')
+);
+const UserActivityReport = React.lazy(
+    () => import('@/pages/storekeeper/UserActivityReport')
+);
 const InventorySummaryReport = React.lazy(
     () => import('@/pages/storekeeper/InventorySummaryReport')
 );
@@ -379,6 +385,18 @@ const router = createBrowserRouter([
                             requiredPermissions={[Permission.VIEW_USER_REPORTS]}
                         >
                             <UserReport />
+                        </ProtectedRoute>
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'reports/user-activity',
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <ProtectedRoute
+                            requiredPermissions={[Permission.VIEW_USER_REPORTS]}
+                        >
+                            <UserActivityReport />
                         </ProtectedRoute>
                     </Suspense>
                 ),

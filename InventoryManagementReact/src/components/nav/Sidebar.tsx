@@ -16,6 +16,7 @@ import {
     MessageSquare,
     Settings,
     ChevronDown,
+    Activity,
     LogOut,
     X,
 } from 'lucide-react';
@@ -90,9 +91,19 @@ const navGroups: NavGroup[] = [
 const reportsGroup: NavGroup = {
     label: 'Reports',
     icon: FileText,
-    items: [{ to: '/reports/transaction', label: 'Transaction', icon: FileText },
+    items: [
+        { to: '/reports/transaction', label: 'Transaction', icon: FileText },
+        {
+            to: '/reports/inventory-summary',
+            label: 'Inventory Summary',
+            icon: FileText,
+        },
         { to: '/reports/user', label: 'User', icon: FileText },
-        { to: '/reports/inventory-summary', label: 'Inventory Summary', icon: FileText }
+        {
+            to: '/reports/user-activity',
+            label: 'User Activity',
+            icon: Activity,
+        },
     ],
 };
 
