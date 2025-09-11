@@ -90,7 +90,10 @@ const navGroups: NavGroup[] = [
 const reportsGroup: NavGroup = {
     label: 'Reports',
     icon: FileText,
-    items: [{ to: '/reports', label: 'Reports', icon: FileText }],
+    items: [{ to: '/reports/transaction', label: 'Transaction', icon: FileText },
+        { to: '/reports/user', label: 'User', icon: FileText },
+        { to: '/reports/inventory-summary', label: 'Inventory Summary', icon: FileText }
+    ],
 };
 
 export function Sidebar({

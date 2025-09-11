@@ -13,6 +13,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Filter, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
@@ -60,6 +61,8 @@ export default function TransactionReportFilters({
     onClearFilters,
     isLoading = false,
 }: TransactionReportFiltersProps) {
+    const [startDate, setStartDate] = useState<Date | undefined>();
+    const [endDate, setEndDate] = useState<Date | undefined>();
 
     // Get inventory items for dropdown
     const { itemsQuery } = useInventoryItemQueries();
@@ -95,8 +98,8 @@ export default function TransactionReportFilters({
             year: data.year,
             month: data.month,
             transactionType: data.transactionType,
-            startDate: data.startDate,
-            endDate: data.endDate,
+            startDate: startDate ? startDate.toISOString().split('T')[0] : undefined,
+            endDate: endDate ? endDate.toISOString().split('T')[0] : undefined,
         };
 
         // Remove undefined values
@@ -109,6 +112,8 @@ export default function TransactionReportFilters({
 
     const handleClearFilters = () => {
         reset();
+        setStartDate(undefined);
+        setEndDate(undefined);
         onClearFilters();
     };
 
@@ -225,30 +230,24 @@ export default function TransactionReportFilters({
 
                         {/* Start Date */}
                         <div className="space-y-2">
-                            <Label htmlFor="startDate">Start Date</Label>
-                            <Input
-                                id="startDate"
-                                type="date"
-                                {...register('startDate')}
-                                placeholder="Select start date"
+                            <Label>Start Date</Label>
+                            <DatePicker
+                                date={startDate}
+                                onDateChange={setStartDate}
+                                placeholder="Pick start date"
+                                disabled={isLoading}
                             />
-                            {errors.startDate && (
-                                <p className="text-sm text-red-600">{errors.startDate.message}</p>
-                            )}
                         </div>
 
                         {/* End Date */}
                         <div className="space-y-2">
-                            <Label htmlFor="endDate">End Date</Label>
-                            <Input
-                                id="endDate"
-                                type="date"
-                                {...register('endDate')}
-                                placeholder="Select end date"
+                            <Label>End Date</Label>
+                            <DatePicker
+                                date={endDate}
+                                onDateChange={setEndDate}
+                                placeholder="Pick end date"
+                                disabled={isLoading}
                             />
-                            {errors.endDate && (
-                                <p className="text-sm text-red-600">{errors.endDate.message}</p>
-                            )}
                         </div>
                     </div>
 

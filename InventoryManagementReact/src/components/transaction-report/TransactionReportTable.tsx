@@ -13,31 +13,22 @@ import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronRight, FileText, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { TransactionReport, TransactionDto, StockTransactionType } from '@/types/reports';
-// Simple date formatting function
+import { format } from 'date-fns';
+
+// Date formatting functions using date-fns
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+    return format(date, 'MMM dd, yyyy');
 };
 
 const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    return format(date, 'PPP');
 };
 
 const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    return format(date, 'p');
 };
 
 interface TransactionReportTableProps {

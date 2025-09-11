@@ -71,6 +71,9 @@ const ImageUploadDemo = React.lazy(
 const InventoryCardDemo = React.lazy(
     () => import('@/components/InventoryCardDemo')
 );
+const DatePickerDemo = React.lazy(
+    () => import('@/components/DatePickerDemo')
+);
 
 // Loading component
 const PageLoader = () => (
@@ -507,6 +510,14 @@ const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <InventoryCardDemo />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'dev/date-picker-demo',
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <DatePickerDemo />
                     </Suspense>
                 ),
             },
