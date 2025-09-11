@@ -50,10 +50,10 @@ const navGroups: NavGroup[] = [
         label: 'Management',
         icon: Users,
         items: [
-            { to: '/staff', label: 'Add Staff', icon: Users },
-            { to: '/inventory', label: 'Add Inventory', icon: Package },
-            { to: '/office', label: 'Add Office', icon: Building },
-            { to: '/batch', label: 'Add Batch', icon: Layers },
+            { to: '/staff/add', label: 'Add Staff', icon: Users },
+            { to: '/inventory/add', label: 'Add Inventory', icon: Package },
+            { to: '/office/add', label: 'Add Office', icon: Building },
+            { to: '/batch/add', label: 'Add Batch', icon: Layers },
         ],
     },
     {
