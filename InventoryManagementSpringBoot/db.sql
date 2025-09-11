@@ -173,6 +173,13 @@ CREATE TABLE audit_log (
 
 
 
+-- Performance indexes for user report queries
+CREATE INDEX idx_stock_transactions_user_report ON stock_transactions (transaction_type, transaction_date, related_request_id);
+CREATE INDEX idx_requests_user_report ON requests (user_id);
+CREATE INDEX idx_users_office_department ON users (office_id, department_id);
+CREATE INDEX idx_offices_department ON offices (department_id);
+
+-- Example query for user report (for reference)
 SELECT
     i.id AS item_id,
     u.office_id,

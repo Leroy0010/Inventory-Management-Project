@@ -10,3 +10,5 @@ databaseChangeLog:
       file: db/changelog/db.changelog-004-alter-request-table.yaml
   - include:
       file: db/changelog/db.changelog-005-refresh-tokens.yaml
+  - include:
+      file: db/changelog/db.changelog-006-user-report-optimizations.yaml

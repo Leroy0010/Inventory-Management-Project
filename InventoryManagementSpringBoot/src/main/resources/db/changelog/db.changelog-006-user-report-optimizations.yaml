@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: user-report-optimizations
+      author: leroy
+      changes:
+        # Add indexes for better performance on user report queries
+        - createIndex:
+            tableName: stock_transactions
+            indexName: idx_stock_transactions_user_report
+            columns:
+              - column:
+                  name: transaction_type
+              - column:
+                  name: transaction_date
+              - column:
+                  name: related_request_id
+        - createIndex:
+            tableName: requests
+            indexName: idx_requests_user_report
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            tableName: users
+            indexName: idx_users_office_department
+            columns:
+              - column:
+                  name: office_id
+              - column:
+                  name: department_id
+        - createIndex:
+            tableName: offices
+            indexName: idx_offices_department
+            columns:
+              - column:
+                  name: department_id
