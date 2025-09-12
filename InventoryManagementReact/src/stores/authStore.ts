@@ -1,102 +1,191 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { devtools } from 'zustand/middleware';
 import type { User } from '@/types/auth';
-
-
-
+import { hasPermission as checkPermission, hasAnyPermission as checkAnyPermission, hasAllPermissions as checkAllPermissions } from '@/lib/auth-utils';
+import { DEV_CONFIG } from '@/config/dev';
 
 export interface AuthState {
+    // User state
     user: User | null;
     isAuthenticated: boolean;
-    error: string | null;
+    isLoading: boolean;
+    
+    // Token state
     token: string | null;
     refreshToken: string | null;
+    
+    // Error state
+    error: string | null;
 }
 
 export interface AuthActions {
     // User management
     setUser: (user: User | null) => void;
-    updateUser: (updates: Partial<User>) => void;
     clearUser: () => void;
-
+    
     // Token management
     setTokens: (token: string, refreshToken: string) => void;
     clearTokens: () => void;
-
+    
     // Error management
     setError: (error: string | null) => void;
     clearError: () => void;
+    
+    // Loading state
+    setLoading: (loading: boolean) => void;
+    
+    // Auth state management
+    login: (user: User, token: string, refreshToken: string) => void;
+    loginWithGoogle: (googleToken: string) => Promise<void>;
+    logout: () => void;
+    
+    // Permission methods
+    hasPermission: (permission: string) => boolean;
+    hasAnyPermission: (permissions: string[]) => boolean;
+    hasAllPermissions: (permissions: string[]) => boolean;
 }
 
 export type AuthStore = AuthState & AuthActions;
 
 // Initial state
 const initialState: AuthState = {
-    user: null,
-    isAuthenticated: false,
+    user: DEV_CONFIG.BYPASS_AUTH ? {
+        id: 1,
+        email: DEV_CONFIG.DEFAULT_USER.email,
+        firstName: DEV_CONFIG.DEFAULT_USER.firstName,
+        lastName: DEV_CONFIG.DEFAULT_USER.lastName,
+        role: { id: 1, name: DEV_CONFIG.DEFAULT_USER.role },
+        active: DEV_CONFIG.DEFAULT_USER.isActive,
+        createdAt: DEV_CONFIG.DEFAULT_USER.createdAt,
+        updatedAt: DEV_CONFIG.DEFAULT_USER.updatedAt,
+    } : null,
+    isAuthenticated: DEV_CONFIG.BYPASS_AUTH,
+    isLoading: false,
+    token: DEV_CONFIG.BYPASS_AUTH ? 'dev-token' : null,
+    refreshToken: DEV_CONFIG.BYPASS_AUTH ? 'dev-refresh-token' : null,
     error: null,
-    token: null,
-    refreshToken: null,
 };
 
-// Auth store - simplified to work with TanStack Query
+// Auth store
 export const useAuthStore = create<AuthStore>()(
     devtools(
-        persist(
-            (set, get) => ({
-                ...initialState,
+        (set, get) => ({
+            ...initialState,
 
-                // Set user and mark as authenticated
-                setUser: (user: User | null) => {
-                    set({ user, isAuthenticated: !!user, error: null });
-                },
+            // Set user
+            setUser: (user) => {
+                set({ 
+                    user, 
+                    isAuthenticated: !!user 
+                });
+            },
 
-                // Update user data
-                updateUser: (updates: Partial<User>) => {
-                    const currentUser = get().user;
-                    if (currentUser) {
-                        set({ user: { ...currentUser, ...updates } });
-                    }
-                },
+            // Clear user
+            clearUser: () => {
+                set({ 
+                    user: null, 
+                    isAuthenticated: false 
+                });
+            },
 
-                // Clear user and mark as unauthenticated
-                clearUser: () => {
-                    set({ user: null, isAuthenticated: false, error: null });
-                },
+            // Set tokens
+            setTokens: (token, refreshToken) => {
+                set({ token, refreshToken });
+            },
 
-                // Set tokens
-                setTokens: (token: string, refreshToken: string) => {
-                    set({ token, refreshToken });
-                },
+            // Clear tokens
+            clearTokens: () => {
+                set({ token: null, refreshToken: null });
+            },
 
-                // Clear tokens
-                clearTokens: () => {
-                    set({ token: null, refreshToken: null });
-                },
+            // Set error
+            setError: (error) => {
+                set({ error });
+            },
 
-                // Set error
-                setError: (error: string | null) => {
-                    set({ error });
-                },
+            // Clear error
+            clearError: () => {
+                set({ error: null });
+            },
 
-                // Clear error
-                clearError: () => {
-                    set({ error: null });
-                },
-            }),
-            {
-                name: 'auth-storage',
-                partialize: (state) => ({
-                    user: state.user,
-                    isAuthenticated: state.isAuthenticated,
-                    token: state.token,
-                    refreshToken: state.refreshToken,
-                }),
-            }
-        ),
+            // Set loading state
+            setLoading: (loading) => {
+                set({ isLoading: loading });
+            },
+
+            // Login (set user and tokens)
+            login: (user, token, refreshToken) => {
+                set({
+                    user,
+                    token,
+                    refreshToken,
+                    isAuthenticated: true,
+                    error: null,
+                });
+            },
+
+            // Login with Google
+            loginWithGoogle: async (googleToken: string) => {
+                // This would typically call an API endpoint
+                // For now, we'll just simulate a successful login
+                const mockUser: User = {
+                    id: 1,
+                    email: 'test@example.com',
+                    firstName: 'Test',
+                    lastName: 'User',
+                    role: { id: 1, name: 'STAFF' },
+                    active: true,
+                };
+                
+                set({
+                    user: mockUser,
+                    token: 'mock-token',
+                    refreshToken: 'mock-refresh-token',
+                    isAuthenticated: true,
+                    error: null,
+                });
+            },
+
+            // Logout (clear everything)
+            logout: () => {
+                set({
+                    user: null,
+                    token: null,
+                    refreshToken: null,
+                    isAuthenticated: false,
+                    error: null,
+                });
+            },
+
+            // Permission methods
+            hasPermission: (permission: string) => {
+                const state = get();
+                return checkPermission(permission, state.user);
+            },
+
+            hasAnyPermission: (permissions: string[]) => {
+                const state = get();
+                return checkAnyPermission(permissions, state.user);
+            },
+
+            hasAllPermissions: (permissions: string[]) => {
+                const state = get();
+                return checkAllPermissions(permissions, state.user);
+            },
+        }),
         {
             name: 'auth-store',
         }
     )
 );
+
+// Selector hooks for better performance
+export const useUser = () => useAuthStore((state) => state.user);
+export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
+export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
+export const useAuthError = () => useAuthStore((state) => state.error);
+export const useAuthTokens = () => useAuthStore((state) => ({
+    token: state.token,
+    refreshToken: state.refreshToken,
+    hasTokens: !!(state.token && state.refreshToken),
+}));

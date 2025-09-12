@@ -1,9 +1,9 @@
-import { useAuth } from './useAuth';
+import { useAuthStore } from '@/stores/authStore';
 import type { Permission } from '@/types';
 
 // Hook for conditional rendering based on permissions
 export function usePermissionCheck() {
-    const { hasAnyPermission, hasAllPermissions } = useAuth();
+    const { hasAnyPermission, hasAllPermissions } = useAuthStore();
 
     return {
         hasAnyPermission,

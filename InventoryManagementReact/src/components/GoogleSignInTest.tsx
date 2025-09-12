@@ -1,11 +1,11 @@
 import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DEV_GOOGLE_OAUTH } from '@/config/google-oauth';
 
 export function GoogleSignInTest() {
-    const { loginWithGoogle, user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, loginWithGoogle } = useAuthStore();
 
     const handleTestGoogleSignIn = async () => {
         try {

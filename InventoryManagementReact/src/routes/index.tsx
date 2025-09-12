@@ -62,24 +62,7 @@ const Notifications = React.lazy(() => import('@/pages/Notifications'));
 const SendMessage = React.lazy(() => import('@/pages/SendMessage'));
 const Settings = React.lazy(() => import('@/pages/Settings'));
 
-// Development/Test pages
-// const ThemeTest = React.lazy(() => import('@/components/ThemeTest'));
-// const GoogleSignInTest = React.lazy(
-//     () => import('@/components/GoogleSignInTest')
-// );
-// const SidebarStyleDemo = React.lazy(
-//     () => import('@/components/SidebarStyleDemo')
-// );
-// const SearchDemo = React.lazy(() => import('@/components/SearchDemo'));
-const ImageUploadDemo = React.lazy(
-    () => import('@/components/ImageUploadDemo')
-);
-const InventoryCardDemo = React.lazy(
-    () => import('@/components/InventoryCardDemo')
-);
-const DatePickerDemo = React.lazy(
-    () => import('@/components/DatePickerDemo')
-);
+// Development/Test pages (removed for production)
 
 // Loading component
 const PageLoader = () => (
@@ -482,63 +465,7 @@ const router = createBrowserRouter([
                 ),
             },
 
-            // Development/Test routes
-            // {
-            //     path: 'dev/theme-test',
-            //     element: (
-            //         <Suspense fallback={<PageLoader />}>
-            //             <ThemeTest />
-            //         </Suspense>
-            //     ),
-            // },
-            // {
-            //     path: 'dev/google-test',
-            //     element: (
-            //         <Suspense fallback={<PageLoader />}>
-            //             <GoogleSignInTest />
-            //         </Suspense>
-            //     ),
-            // },
-            // {
-            //     path: 'dev/sidebar-demo',
-            //     element: (
-            //         <Suspense fallback={<PageLoader />}>
-            //             <SidebarStyleDemo />
-            //         </Suspense>
-            //     ),
-            // },
-            // {
-            //     path: 'dev/search-demo',
-            //     element: (
-            //         <Suspense fallback={<PageLoader />}>
-            //             <SearchDemo />
-            //         </Suspense>
-            //     ),
-            // },
-            {
-                path: 'dev/image-upload-demo',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <ImageUploadDemo />
-                    </Suspense>
-                ),
-            },
-            {
-                path: 'dev/inventory-card-demo',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <InventoryCardDemo />
-                    </Suspense>
-                ),
-            },
-            {
-                path: 'dev/date-picker-demo',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <DatePickerDemo />
-                    </Suspense>
-                ),
-            },
+            // Development/Test routes (removed for production)
         ],
     },
     {

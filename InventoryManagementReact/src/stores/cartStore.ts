@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { api, handleApiError } from '@/api/client';
 import type { CartItem, CartItemRequestDto } from '@/types/cart';
 
 // Types
@@ -50,15 +51,7 @@ export const useCartStore = create<CartStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/cart', {
-                        credentials: 'include',
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch cart');
-                    }
-
-                    const cartData = await response.json();
+                    const cartData = await api.get<{ items: CartItem[] }>('/api/cart');
                     const items = cartData.items || [];
 
                     set({
@@ -73,10 +66,7 @@ export const useCartStore = create<CartStore>()(
                     });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to fetch cart',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                 }
@@ -87,23 +77,7 @@ export const useCartStore = create<CartStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/cart/add', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify(item),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to add item to cart'
-                        );
-                    }
-
-                    const cartData = await response.json();
+                    const cartData = await api.post<{ items: CartItem[] }>('/api/cart/add', item);
                     const items = cartData.items || [];
 
                     set({
@@ -118,10 +92,7 @@ export const useCartStore = create<CartStore>()(
                     });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to add item to cart',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;
@@ -133,24 +104,7 @@ export const useCartStore = create<CartStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/cart/update', {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ itemId, quantity }),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message ||
-                                'Failed to update item quantity'
-                        );
-                    }
-
-                    const cartData = await response.json();
+                    const cartData = await api.put<{ items: CartItem[] }>('/api/cart/update', { itemId, quantity });
                     const items = cartData.items || [];
 
                     set({
@@ -165,10 +119,7 @@ export const useCartStore = create<CartStore>()(
                     });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to update item quantity',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;
@@ -180,24 +131,7 @@ export const useCartStore = create<CartStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/cart/remove', {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ itemId }),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message ||
-                                'Failed to remove item from cart'
-                        );
-                    }
-
-                    const cartData = await response.json();
+                    const cartData = await api.delete<{ items: CartItem[] }>('/api/cart/remove', { data: { itemId } });
                     const items = cartData.items || [];
 
                     set({
@@ -212,10 +146,7 @@ export const useCartStore = create<CartStore>()(
                     });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to remove item from cart',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;
@@ -227,17 +158,7 @@ export const useCartStore = create<CartStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/cart/clear', {
-                        method: 'DELETE',
-                        credentials: 'include',
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to clear cart'
-                        );
-                    }
+                    await api.delete('/api/cart/clear');
 
                     set({
                         items: [],
@@ -247,10 +168,7 @@ export const useCartStore = create<CartStore>()(
                     });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to clear cart',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;
@@ -262,18 +180,7 @@ export const useCartStore = create<CartStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/requests', {
-                        method: 'POST',
-                        credentials: 'include',
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message ||
-                                'Failed to submit cart as request'
-                        );
-                    }
+                    await api.post('/api/requests');
 
                     // Clear cart after successful submission
                     set({
@@ -284,10 +191,7 @@ export const useCartStore = create<CartStore>()(
                     });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to submit cart as request',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Search, X, Filter } from 'lucide-react';
-import type { RequestStatus } from '@/types/request';
 
 interface RequestFiltersProps {
     searchQuery: string;

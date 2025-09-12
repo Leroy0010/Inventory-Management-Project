@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/stores/authStore';
 import type { Permission } from '@/types';
 import { DEV_CONFIG } from '@/config/dev';
 
@@ -18,7 +18,7 @@ export function ProtectedRoute({
     fallbackPath = '/login',
 }: ProtectedRouteProps) {
     const { isAuthenticated, isLoading, hasAnyPermission, hasAllPermissions } =
-        useAuth();
+        useAuthStore();
     const location = useLocation();
 
     // Show loading state while checking authentication
@@ -63,7 +63,7 @@ export function withPermission<P extends object>(
             return <Component {...props} />;
         }
 
-        const { hasAnyPermission, hasAllPermissions } = useAuth();
+        const { hasAnyPermission, hasAllPermissions } = useAuthStore();
 
         const hasRequiredPermissions = requireAll
             ? hasAllPermissions(requiredPermissions)

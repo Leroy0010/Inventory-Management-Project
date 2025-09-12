@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/stores/authStore';
 import { usePermissionCheck } from '@/hooks/usePermissionCheck';
 import { useResponsive } from '@/hooks/useResponsive';
 import {
@@ -114,7 +114,7 @@ export function Sidebar({
     isSidebarOpen: boolean;
     toggleSidebar: () => void;
 }) {
-    const { logout, user } = useAuth();
+    const { logout, user } = useAuthStore();
     const { canAccess } = usePermissionCheck();
     const { isMobile } = useResponsive();
     const navigate = useNavigate();

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { api, handleApiError } from '@/api/client';
 import type { InventoryBatch, CreateBatchDto } from '@/types/inventoryBatch';
 
 export interface InventoryBatchState {
@@ -36,22 +37,11 @@ export const useInventoryBatchStore = create<InventoryBatchStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/inventory-batches', {
-                        credentials: 'include',
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch batches');
-                    }
-
-                    const batches = await response.json();
+                    const batches = await api.get<InventoryBatch[]>('/api/inventory-batches');
                     set({ batches: batches || [], isLoading: false });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to fetch batches',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                 }
@@ -62,23 +52,7 @@ export const useInventoryBatchStore = create<InventoryBatchStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/inventory-batches', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify(batch),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to create batch'
-                        );
-                    }
-
-                    const newBatch = await response.json();
+                    const newBatch = await api.post<InventoryBatch>('/api/inventory-batches', batch);
 
                     set((state) => ({
                         batches: [...state.batches, newBatch],
@@ -88,10 +62,7 @@ export const useInventoryBatchStore = create<InventoryBatchStore>()(
                     return newBatch;
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to create batch',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;

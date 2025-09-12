@@ -7,22 +7,9 @@ import { cn } from '@/lib/utils';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
 import { useBatchQueries } from '@/hooks/queries/useBatch';
 import { toast } from 'sonner';
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/ui/command';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
+import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
-import { Check, ChevronsUpDown } from 'lucide-react';
 import { Input } from '../ui/input';
 
 const addBatchSchema = z.object({
@@ -58,15 +45,17 @@ interface AddBatchFormProps {
 }
 
 export default function AddBatchForm({ className }: AddBatchFormProps) {
-    const [open, setOpen] = useState(false);
     const [value, setValue] = useState('');
 
     // Queries
     const { itemsQuery } = useInventoryItemQueries();
     const { createBatchMutation } = useBatchQueries();
 
-    // Get item names from API
-    const itemNames = itemsQuery.data?.map(item => item.name) || [];
+    // Convert items to combobox options
+    const itemOptions: ComboboxOption[] = itemsQuery.data?.map((item) => ({
+        value: item.name,
+        label: item.name,
+    })) || [];
 
     const {
         register,
@@ -114,66 +103,27 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
                         <Label htmlFor="itemName" className="mb-1">
                             Item Name
                         </Label>
-                        <Popover open={open} onOpenChange={setOpen}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={open}
-                                    className="w-[200px] justify-between"
-                                >
-                                    {value
-                                        ? itemNames.find(
-                                              (itemName) => itemName === value
-                                          )
-                                        : 'Select item name...'}
-                                    <ChevronsUpDown className="opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[200px] p-0">
-                                <Command>
-                                    <CommandInput
-                                        placeholder="Search item name..."
-                                        className="h-9"
-                                    />
-                                    <CommandList>
-                                        <CommandEmpty>
-                                            No itemName found.
-                                        </CommandEmpty>
-                                        <CommandGroup>
-                                            {itemNames.map((itemName) => (
-                                                <CommandItem
-                                                    key={itemName}
-                                                    value={itemName}
-                                                    onSelect={(
-                                                        currentValue
-                                                    ) => {
-                                                        const selectedValue = currentValue === value ? '' : currentValue;
-                                                        setValue(selectedValue);
-                                                        setFormValue('itemName', selectedValue);
-                                                        setOpen(false);
-                                                    }}
-                                                >
-                                                    {itemName}
-                                                    <Check
-                                                        className={cn(
-                                                            'ml-auto',
-                                                            value === itemName
-                                                                ? 'opacity-100'
-                                                                : 'opacity-0'
-                                                        )}
-                                                    />
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
+                        <Combobox
+                            options={itemOptions}
+                            value={value}
+                            onValueChange={(selectedValue) => {
+                                setValue(selectedValue);
+                                setFormValue('itemName', selectedValue);
+                            }}
+                            placeholder="Select item name..."
+                            searchPlaceholder="Search item name..."
+                            emptyText="No item found"
+                            width="w-full"
+                        />
+                        {errors.itemName && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.itemName.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
-                        <Label htmlFor="quantity">Quantiy</Label>
+                        <Label htmlFor="quantity">Quantity</Label>
                         <Input
                             id="quantity"
                             type="number"

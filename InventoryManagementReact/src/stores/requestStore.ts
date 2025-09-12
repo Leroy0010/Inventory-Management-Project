@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { api, handleApiError } from '@/api/client';
 
 // Types
 export interface Request {
@@ -133,22 +134,11 @@ export const useRequestStore = create<RequestStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/requests', {
-                        credentials: 'include',
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch requests');
-                    }
-
-                    const requests = await response.json();
+                    const requests = await api.get<Request[]>('/api/requests');
                     set({ requests: requests || [], isLoading: false });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to fetch requests',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                 }
@@ -159,22 +149,11 @@ export const useRequestStore = create<RequestStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/requests', {
-                        credentials: 'include',
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch user requests');
-                    }
-
-                    const requests = await response.json();
+                    const requests = await api.get<Request[]>('/api/requests');
                     set({ userRequests: requests || [], isLoading: false });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to fetch user requests',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                 }
@@ -183,22 +162,11 @@ export const useRequestStore = create<RequestStore>()(
             // Fetch request by ID
             fetchRequestById: async (id: number) => {
                 try {
-                    const response = await fetch(`/api/requests/${id}`, {
-                        credentials: 'include',
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch request');
-                    }
-
-                    const request = await response.json();
+                    const request = await api.get<Request>(`/api/requests/${id}`);
                     return request;
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to fetch request',
+                        error: handleApiError(error),
                     });
                     return null;
                 }
@@ -209,23 +177,7 @@ export const useRequestStore = create<RequestStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/requests', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify(request),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to create request'
-                        );
-                    }
-
-                    const newRequest = await response.json();
+                    const newRequest = await api.post<Request>('/api/requests', request);
 
                     set((state) => ({
                         userRequests: [...state.userRequests, newRequest],
@@ -235,10 +187,7 @@ export const useRequestStore = create<RequestStore>()(
                     return newRequest;
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to create request',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;
@@ -250,21 +199,7 @@ export const useRequestStore = create<RequestStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/requests/approve', {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify(approval),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to approve request'
-                        );
-                    }
+                    await api.put('/api/requests/approve', approval);
 
                     // Update the request in the store
                     set((state) => ({
@@ -292,10 +227,7 @@ export const useRequestStore = create<RequestStore>()(
                     }));
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to approve request',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;
@@ -307,21 +239,7 @@ export const useRequestStore = create<RequestStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/requests/fulfil', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify(fulfillment),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to fulfill request'
-                        );
-                    }
+                    await api.post('/api/requests/fulfil', fulfillment);
 
                     // Update the request in the store
                     set((state) => ({
@@ -339,10 +257,7 @@ export const useRequestStore = create<RequestStore>()(
                     }));
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to fulfill request',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;

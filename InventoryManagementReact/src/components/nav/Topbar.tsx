@@ -11,7 +11,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/stores/authStore';
 import { useNotificationsSafe } from '@/hooks/useNotificationsSafe';
 import { SearchBar } from '@/components/SearchBar';
 import { cn } from '@/lib/utils';
@@ -26,7 +26,7 @@ export function Topbar({
     onMenuToggle,
     isSidebarCollapsed = false,
 }: TopbarProps) {
-    const { user, logout } = useAuth();
+    const { user, logout } = useAuthStore();
     const { unreadCount, notifications } = useNotificationsSafe();
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const { theme, setTheme } = useTheme();

@@ -6,24 +6,10 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useOfficeQueries } from '@/hooks/queries/useOffice';
 import { useUserQueries } from '@/hooks/queries/useUser';
 import { toast } from 'sonner';
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/ui/command';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
+import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 
 interface AddStaffFormProps {
     className?: string;
@@ -38,15 +24,17 @@ const addStaffSchema = z.object({
 type AddStaffFormData = z.infer<typeof addStaffSchema>;
 
 export default function AddStaffForm({ className }: AddStaffFormProps) {
-    const [open, setOpen] = useState(false);
     const [value, setValue] = useState('');
 
     // Queries
     const { officeNamesQuery } = useOfficeQueries();
     const { createStaffMutation } = useUserQueries();
 
-    // Get office names from API
-    const offices = officeNamesQuery.data || [];
+    // Convert offices to combobox options
+    const officeOptions: ComboboxOption[] = officeNamesQuery.data?.map((office) => ({
+        value: office,
+        label: office,
+    })) || [];
 
     const {
         register,
@@ -137,62 +125,23 @@ export default function AddStaffForm({ className }: AddStaffFormProps) {
                         <Label htmlFor="office" className="mb-1">
                             Office
                         </Label>
-                        <Popover open={open} onOpenChange={setOpen}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={open}
-                                    className="w-[200px] justify-between"
-                                >
-                                    {value
-                                        ? offices.find(
-                                              (office) => office === value
-                                          )
-                                        : 'Select office...'}
-                                    <ChevronsUpDown className="opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[200px] p-0">
-                                <Command>
-                                    <CommandInput
-                                        placeholder="Search office..."
-                                        className="h-9"
-                                    />
-                                    <CommandList>
-                                        <CommandEmpty>
-                                            No office found.
-                                        </CommandEmpty>
-                                        <CommandGroup>
-                                            {offices.map((office) => (
-                                                <CommandItem
-                                                    key={office}
-                                                    value={office}
-                                                    onSelect={(
-                                                        currentValue
-                                                    ) => {
-                                                        const selectedValue = currentValue === value ? '' : currentValue;
-                                                        setValue(selectedValue);
-                                                        setFormValue('office', selectedValue);
-                                                        setOpen(false);
-                                                    }}
-                                                >
-                                                    {office}
-                                                    <Check
-                                                        className={cn(
-                                                            'ml-auto',
-                                                            value === office
-                                                                ? 'opacity-100'
-                                                                : 'opacity-0'
-                                                        )}
-                                                    />
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
+                        <Combobox
+                            options={officeOptions}
+                            value={value}
+                            onValueChange={(selectedValue) => {
+                                setValue(selectedValue);
+                                setFormValue('office', selectedValue);
+                            }}
+                            placeholder="Select office..."
+                            searchPlaceholder="Search office..."
+                            emptyText="No office found"
+                            width="w-full"
+                        />
+                        {errors.office && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.office.message}
+                            </p>
+                        )}
                     </div>
 
                     <div className="pt-4">

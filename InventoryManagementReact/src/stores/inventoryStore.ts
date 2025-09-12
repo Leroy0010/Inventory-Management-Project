@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { api, handleApiError } from '@/api/client';
 import type {
     InventoryItem,
     CreateInventoryItemDto,
@@ -57,25 +58,11 @@ export const useInventoryStore = create<InventoryStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch(
-                        '/api/inventory-items/get-all-department',
-                        {
-                            credentials: 'include',
-                        }
-                    );
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch inventory items');
-                    }
-
-                    const items = await response.json();
+                    const items = await api.get<InventoryItem[]>('/api/inventory-items/get-all-department');
                     set({ items: items || [], isLoading: false });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to fetch items',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                 }
@@ -84,22 +71,11 @@ export const useInventoryStore = create<InventoryStore>()(
             // Fetch item by ID
             fetchItemById: async (id: number) => {
                 try {
-                    const response = await fetch(`/api/inventory-items/${id}`, {
-                        credentials: 'include',
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch item');
-                    }
-
-                    const item = await response.json();
+                    const item = await api.get<InventoryItem>(`/api/inventory-items/${id}`);
                     return item;
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to fetch item',
+                        error: handleApiError(error),
                     });
                     return null;
                 }
@@ -110,23 +86,7 @@ export const useInventoryStore = create<InventoryStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/inventory-items', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify(item),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to create item'
-                        );
-                    }
-
-                    const newItem = await response.json();
+                    const newItem = await api.post<InventoryItem>('/api/inventory-items', item);
 
                     set((state) => ({
                         items: [...state.items, newItem],
@@ -136,10 +96,7 @@ export const useInventoryStore = create<InventoryStore>()(
                     return newItem;
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to create item',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;
@@ -151,23 +108,7 @@ export const useInventoryStore = create<InventoryStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/inventory-items', {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify(item),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to update item'
-                        );
-                    }
-
-                    const updatedItem = await response.json();
+                    const updatedItem = await api.put<InventoryItem>('/api/inventory-items', item);
 
                     set((state) => ({
                         items: state.items.map((item) =>
@@ -179,10 +120,7 @@ export const useInventoryStore = create<InventoryStore>()(
                     return updatedItem;
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to update item',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;
@@ -194,21 +132,7 @@ export const useInventoryStore = create<InventoryStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/inventory-items', {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ id }),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to delete item'
-                        );
-                    }
+                    await api.delete('/api/inventory-items', { data: { id } });
 
                     set((state) => ({
                         items: state.items.filter((item) => item.id !== id),
@@ -216,10 +140,7 @@ export const useInventoryStore = create<InventoryStore>()(
                     }));
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to delete item',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;

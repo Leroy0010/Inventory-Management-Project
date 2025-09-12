@@ -17,9 +17,9 @@ export interface User {
     lastName: string;
     fullName: string;
     role: Role;
-    office: OfficeResponseDto;
+    office?: OfficeResponseDto;
     department?: Department;
-    // active: boolean;
+    active?: boolean;
 }
 
 export interface Role {

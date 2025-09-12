@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { DatePicker } from '@/components/ui/date-picker';
+import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { Filter, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
@@ -69,6 +70,12 @@ export default function TransactionReportFilters({
 
     // Get inventory items for dropdown
     const { itemsQuery } = useInventoryItemQueries();
+
+    // Convert items to combobox options
+    const itemOptions: ComboboxOption[] = itemsQuery.data?.map((item) => ({
+        value: item.id.toString(),
+        label: item.name,
+    })) || [];
 
     const {
         register,
@@ -139,7 +146,8 @@ export default function TransactionReportFilters({
                         {/* Item Selection */}
                         <div className="space-y-2">
                             <Label htmlFor="itemId">Item</Label>
-                            <Select
+                            <Combobox
+                                options={itemOptions}
                                 value={watchedValues.itemId?.toString() || ''}
                                 onValueChange={(value) =>
                                     setValue(
@@ -147,21 +155,11 @@ export default function TransactionReportFilters({
                                         value ? parseInt(value) : undefined
                                     )
                                 }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select item" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {itemsQuery.data?.map((item) => (
-                                        <SelectItem
-                                            key={item.id}
-                                            value={item.id.toString()}
-                                        >
-                                            {item.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                placeholder="Select item"
+                                searchPlaceholder="Search items..."
+                                emptyText="No items found"
+                                width="w-full"
+                            />
                             {errors.itemId && (
                                 <p className="text-sm text-red-600">
                                     {errors.itemId.message}

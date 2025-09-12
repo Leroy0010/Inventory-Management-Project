@@ -42,7 +42,7 @@ export default function InventoryItems() {
     const { itemsQuery, deleteItemMutation } = useInventoryItemQueries();
 
     // Determine if user is storekeeper
-    const isStorekeeper = user?.role.name === 'STOREKEEPER';
+    const isStorekeeper = user?.role === 'STOREKEEPER';
 
     // Filter items based on search term
     const filteredItems = useMemo(() => {

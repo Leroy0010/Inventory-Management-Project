@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { api, handleApiError } from '@/api/client';
 import type { Department } from '@/types/department';
 
 export interface DepartmentState {
@@ -38,22 +39,11 @@ export const useDepartmentStore = create<DepartmentStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/departments', {
-                        credentials: 'include',
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch departments');
-                    }
-
-                    const departments = await response.json();
+                    const departments = await api.get<Department[]>('/api/departments');
                     set({ departments: departments || [], isLoading: false });
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to fetch departments',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                 }
@@ -64,23 +54,7 @@ export const useDepartmentStore = create<DepartmentStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch('/api/departments', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ name }),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to create department'
-                        );
-                    }
-
-                    const newDepartment = await response.json();
+                    const newDepartment = await api.post<Department>('/api/departments', { name });
 
                     set((state) => ({
                         departments: [...state.departments, newDepartment],
@@ -90,10 +64,7 @@ export const useDepartmentStore = create<DepartmentStore>()(
                     return newDepartment;
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to create department',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;
@@ -105,23 +76,7 @@ export const useDepartmentStore = create<DepartmentStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch(`/api/departments/${id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({ name }),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to update department'
-                        );
-                    }
-
-                    const updatedDepartment = await response.json();
+                    const updatedDepartment = await api.put<Department>(`/api/departments/${id}`, { name });
 
                     set((state) => ({
                         departments: state.departments.map((dept) =>
@@ -135,10 +90,7 @@ export const useDepartmentStore = create<DepartmentStore>()(
                     return updatedDepartment;
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to update department',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;
@@ -150,17 +102,7 @@ export const useDepartmentStore = create<DepartmentStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const response = await fetch(`/api/departments/${id}`, {
-                        method: 'DELETE',
-                        credentials: 'include',
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(
-                            errorData.message || 'Failed to delete department'
-                        );
-                    }
+                    await api.delete(`/api/departments/${id}`);
 
                     set((state) => ({
                         departments: state.departments.filter(
@@ -170,10 +112,7 @@ export const useDepartmentStore = create<DepartmentStore>()(
                     }));
                 } catch (error) {
                     set({
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : 'Failed to delete department',
+                        error: handleApiError(error),
                         isLoading: false,
                     });
                     throw error;

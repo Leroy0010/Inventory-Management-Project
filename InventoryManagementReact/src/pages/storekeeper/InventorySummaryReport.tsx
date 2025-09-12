@@ -22,9 +22,7 @@ import {
     BarChart3,
     Download,
     Filter,
-    Calendar,
     TrendingUp,
-    TrendingDown,
     Package,
     AlertTriangle,
     CheckCircle,
@@ -563,9 +561,10 @@ export default function InventorySummaryReport() {
                                                             : 'bg-green-500'
                                                 }`}
                                                 style={{
-                                                    width: `${getStockLevelPercentage(item.currentStock, item.maxStock)}%`,
-                                                }}
-                                            ></div>
+                                                    '--progress-width': `${getStockLevelPercentage(item.currentStock, item.maxStock)}%`,
+                                                    width: 'var(--progress-width)',
+                                                } as React.CSSProperties}
+                                            />
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-1">
                                             {getStockLevelPercentage(

@@ -34,7 +34,7 @@ import {
     Camera,
 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/stores/authStore';
 
 const profileSchema = z.object({
     firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -50,7 +50,7 @@ type ProfileForm = z.infer<typeof profileSchema>;
 
 export default function Profile() {
     const { hasPermission } = usePermissions();
-    const { user } = useAuth();
+    const { user } = useAuthStore();
     const [isEditing, setIsEditing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [profileData, setProfileData] = useState({
