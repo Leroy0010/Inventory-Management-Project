@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Dialog,
     DialogContent,
@@ -16,6 +17,7 @@ import {
     Package,
     CheckCircle2,
     AlertTriangle,
+    ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { InventoryItemResponseDto } from '@/types/inventoryItem';
@@ -41,6 +43,7 @@ export default function InventoryItemDetails({
     onAddToCart,
 }: InventoryItemDetailsProps) {
     const [isInCart, setIsInCart] = useState(false);
+    const navigate = useNavigate();
 
     if (!item) return null;
 
@@ -64,6 +67,13 @@ export default function InventoryItemDetails({
         if (onDelete) {
             onDelete(item);
         }
+    };
+
+    const handleViewFullScreen = () => {
+        // Close the modal first
+        onClose();
+        // Navigate to the full page view
+        navigate(`/inventory-items/${item.id}`);
     };
 
     return (
@@ -202,52 +212,65 @@ export default function InventoryItemDetails({
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        {isStorekeeperView ? (
-                            // Storekeeper Action Buttons
-                            <>
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                        {/* Full Screen Button - Always visible */}
+                        <Button
+                            variant="outline"
+                            onClick={handleViewFullScreen}
+                            className="flex items-center space-x-2 text-blue-600 border-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-700 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-blue-950 dark:hover:text-blue-300"
+                        >
+                            <ExternalLink className="h-4 w-4" />
+                            <span>View Full Screen</span>
+                        </Button>
+
+                        {/* Role-specific Action Buttons */}
+                        <div className="flex items-center space-x-3">
+                            {isStorekeeperView ? (
+                                // Storekeeper Action Buttons
+                                <>
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleEdit}
+                                        className="flex items-center space-x-2"
+                                    >
+                                        <Edit className="h-4 w-4" />
+                                        <span>Edit</span>
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        onClick={handleDelete}
+                                        className="flex items-center space-x-2"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        <span>Delete</span>
+                                    </Button>
+                                </>
+                            ) : (
+                                // Staff Add to Cart Button
                                 <Button
-                                    variant="outline"
-                                    onClick={handleEdit}
-                                    className="flex items-center space-x-2"
+                                    onClick={handleAddToCart}
+                                    disabled={isInCart}
+                                    className={cn(
+                                        'flex items-center space-x-2',
+                                        isInCart
+                                            ? 'bg-green-600 hover:bg-green-600 cursor-not-allowed'
+                                            : 'bg-green-500 hover:bg-green-600'
+                                    )}
                                 >
-                                    <Edit className="h-4 w-4" />
-                                    <span>Edit</span>
+                                    {isInCart ? (
+                                        <>
+                                            <CheckCircle2 className="h-4 w-4" />
+                                            <span>In Cart</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ShoppingCart className="h-4 w-4" />
+                                            <span>Add to Cart</span>
+                                        </>
+                                    )}
                                 </Button>
-                                <Button
-                                    variant="destructive"
-                                    onClick={handleDelete}
-                                    className="flex items-center space-x-2"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                    <span>Delete</span>
-                                </Button>
-                            </>
-                        ) : (
-                            // Staff Add to Cart Button
-                            <Button
-                                onClick={handleAddToCart}
-                                disabled={isInCart}
-                                className={cn(
-                                    'flex items-center space-x-2',
-                                    isInCart
-                                        ? 'bg-green-600 hover:bg-green-600 cursor-not-allowed'
-                                        : 'bg-green-500 hover:bg-green-600'
-                                )}
-                            >
-                                {isInCart ? (
-                                    <>
-                                        <CheckCircle2 className="h-4 w-4" />
-                                        <span>In Cart</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <ShoppingCart className="h-4 w-4" />
-                                        <span>Add to Cart</span>
-                                    </>
-                                )}
-                            </Button>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             </DialogContent>
