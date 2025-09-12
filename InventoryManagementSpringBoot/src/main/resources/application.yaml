@@ -1,92 +1,97 @@
 spring:
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+    profiles:
+        active: ${SPRING_PROFILES_ACTIVE:dev}
+    datasource:
+        url: ${SPRING_DATASOURCE_URL}
+        username: ${SPRING_DATASOURCE_USERNAME}
+        password: ${SPRING_DATASOURCE_PASSWORD}
+        driver-class-name: org.postgresql.Driver
 
-  liquibase:
-    change-log: classpath:/db/changelog/db.changelog-master.yaml
-    enabled: true
-  application:
-    name: InventoryManagementSpringBoot
-  devtools: # These settings are generally for local development and might not have an effect in a Dockerized production environment
-    restart:
-      enabled: true
-    livereload:
-      enabled: true
-      port: 8080
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            # For desktop apps, "urn:ietf:wg:oauth:2.0:oob" is common for out-of-band flow
-            redirect-uri: "urn:ietf:wg:oauth:2.0:oob"
-            scope:
-              - email
-              - profile
-            authorization-grant-type: authorization_code
-        provider:
-          google:
-            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
-            token-uri: https://www.googleapis.com/oauth2/v4/token
-            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
-            jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
-            user-name-attribute: email
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
+    liquibase:
+        change-log: classpath:/db/changelog/db.changelog-master.yaml
+        enabled: true
+    application:
+        name: InventoryManagementSpringBoot
+    devtools: # These settings are generally for local development and might not have an effect in a Dockerized production environment
+        restart:
             enabled: true
-            required: true
-          ssl:
-            protocols: TLSv1.2
-        test-connection: true # You might want to set this to false for production if it causes issues on startup
-  task:
-    execution:
-      pool:
-        core-size: 2
-        max-size: 10
-        queue-capacity: 100
-      thread-name-prefix: MailSender-
+        livereload:
+            enabled: true
+            port: 8080
+    security:
+        oauth2:
+            client:
+                registration:
+                    google:
+                        client-id: ${GOOGLE_CLIENT_ID}
+                        client-secret: ${GOOGLE_CLIENT_SECRET}
+                        # Web application redirect URI
+                        redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:5173/auth/callback}
+                        scope:
+                            - email
+                            - profile
+                            - openid
+                        authorization-grant-type: authorization_code
+                        client-name: Google
+                provider:
+                    google:
+                        authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+                        token-uri: https://oauth2.googleapis.com/token
+                        user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
+                        jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+                        user-name-attribute: email
+    mail:
+        host: ${MAIL_HOST:smtp.gmail.com}
+        port: ${MAIL_PORT:587}
+        username: ${MAIL_USERNAME}
+        password: ${MAIL_PASSWORD}
+        properties:
+            mail:
+                smtp:
+                    auth: ${MAIL_SMTP_AUTH:true}
+                    starttls:
+                        enabled: ${MAIL_SMTP_STARTTLS_ENABLED:true}
+                        required: ${MAIL_SMTP_STARTTLS_REQUIRED:true}
+                    ssl:
+                        protocols: ${MAIL_SMTP_SSL_PROTOCOLS:TLSv1.2}
+                test-connection: ${MAIL_TEST_CONNECTION:true} # You might want to set this to false for production if it causes issues on startup
+    task:
+        execution:
+            pool:
+                core-size: 2
+                max-size: 10
+                queue-capacity: 100
+            thread-name-prefix: MailSender-
 
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: 86400000  # 24 hours in milliseconds
-  refresh:
-    expiration: 604800000  # 7 days in milliseconds
-    max-tokens-per-user: 5
-  cookie:
-    name: jwt
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
     refresh:
-      name: refreshToken
-    domain: ""
-    path: /
-    secure: true
-    http-only: true
-    same-site: Strict
+        expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days in milliseconds
+        max-tokens-per-user: ${JWT_MAX_TOKENS_PER_USER:5}
+    cookie:
+        name: ${JWT_COOKIE_NAME:jwt}
+        refresh:
+            name: ${JWT_REFRESH_COOKIE_NAME:refreshToken}
+        domain: ${JWT_COOKIE_DOMAIN:}
+        path: ${JWT_COOKIE_PATH:/}
+        secure: ${JWT_COOKIE_SECURE:true}
+        http-only: ${JWT_COOKIE_HTTP_ONLY:true}
+        same-site: ${JWT_COOKIE_SAME_SITE:Strict}
 
 server:
-  servlet:
-    session:
-      cookie:
-        same-site: LAX
-        # IMPORTANT: For Render (HTTPS), this should be 'true' in production.
-        # You can either set it here and remember to change it, or use an env var.
-        # Let's set it to true for Render's HTTPS environment.
-        secure: true
+    port: ${SERVER_PORT:8080}
+    servlet:
+        session:
+            cookie:
+                same-site: LAX
+                # IMPORTANT: For Render (HTTPS), this should be 'true' in production.
+                # You can either set it here and remember to change it, or use an env var.
+                # Let's set it to true for Render's HTTPS environment.
+                secure: ${COOKIE_SECURE:true}
 
 app:
-  frontend:
-    # This will be the public URL of your Spring Boot backend on Render,
-    # as your JavaFX app will interact directly with your backend's public endpoint.
-    base-url: ${FRONTEND_BASE_URL}
+    frontend:
+        # This will be the public URL of your Spring Boot backend on Render,
+        # as your JavaFX app will interact directly with your backend's public endpoint.
+        base-url: ${FRONTEND_BASE_URL}

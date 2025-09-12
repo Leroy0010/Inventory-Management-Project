@@ -126,7 +126,16 @@ public class RefreshTokenService {
     @Scheduled(fixedRate = 3600000) // Run every hour
     @Transactional
     public void cleanupExpiredTokens() {
-        int deletedCount = refreshTokenRepository.deleteExpiredTokens(LocalDateTime.now());
+        // Count tokens before deletion
+        long countBefore = refreshTokenRepository.count();
+        
+        // Delete expired tokens
+        refreshTokenRepository.deleteExpiredTokens(LocalDateTime.now());
+        
+        // Count tokens after deletion
+        long countAfter = refreshTokenRepository.count();
+        long deletedCount = countBefore - countAfter;
+        
         if (deletedCount > 0) {
             logger.info("Cleaned up {} expired refresh tokens", deletedCount);
         }

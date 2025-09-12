@@ -1,46 +1,54 @@
 # No 'version' field needed anymore for modern Compose Specification
-services:
-  backend:
-    # Instead of 'image', we use 'build' to tell Docker Compose to build an image from your Dockerfile
-    build: . # This tells Docker Compose to look for a Dockerfile in the current directory (your project root)
-    develop:
-      watch:
-        - action: rebuild
-          path: ./src
-          target: /app/src
-        - action: sync
-          path: ./target
-          target: /app/target
-    ports:
-      - "8080:8080" # Maps port 8080 on your host to port 8080 in the container
-    environment:
-      # Spring Boot database connection properties (adjust as per your needs)
-      # These tell your Spring Boot app how to connect to the 'database' service
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/InventoryManagementDB
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: leroy001
-      SPRING_JPA_HIBERNATE_DDL_AUTO: none # Or 'create', 'create-drop' etc.
-    depends_on:
-      - database # Ensures the 'database' service starts before the 'backend' service
-    # Optional: volume for live reloading with Spring Boot DevTools (advanced, but useful)
-    # volumes:
-    #   - .:/app
-    #   - /app/target
-    #   - /root/.m2
+# Load environment variables from docker-compose.env file
+# Run: cp docker-compose.env .env and update with your values
 
-  database:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: InventoryManagementDB
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: leroy001
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
+services:
+    backend:
+        # Instead of 'image', we use 'build' to tell Docker Compose to build an image from your Dockerfile
+        build: . # This tells Docker Compose to look for a Dockerfile in the current directory (your project root)
+        develop:
+            watch:
+                - action: rebuild
+                  path: ./src
+                  target: /app/src
+                - action: sync
+                  path: ./target
+                  target: /app/target
+        ports:
+            - "8080:8080" # Maps port 8080 on your host to port 8080 in the container
+        environment:
+            # Spring Boot database connection properties (adjust as per your needs)
+            # These tell your Spring Boot app how to connect to the 'database' service
+            SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://database:5432/InventoryManagementDB}
+            SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+            SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgres}
+            SPRING_JPA_HIBERNATE_DDL_AUTO: none # Or 'create', 'create-drop' etc.
+            JWT_SECRET: ${JWT_SECRET}
+            GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+            GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+            MAIL_USERNAME: ${MAIL_USERNAME}
+            MAIL_PASSWORD: ${MAIL_PASSWORD}
+            FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:5173}
+        depends_on:
+            - database # Ensures the 'database' service starts before the 'backend' service
+        # Optional: volume for live reloading with Spring Boot DevTools (advanced, but useful)
+        # volumes:
+        #   - .:/app
+        #   - /app/target
+        #   - /root/.m2
+
+    database:
+        image: postgres:16-alpine
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB:-InventoryManagementDB}
+            POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+        ports:
+            - "5432:5432"
+        volumes:
+            - db_data:/var/lib/postgresql/data
 
 volumes:
-  db_data: # Define the volume for persistent database data
-
+    db_data: # Define the volume for persistent database data
 
 #  docker exec -it inventorymanagementspringboot-database-1 psql -U postgres -d InventoryManagementDB

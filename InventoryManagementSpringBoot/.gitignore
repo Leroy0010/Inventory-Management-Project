@@ -1,6 +1,11 @@
 HELP.md
 target/
 .env
+.env.local
+.env.production
+.env.staging
+*.env
+environment.local
 
 !**/src/main/**/target/
 !**/src/test/**/target/
