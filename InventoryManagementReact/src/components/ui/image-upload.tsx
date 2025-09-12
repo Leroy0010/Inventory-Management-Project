@@ -11,6 +11,7 @@ import {
     RotateCcw,
     ZoomIn,
     Download,
+    CheckCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +19,9 @@ export interface ImageUploadProps {
     value?: File | string | null;
     onChange: (file: File | null) => void;
     onError?: (error: string) => void;
+    onUploadStart?: () => void;
+    onUploadComplete?: (file: File) => void;
+    onUploadError?: (error: string) => void;
     maxSize?: number; // in MB
     acceptedTypes?: string[];
     multiple?: boolean;
@@ -28,6 +32,8 @@ export interface ImageUploadProps {
     showPreview?: boolean;
     showProgress?: boolean;
     maxFiles?: number;
+    simulateUpload?: boolean; // Enable/disable upload simulation
+    uploadFailureRate?: number; // Percentage chance of upload failure (0-1)
 }
 
 const DEFAULT_MAX_SIZE = 5; // 5MB
@@ -43,19 +49,23 @@ export function ImageUpload({
     value,
     onChange,
     onError,
+    onUploadStart,
+    onUploadComplete,
+    onUploadError,
     maxSize = DEFAULT_MAX_SIZE,
     acceptedTypes = DEFAULT_ACCEPTED_TYPES,
-    multiple = false,
     disabled = false,
     className,
     label = 'Upload Image',
     description = 'Drag and drop an image here, or click to select',
     showPreview = true,
     showProgress = true,
-    maxFiles = 1,
+    simulateUpload: enableSimulation = true,
+    uploadFailureRate = 0.05, // 5% default failure rate
 }: ImageUploadProps) {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
+    const [isUploaded, setIsUploaded] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,7 +90,7 @@ export function ImageUpload({
 
     // Handle file selection
     const handleFileSelect = useCallback(
-        (file: File) => {
+        async (file: File) => {
             const validationError = validateFile(file);
 
             if (validationError) {
@@ -90,15 +100,24 @@ export function ImageUpload({
             }
 
             setError(null);
-            onChange(file);
 
-            // Create preview
+            // Create preview immediately
             if (showPreview) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     setPreview(e.target?.result as string);
                 };
                 reader.readAsDataURL(file);
+            }
+
+            // Start upload simulation
+            const uploadSuccess = await simulateUpload(file);
+            
+            if (uploadSuccess) {
+                onChange(file);
+            } else {
+                // Clear preview on upload failure
+                setPreview(null);
             }
         },
         [validateFile, onChange, onError, showPreview]
@@ -159,23 +178,85 @@ export function ImageUpload({
         setPreview(null);
         setError(null);
         setUploadProgress(0);
+        setIsUploading(false);
+        setIsUploaded(false);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     };
 
-    // Simulate upload progress (replace with actual upload logic)
-    const simulateUpload = async (file: File) => {
-        setIsUploading(true);
-        setUploadProgress(0);
+    // Retry upload
+    const retryUpload = async () => {
+        if (value instanceof File) {
+            await handleFileSelect(value);
+        }
+    };
 
-        // Simulate progress
-        for (let i = 0; i <= 100; i += 10) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            setUploadProgress(i);
+    // Simulate upload progress with realistic timing and error handling
+    const simulateUpload = async (file: File): Promise<boolean> => {
+        if (!enableSimulation) {
+            // If simulation is disabled, just call the file immediately
+            onChange(file);
+            onUploadComplete?.(file);
+            return true;
         }
 
-        setIsUploading(false);
+        setIsUploading(true);
+        setUploadProgress(0);
+        setError(null);
+        onUploadStart?.();
+
+        try {
+            // Simulate network delay based on file size
+            const baseDelay = 200; // Base delay in ms
+            const sizeDelay = Math.min(file.size / (1024 * 1024) * 50, 1000); // Max 1s additional delay
+            const totalDelay = baseDelay + sizeDelay;
+
+            // Simulate realistic upload progress with varying speeds
+            const progressSteps = [
+                { progress: 10, delay: totalDelay * 0.1 }, // Quick start
+                { progress: 25, delay: totalDelay * 0.2 }, // Slow down
+                { progress: 45, delay: totalDelay * 0.3 }, // Steady progress
+                { progress: 70, delay: totalDelay * 0.2 }, // Speed up
+                { progress: 85, delay: totalDelay * 0.1 }, // Almost done
+                { progress: 95, delay: totalDelay * 0.05 }, // Final processing
+                { progress: 100, delay: totalDelay * 0.05 }, // Complete
+            ];
+
+            for (const step of progressSteps) {
+                await new Promise((resolve) => setTimeout(resolve, step.delay));
+                setUploadProgress(step.progress);
+            }
+
+            // Simulate upload failures based on configurable rate
+            if (Math.random() < uploadFailureRate) {
+                const errorMessages = [
+                    'Upload failed: Network timeout',
+                    'Upload failed: Server error',
+                    'Upload failed: File too large',
+                    'Upload failed: Invalid file format',
+                    'Upload failed: Connection lost'
+                ];
+                const randomError = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+                throw new Error(randomError);
+            }
+
+            // Simulate server processing time
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            
+            setIsUploading(false);
+            setIsUploaded(true);
+            onUploadComplete?.(file);
+            return true;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+            setError(errorMessage);
+            onError?.(errorMessage);
+            onUploadError?.(errorMessage);
+            setIsUploading(false);
+            setUploadProgress(0);
+            return false;
+        }
     };
 
     // Get file info
@@ -245,13 +326,25 @@ export function ImageUpload({
                                 >
                                     <X className="h-3 w-3" />
                                 </Button>
+                                {isUploaded && (
+                                    <div className="absolute -bottom-2 -right-2 bg-green-500 text-white rounded-full p-1">
+                                        <CheckCircle className="h-4 w-4" />
+                                    </div>
+                                )}
                             </div>
 
                             {fileInfo && (
                                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                                    <p className="font-medium">
-                                        {fileInfo.name}
-                                    </p>
+                                    <div className="flex items-center justify-center space-x-2 mb-2">
+                                        <p className="font-medium">
+                                            {fileInfo.name}
+                                        </p>
+                                        {isUploaded && (
+                                            <span className="text-green-600 dark:text-green-400 text-xs font-medium">
+                                                ✓ Uploaded
+                                            </span>
+                                        )}
+                                    </div>
                                     <p>
                                         {(fileInfo.size / 1024 / 1024).toFixed(
                                             2
@@ -290,19 +383,37 @@ export function ImageUpload({
                 </div>
 
                 {error && (
-                    <div className="mt-4 flex items-center space-x-2 text-sm text-red-600 dark:text-red-400">
-                        <AlertCircle className="h-4 w-4" />
-                        <span>{error}</span>
+                    <div className="mt-4 flex items-center justify-between text-sm text-red-600 dark:text-red-400">
+                        <div className="flex items-center space-x-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <span>{error}</span>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={retryUpload}
+                            className="text-red-600 hover:text-red-700"
+                        >
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            Retry
+                        </Button>
                     </div>
                 )}
 
                 {showProgress && isUploading && (
                     <div className="mt-4 space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                            <span>Uploading...</span>
-                            <span>{uploadProgress}%</span>
+                            <span className="flex items-center space-x-2">
+                                <div className="animate-spin h-3 w-3 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                                <span>Uploading...</span>
+                            </span>
+                            <span className="font-medium">{uploadProgress}%</span>
                         </div>
                         <Progress value={uploadProgress} className="h-2" />
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Please don't close this page while uploading
+                        </p>
                     </div>
                 )}
 

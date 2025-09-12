@@ -3,6 +3,7 @@ import { devtools } from 'zustand/middleware';
 import type { User } from '@/types/auth';
 import { hasPermission as checkPermission, hasAnyPermission as checkAnyPermission, hasAllPermissions as checkAllPermissions } from '@/lib/auth-utils';
 import { DEV_CONFIG } from '@/config/dev';
+import type { Permission } from '@/types/permissions';
 
 export interface AuthState {
     // User state
@@ -54,10 +55,9 @@ const initialState: AuthState = {
         email: DEV_CONFIG.DEFAULT_USER.email,
         firstName: DEV_CONFIG.DEFAULT_USER.firstName,
         lastName: DEV_CONFIG.DEFAULT_USER.lastName,
-        role: { id: 1, name: DEV_CONFIG.DEFAULT_USER.role },
+        fullName: DEV_CONFIG.DEFAULT_USER.firstName + ' ' + DEV_CONFIG.DEFAULT_USER.lastName, 
+        role: { id: 1, name: DEV_CONFIG.DEFAULT_USER.role as 'ADMIN' | 'STOREKEEPER' | 'STAFF' },
         active: DEV_CONFIG.DEFAULT_USER.isActive,
-        createdAt: DEV_CONFIG.DEFAULT_USER.createdAt,
-        updatedAt: DEV_CONFIG.DEFAULT_USER.updatedAt,
     } : null,
     isAuthenticated: DEV_CONFIG.BYPASS_AUTH,
     isLoading: false,
@@ -133,6 +133,7 @@ export const useAuthStore = create<AuthStore>()(
                     email: 'test@example.com',
                     firstName: 'Test',
                     lastName: 'User',
+                    fullName: 'Test User',
                     role: { id: 1, name: 'STAFF' },
                     active: true,
                 };
@@ -158,17 +159,17 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             // Permission methods
-            hasPermission: (permission: string) => {
+            hasPermission: (permission: Permission) => {
                 const state = get();
                 return checkPermission(permission, state.user);
             },
 
-            hasAnyPermission: (permissions: string[]) => {
+            hasAnyPermission: (permissions: Permission[]) => {
                 const state = get();
                 return checkAnyPermission(permissions, state.user);
             },
 
-            hasAllPermissions: (permissions: string[]) => {
+            hasAllPermissions: (permissions: Permission[]) => {
                 const state = get();
                 return checkAllPermissions(permissions, state.user);
             },

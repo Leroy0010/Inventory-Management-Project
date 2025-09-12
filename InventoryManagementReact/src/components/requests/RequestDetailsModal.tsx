@@ -1,4 +1,3 @@
-import React from 'react';
 import {
     Dialog,
     DialogContent,
@@ -22,10 +21,7 @@ import {
     CheckCircle, 
     XCircle, 
     Clock, 
-    Package, 
-    User, 
-    Calendar,
-    RefreshCw 
+    Package
 } from 'lucide-react';
 import type { RequestResponseDto, RequestStatus } from '@/types/request';
 

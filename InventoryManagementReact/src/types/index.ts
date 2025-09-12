@@ -1,103 +1,5 @@
-// User and Authentication Types
-export interface User {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: UserRole;
-    avatar?: string;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export const UserRole = {
-    ADMIN: 'ADMIN',
-    STAFF: 'STAFF',
-    STOREKEEPER: 'STOREKEEPER',
-} as const;
-
-export type UserRole = (typeof UserRole)[keyof typeof UserRole];
-
-export interface AuthState {
-    user: User | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    permissions: Permission[];
-}
-
-// Permission System
-export const Permission = {
-    // Dashboard
-    VIEW_DASHBOARD: 'VIEW_DASHBOARD',
-
-    // Department Management (Admin only)
-    VIEW_DEPARTMENTS: 'VIEW_DEPARTMENTS',
-    ADD_DEPARTMENT: 'ADD_DEPARTMENT',
-    EDIT_DEPARTMENT: 'EDIT_DEPARTMENT',
-    DELETE_DEPARTMENT: 'DELETE_DEPARTMENT',
-
-    // Staff Management
-    VIEW_STAFF: 'VIEW_STAFF',
-    ADD_STAFF: 'ADD_STAFF',
-    EDIT_STAFF: 'EDIT_STAFF',
-    DELETE_STAFF: 'DELETE_STAFF',
-    ADD_STOREKEEPER: 'ADD_STOREKEEPER',
-
-    // Inventory Management
-    VIEW_INVENTORY: 'VIEW_INVENTORY',
-    ADD_INVENTORY: 'ADD_INVENTORY',
-    EDIT_INVENTORY: 'EDIT_INVENTORY',
-    DELETE_INVENTORY: 'DELETE_INVENTORY',
-
-    // Office Management
-    VIEW_OFFICE: 'VIEW_OFFICE',
-    ADD_OFFICE: 'ADD_OFFICE',
-    EDIT_OFFICE: 'EDIT_OFFICE',
-    DELETE_OFFICE: 'DELETE_OFFICE',
-
-    // Batch Management
-    VIEW_BATCH: 'VIEW_BATCH',
-    ADD_BATCH: 'ADD_BATCH',
-    EDIT_BATCH: 'EDIT_BATCH',
-    DELETE_BATCH: 'DELETE_BATCH',
-
-    // Requests
-    VIEW_REQUESTS: 'VIEW_REQUESTS',
-    APPROVE_REQUESTS: 'APPROVE_REQUESTS',
-    REJECT_REQUESTS: 'REJECT_REQUESTS',
-    MANAGE_REQUESTS: 'MANAGE_REQUESTS',
-
-    // Cart (Staff specific)
-    VIEW_CART: 'VIEW_CART',
-    ADD_TO_CART: 'ADD_TO_CART',
-    REMOVE_FROM_CART: 'REMOVE_FROM_CART',
-    CHECKOUT_CART: 'CHECKOUT_CART',
-
-    // Notifications
-    VIEW_NOTIFICATIONS: 'VIEW_NOTIFICATIONS',
-    SEND_MESSAGES: 'SEND_MESSAGES',
-    SEND_GENERAL_NOTIFICATION: 'SEND_GENERAL_NOTIFICATION',
-
-    // Reports (Storekeeper specific)
-    VIEW_REPORTS: 'VIEW_REPORTS',
-    VIEW_TRANSACTION_REPORTS: 'VIEW_TRANSACTION_REPORTS',
-    VIEW_USER_REPORTS: 'VIEW_USER_REPORTS',
-    VIEW_INVENTORY_SUMMARY_REPORTS: 'VIEW_INVENTORY_SUMMARY_REPORTS',
-    EXPORT_REPORTS: 'EXPORT_REPORTS',
-
-    // Profile and Common
-    VIEW_PROFILE: 'VIEW_PROFILE',
-    EDIT_PROFILE: 'EDIT_PROFILE',
-    VIEW_REQUEST_DETAILS: 'VIEW_REQUEST_DETAILS',
-    VIEW_INVENTORY_ITEM_DETAILS: 'VIEW_INVENTORY_ITEM_DETAILS',
-
-    // Settings
-    VIEW_SETTINGS: 'VIEW_SETTINGS',
-    EDIT_SETTINGS: 'EDIT_SETTINGS',
-} as const;
-
-export type Permission = (typeof Permission)[keyof typeof Permission];
+// Re-export types from auth.ts for convenience
+export type { User, Role } from './auth';
 
 // Inventory Types
 export interface InventoryItem {
@@ -138,7 +40,7 @@ export interface Staff {
     department: string;
     position: string;
     officeId: string;
-    role: UserRole;
+    role: string;
     isActive: boolean;
     hireDate: string;
     createdAt: string;
@@ -288,5 +190,5 @@ export interface RegisterForm {
     email: string;
     password: string;
     confirmPassword: string;
-    role: UserRole;
+    role: string;
 }

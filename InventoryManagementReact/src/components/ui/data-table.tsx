@@ -9,8 +9,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { LoadingSpinner } from '@/components/ui/progress';
+import { Skeleton, SkeletonTable } from '@/components/ui/skeleton';
 import {
     Select,
     SelectContent,

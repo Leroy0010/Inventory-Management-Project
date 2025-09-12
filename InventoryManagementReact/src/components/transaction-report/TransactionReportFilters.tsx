@@ -12,11 +12,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { Filter, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
 import type {
     TransactionReportRequest,
@@ -78,7 +76,6 @@ export default function TransactionReportFilters({
     })) || [];
 
     const {
-        register,
         handleSubmit,
         formState: { errors },
         setValue,

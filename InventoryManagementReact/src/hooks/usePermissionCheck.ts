@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/stores/authStore';
-import type { Permission } from '@/types';
+import type { Permission } from '@/types/permissions';
 
 // Hook for conditional rendering based on permissions
 export function usePermissionCheck() {

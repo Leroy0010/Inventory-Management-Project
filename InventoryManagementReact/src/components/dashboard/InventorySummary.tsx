@@ -2,14 +2,11 @@ import React from 'react';
 import {
     Card,
     CardContent,
-    CardDescription,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
 import { SkeletonCard } from '@/components/ui/skeleton';
-import { LoadingOverlay } from '@/components/ui/progress';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
-import { useInventoryBalanceQueries } from '@/hooks/queries/useInventoryBalance';
 import { Package, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -19,7 +16,6 @@ interface InventorySummaryProps {
 
 export function InventorySummary({ className }: InventorySummaryProps) {
     const { itemsQuery } = useInventoryItemQueries();
-    const { balanceQuery } = useInventoryBalanceQueries();
 
     // Calculate summary statistics
     const summary = React.useMemo(() => {
@@ -29,14 +25,10 @@ export function InventorySummary({ className }: InventorySummaryProps) {
         const lowStockItems = itemsQuery.data.filter(
             (item) => item.reorderLevel <= 10
         ).length;
-        const departments = new Set(
-            itemsQuery.data.map((item) => item.department.name)
-        ).size;
 
         return {
             totalItems,
             lowStockItems,
-            departments,
             lowStockPercentage:
                 totalItems > 0
                     ? Math.round((lowStockItems / totalItems) * 100)
@@ -90,7 +82,7 @@ export function InventorySummary({ className }: InventorySummaryProps) {
                             {summary.totalItems}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            Across {summary.departments} departments
+                            Total inventory items
                         </p>
                     </CardContent>
                 </Card>
@@ -113,23 +105,6 @@ export function InventorySummary({ className }: InventorySummaryProps) {
                     </CardContent>
                 </Card>
 
-                {/* Departments */}
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Departments
-                        </CardTitle>
-                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {summary.departments}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            Active departments
-                        </p>
-                    </CardContent>
-                </Card>
 
                 {/* Stock Status */}
                 <Card>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePermissionCheck } from '@/hooks/usePermissionCheck';
 import type { SearchContextType } from '@/hooks/useSerach';
 import { SearchContext } from '@/hooks/useSerach';
-import type { Permission } from '@/types';
+import type { Permission } from '@/types/permissions';
 
 // Search result types
 export interface SearchResult {

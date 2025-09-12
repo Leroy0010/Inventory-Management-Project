@@ -1,8 +1,81 @@
-import { UserRole, Permission } from '@/types';
+// Permission System Types
+export const Permission = {
+    // Dashboard
+    VIEW_DASHBOARD: 'VIEW_DASHBOARD',
+
+    // Department Management (Admin only)
+    VIEW_DEPARTMENTS: 'VIEW_DEPARTMENTS',
+    ADD_DEPARTMENT: 'ADD_DEPARTMENT',
+    EDIT_DEPARTMENT: 'EDIT_DEPARTMENT',
+    DELETE_DEPARTMENT: 'DELETE_DEPARTMENT',
+
+    // Staff Management
+    VIEW_STAFF: 'VIEW_STAFF',
+    ADD_STAFF: 'ADD_STAFF',
+    EDIT_STAFF: 'EDIT_STAFF',
+    DELETE_STAFF: 'DELETE_STAFF',
+    ADD_STOREKEEPER: 'ADD_STOREKEEPER',
+
+    // Inventory Management
+    VIEW_INVENTORY: 'VIEW_INVENTORY',
+    ADD_INVENTORY: 'ADD_INVENTORY',
+    EDIT_INVENTORY: 'EDIT_INVENTORY',
+    DELETE_INVENTORY: 'DELETE_INVENTORY',
+
+    // Office Management
+    VIEW_OFFICE: 'VIEW_OFFICE',
+    ADD_OFFICE: 'ADD_OFFICE',
+    EDIT_OFFICE: 'EDIT_OFFICE',
+    DELETE_OFFICE: 'DELETE_OFFICE',
+
+    // Batch Management
+    VIEW_BATCH: 'VIEW_BATCH',
+    ADD_BATCH: 'ADD_BATCH',
+    EDIT_BATCH: 'EDIT_BATCH',
+    DELETE_BATCH: 'DELETE_BATCH',
+
+    // Requests
+    VIEW_REQUESTS: 'VIEW_REQUESTS',
+    APPROVE_REQUESTS: 'APPROVE_REQUESTS',
+    REJECT_REQUESTS: 'REJECT_REQUESTS',
+    MANAGE_REQUESTS: 'MANAGE_REQUESTS',
+    FULFIL_REQUESTS: 'FULFIL_REQUESTS',
+
+    // Cart (Staff specific)
+    VIEW_CART: 'VIEW_CART',
+    ADD_TO_CART: 'ADD_TO_CART',
+    REMOVE_FROM_CART: 'REMOVE_FROM_CART',
+    CHECKOUT_CART: 'CHECKOUT_CART',
+
+    // Notifications
+    VIEW_NOTIFICATIONS: 'VIEW_NOTIFICATIONS',
+    SEND_MESSAGES: 'SEND_MESSAGES',
+    SEND_GENERAL_NOTIFICATION: 'SEND_GENERAL_NOTIFICATION',
+
+    // Reports (Storekeeper specific)
+    VIEW_REPORTS: 'VIEW_REPORTS',
+    VIEW_TRANSACTION_REPORTS: 'VIEW_TRANSACTION_REPORTS',
+    VIEW_USER_REPORTS: 'VIEW_USER_REPORTS',
+    VIEW_INVENTORY_SUMMARY_REPORTS: 'VIEW_INVENTORY_SUMMARY_REPORTS',
+    EXPORT_REPORTS: 'EXPORT_REPORTS',
+    VIEW_ACTIVITY_REPORTS: 'VIEW_ACTIVITY_REPORTS',
+
+    // Profile and Common
+    VIEW_PROFILE: 'VIEW_PROFILE',
+    EDIT_PROFILE: 'EDIT_PROFILE',
+    VIEW_REQUEST_DETAILS: 'VIEW_REQUEST_DETAILS',
+    VIEW_INVENTORY_ITEM_DETAILS: 'VIEW_INVENTORY_ITEM_DETAILS',
+
+    // Settings
+    VIEW_SETTINGS: 'VIEW_SETTINGS',
+    EDIT_SETTINGS: 'EDIT_SETTINGS',
+} as const;
+
+export type Permission = (typeof Permission)[keyof typeof Permission];
 
 // Role-based permissions mapping
-export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-    [UserRole.ADMIN]: [
+export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
+    'ADMIN': [
         // Dashboard
         Permission.VIEW_DASHBOARD,
 
@@ -14,7 +87,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
         Permission.VIEW_SETTINGS,
         Permission.EDIT_SETTINGS,
 
-        // Admin-specific pages (to be implemented)
+        // Admin-specific pages
         Permission.VIEW_DEPARTMENTS,
         Permission.ADD_DEPARTMENT,
         Permission.EDIT_DEPARTMENT,
@@ -22,7 +95,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
         Permission.ADD_STOREKEEPER,
         Permission.SEND_GENERAL_NOTIFICATION,
     ],
-    [UserRole.STAFF]: [
+    'STAFF': [
         // Dashboard
         Permission.VIEW_DASHBOARD,
 
@@ -43,7 +116,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
         Permission.VIEW_REQUESTS,
         Permission.VIEW_REQUEST_DETAILS,
     ],
-    [UserRole.STOREKEEPER]: [
+    'STOREKEEPER': [
         // Dashboard
         Permission.VIEW_DASHBOARD,
 
@@ -87,6 +160,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
         Permission.VIEW_TRANSACTION_REPORTS,
         Permission.VIEW_USER_REPORTS,
         Permission.VIEW_INVENTORY_SUMMARY_REPORTS,
+        Permission.VIEW_ACTIVITY_REPORTS,
+
         Permission.EXPORT_REPORTS,
     ],
 };

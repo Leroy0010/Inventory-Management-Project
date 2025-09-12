@@ -19,5 +19,12 @@ export default tseslint.config([
             ecmaVersion: 2020,
             globals: globals.browser,
         },
+
+        rules: {
+            'no-unused-vars': 'off', // Disables the base ESLint rule for unused variables
+            '@typescript-eslint/no-unused-vars': 'off',
+            '@typescript-eslint/no-unused-imports': 'off', // Disable unused imports warnings
+            'react-hooks/exhaustive-deps': 'warn', // Keep this as warning instead of error
+        },
     },
 ]);

@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { officeApi } from '@/api/office';
 import { toast } from 'sonner';
 import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
-import type { CreateOfficeDto } from '@/types/office';
 
 // Query keys for office operations
 export const officeKeys = {

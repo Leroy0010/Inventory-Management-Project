@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +23,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
-    User,
     Mail,
     Phone,
     Building2,
@@ -91,10 +90,10 @@ export default function Profile() {
                 department: 'IT Department',
                 office: 'Main Office',
                 bio: 'Experienced professional with expertise in inventory management and system administration.',
-                avatar: user.avatar || '',
-                role: user.role || 'STAFF',
+                role: user.role.name || 'STAFF',
                 joinDate: '2024-01-15',
                 lastLogin: '2024-01-20T14:30:00Z',
+                avatar: ""
             };
 
             setProfileData(mockProfileData);

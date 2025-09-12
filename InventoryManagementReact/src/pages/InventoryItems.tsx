@@ -28,6 +28,7 @@ import InventoryItemDetails from '@/components/modals/InventoryItemDetails';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 
+
 type ViewMode = 'grid' | 'list';
 
 export default function InventoryItems() {
@@ -42,7 +43,7 @@ export default function InventoryItems() {
     const { itemsQuery, deleteItemMutation } = useInventoryItemQueries();
 
     // Determine if user is storekeeper
-    const isStorekeeper = user?.role === 'STOREKEEPER';
+    const isStorekeeper = user?.role.name === "STOREKEEPER";
 
     // Filter items based on search term
     const filteredItems = useMemo(() => {

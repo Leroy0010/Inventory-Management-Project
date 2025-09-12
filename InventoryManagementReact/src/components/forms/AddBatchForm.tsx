@@ -3,7 +3,6 @@ import { Card, CardContent } from '../ui/card';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { cn } from '@/lib/utils';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
 import { useBatchQueries } from '@/hooks/queries/useBatch';
 import { toast } from 'sonner';

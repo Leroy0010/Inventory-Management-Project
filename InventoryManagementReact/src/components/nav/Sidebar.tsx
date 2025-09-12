@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissionCheck } from '@/hooks/usePermissionCheck';
 import { useResponsive } from '@/hooks/useResponsive';
+import type { Permission } from '@/types/permissions';
 import {
     LayoutDashboard,
     Users,
@@ -31,14 +32,14 @@ interface NavItem {
     to: string;
     label: string;
     icon: React.ComponentType<{ className?: string }>;
-    permissions?: string[];
+    permissions?: Permission[];
 }
 
 interface NavGroup {
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     items: NavItem[];
-    permissions?: string[];
+    permissions?: Permission[];
 }
 
 const navGroups: NavGroup[] = [
@@ -141,7 +142,7 @@ export function Sidebar({
 
     const renderNavItem = (item: NavItem) => {
         const hasPermission =
-            !item.permissions || canAccess(item.permissions as []);
+            !item.permissions || canAccess(item.permissions);
         if (!hasPermission) return null;
 
         const handleItemClick = () => {
@@ -313,7 +314,7 @@ export function Sidebar({
                                 {user?.firstName} {user?.lastName}
                             </p>
                             <p className="text-xs text-slate-400 truncate">
-                                {user?.role}
+                                {user?.role.name}
                             </p>
                         </div>
                     </div>

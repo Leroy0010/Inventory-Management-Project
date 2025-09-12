@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { Permission } from '@/types';
+import { Permission } from '@/types/permissions';
 
 
 // Lazy load pages for better performance
@@ -23,7 +23,6 @@ const AddDepartment = React.lazy(() => import('@/pages/admin/AddDepartment'));
 
 // Staff pages
 const StaffDashboard = React.lazy(() => import('@/pages/Dashboard'));
-// const StaffInventoryItems = React.lazy(() => import('@/pages/InventoryItems'));
 const StaffCart = React.lazy(() => import('@/pages/staff/Cart'));
 const StaffRequests = React.lazy(() => import('@/pages/staff/MyRequests'));
 
@@ -31,7 +30,6 @@ const StaffRequests = React.lazy(() => import('@/pages/staff/MyRequests'));
 const StorekeeperDashboard = React.lazy(() => import('@/pages/Dashboard'));
 const Staff = React.lazy(() => import('@/pages/storekeeper/Staff'));
 const AddStaff = React.lazy(() => import('@/pages/storekeeper/AddStaff'));
-// const Inventory = React.lazy(() => import('@/pages/Inventory'));
 const AddInventory = React.lazy(
     () => import('@/pages/storekeeper/AddInventory')
 );
@@ -162,18 +160,6 @@ const router = createBrowserRouter([
                     </Suspense>
                 ),
             },
-            // {
-            //     path: 'staff-inventory-items',
-            //     element: (
-            //         <Suspense fallback={<PageLoader />}>
-            //             <ProtectedRoute
-            //                 requiredPermissions={[Permission.VIEW_INVENTORY]}
-            //             >
-            //                 <StaffInventoryItems />
-            //             </ProtectedRoute>
-            //         </Suspense>
-            //     ),
-            // },
             {
                 path: 'cart',
                 element: (
@@ -236,18 +222,6 @@ const router = createBrowserRouter([
                     </Suspense>
                 ),
             },
-            // {
-            //     path: 'inventory',
-            //     element: (
-            //         <Suspense fallback={<PageLoader />}>
-            //             <ProtectedRoute
-            //                 requiredPermissions={[Permission.VIEW_INVENTORY]}
-            //             >
-            //                 <Inventory />
-            //             </ProtectedRoute>
-            //         </Suspense>
-            //     ),
-            // },
             {
                 path: 'inventory/add',
                 element: (

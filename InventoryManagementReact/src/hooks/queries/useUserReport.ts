@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, } from '@tanstack/react-query';
 import { userReportApi } from '@/api/userReport';
 import { toast } from 'sonner';
 import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
-import type { UserReportRequest, UserReportFilters } from '@/types/userReport';
+import type {  UserReportFilters } from '@/types/userReport';
 
 // Query keys for user report operations
 export const userReportKeys = {
@@ -15,7 +15,6 @@ export const userReportKeys = {
 
 // User Report queries and mutations
 export const useUserReportQueries = () => {
-    const queryClient = useQueryClient();
 
     // Get user report for specific user (existing Spring Boot implementation)
     const getUserReportMutation = useMutation({

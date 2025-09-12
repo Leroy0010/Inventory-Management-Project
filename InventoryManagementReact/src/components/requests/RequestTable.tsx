@@ -13,6 +13,7 @@ import { Eye, CheckCircle, XCircle, Clock, User, Package } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import type { RequestResponseDto, RequestStatus } from '@/types/request';
 import type { Role } from '@/types/auth';
+import { Permission } from '@/types/permissions';
 import { formatDate, getStatusBadgeVariant } from '@/lib/request-utils';
 
 interface RequestTableProps {
@@ -73,7 +74,7 @@ export default function RequestTable({
 
         // Role-specific action buttons
         if (userRole === 'STOREKEEPER' && request.status === 'PENDING') {
-            if (hasPermission('APPROVE_REQUESTS') && onApprove) {
+            if (hasPermission(Permission.APPROVE_REQUESTS) && onApprove) {
                 buttons.push(
                     <Button
                         key="approve"
@@ -88,7 +89,7 @@ export default function RequestTable({
                     </Button>
                 );
             }
-            if (hasPermission('REJECT_REQUESTS') && onReject) {
+            if (hasPermission(Permission.REJECT_REQUESTS) && onReject) {
                 buttons.push(
                     <Button
                         key="reject"

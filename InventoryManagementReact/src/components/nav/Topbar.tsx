@@ -198,7 +198,7 @@ export function Topbar({
                                 {user?.email}
                             </span>
                             <span className="text-xs text-slate-400 capitalize">
-                                {user?.role?.toLowerCase()}
+                                {user?.role?.name.toLowerCase()}
                             </span>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />

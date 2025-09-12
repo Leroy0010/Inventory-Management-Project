@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
 import { Button } from '@/components/ui/button';
@@ -37,14 +37,10 @@ export default function InventoryItemDetails() {
     const itemQuery = useItemQuery(Number(id));
 
     // Determine if user is storekeeper
-    const isStorekeeper = user?.role === 'STOREKEEPER';
+    const isStorekeeper = user?.role.name === 'STOREKEEPER';
 
     // Calculate current quantity and reorder status
-    const currentQuantity =
-        itemQuery.data?.batches?.reduce(
-            (total, batch) => total + batch.quantity,
-            0
-        ) || 0;
+    const currentQuantity = itemQuery.data?.quantity || 0;
     const needsReorder = currentQuantity <= (itemQuery.data?.reorderLevel || 0);
 
     const handleDelete = async () => {
@@ -273,8 +269,7 @@ export default function InventoryItemDetails() {
                                 <div className="flex items-center space-x-2 mt-1">
                                     <Building className="h-4 w-4 text-gray-400" />
                                     <span className="text-sm text-gray-900 dark:text-gray-100">
-                                        {item.department?.name ||
-                                            'No Department'}
+                                        Inventory Item
                                     </span>
                                 </div>
                             </div>
@@ -342,85 +337,6 @@ export default function InventoryItemDetails() {
                 </div>
             </div>
 
-            {/* Batch Information */}
-            {item.batches && item.batches.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Batch Information</CardTitle>
-                        <CardDescription>
-                            Details about inventory batches for this item
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {item.batches.map((batch, index) => (
-                                <div
-                                    key={batch.id}
-                                    className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
-                                >
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                        <div className="flex items-center space-x-2">
-                                            <Package className="h-4 w-4 text-gray-400" />
-                                            <div>
-                                                <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                                                    Quantity
-                                                </p>
-                                                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                                                    {batch.quantity}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                                                Unit Price
-                                            </span>
-                                            <div>
-                                                <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                                                    Price
-                                                </p>
-                                                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                                                    ${batch.unitPrice}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <User className="h-4 w-4 text-gray-400" />
-                                            <div>
-                                                <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                                                    Supplier
-                                                </p>
-                                                <p className="text-sm text-gray-900 dark:text-gray-100">
-                                                    {batch.supplierName}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Calendar className="h-4 w-4 text-gray-400" />
-                                            <div>
-                                                <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                                                    Received
-                                                </p>
-                                                <p className="text-sm text-gray-900 dark:text-gray-100">
-                                                    {new Date(
-                                                        batch.receivedAt
-                                                    ).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {batch.invoiceId && (
-                                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                Invoice ID: {batch.invoiceId}
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
         </div>
     );
 }

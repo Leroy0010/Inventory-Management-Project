@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { userApi } from '@/api/user';
 import { toast } from 'sonner';
 import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
-import type { CreateStaffDto, CreateStorekeeperDto } from '@/types/user';
 
 // Query keys for user operations
 export const userKeys = {

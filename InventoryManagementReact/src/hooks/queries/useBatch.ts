@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { batchApi } from '@/api/batch';
 import { toast } from 'sonner';
 import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
-import type { CreateBatchDto } from '@/types/inventoryBatch';
 
 // Query keys for batch operations
 export const batchKeys = {

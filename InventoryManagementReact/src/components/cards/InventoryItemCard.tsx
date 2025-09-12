@@ -9,7 +9,6 @@ import {
     Eye,
     Package,
     AlertTriangle,
-    CheckCircle2,
     RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';

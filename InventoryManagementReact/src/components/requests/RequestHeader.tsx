@@ -1,7 +1,6 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw, Filter, Search } from 'lucide-react';
+import { RefreshCw, Filter } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 
 interface RequestHeaderProps {
@@ -20,10 +19,8 @@ export default function RequestHeader({
     totalRequests,
     isLoading,
     onRefresh,
-    onSearch,
     onFilter,
     showFilters = false,
-    searchQuery = '',
 }: RequestHeaderProps) {
     const { hasPermission } = usePermissions();
 
