@@ -26,13 +26,6 @@ import type {
     UserActivityReportResponseDto,
 } from '@/types/userActivityReport';
 
-// Mock offices data - in real app, this would come from API
-const MOCK_OFFICES = [
-    { id: 1, name: 'Main Office' },
-    { id: 2, name: 'Branch Office A' },
-    { id: 3, name: 'Branch Office B' },
-    { id: 4, name: 'Remote Office' },
-];
 
 export default function UserActivityReport() {
     const { user, hasPermission } = useAuthStore();
@@ -235,7 +228,6 @@ export default function UserActivityReport() {
                         onGenerate={handleGenerateReport}
                         onExport={canExport ? handleExport : undefined}
                         isLoading={isLoading}
-                        offices={MOCK_OFFICES}
                     />
                 </div>
 

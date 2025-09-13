@@ -1,22 +1,22 @@
-import { useState,} from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Search, Filter, Download } from 'lucide-react';
-import { format } from 'date-fns';
+import { DatePicker, DateRangePicker } from '@/components/ui/date-picker';
+import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
+import { Search, Filter, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
+import { officeApi } from '@/api/office';
 import type { UserActivityReportFilters, UserRole } from '@/types/userActivityReport';
 
 interface UserActivityReportFormProps {
   onGenerate: (filters: UserActivityReportFilters) => void;
   onExport?: (filters: UserActivityReportFilters) => void;
   isLoading?: boolean;
-  offices?: Array<{ id: number; name: string }>;
   className?: string;
 }
 
@@ -38,7 +38,6 @@ export function UserActivityReportForm({
   onGenerate,
   onExport,
   isLoading = false,
-  offices = [],
   className
 }: UserActivityReportFormProps) {
   const [filters, setFilters] = useState<UserActivityReportFilters>({
@@ -54,6 +53,31 @@ export function UserActivityReportForm({
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Fetch offices data
+  const { data: offices = [], isLoading: officesLoading } = useQuery({
+    queryKey: ['offices'],
+    queryFn: officeApi.getOffices,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Convert offices to combobox options
+  const officeOptions: ComboboxOption[] = [
+    { value: 'all', label: 'All Offices' },
+    ...offices.map(office => ({
+      value: office.id.toString(),
+      label: office.name
+    }))
+  ];
+
+  // Convert roles to combobox options
+  const roleOptions: ComboboxOption[] = [
+    { value: 'all', label: 'All Roles' },
+    ...USER_ROLES.map(role => ({
+      value: role.value,
+      label: role.label
+    }))
+  ];
 
   const handleTimePeriodChange = (type: 'year' | 'dateRange') => {
     setFilters(prev => ({
@@ -77,12 +101,13 @@ export function UserActivityReportForm({
     }));
   };
 
-  const handleDateRangeChange = (field: 'startDate' | 'endDate', date: Date | undefined) => {
+  const handleDateRangeChange = (startDate: Date | undefined, endDate: Date | undefined) => {
     setFilters(prev => ({
       ...prev,
       timePeriod: {
         ...prev.timePeriod,
-        [field]: date ? date.toISOString().split('T')[0] : undefined,
+        startDate: startDate ? startDate.toISOString().split('T')[0] : undefined,
+        endDate: endDate ? endDate.toISOString().split('T')[0] : undefined,
       }
     }));
   };
@@ -166,65 +191,17 @@ export function UserActivityReportForm({
           )}
 
           {filters.timePeriod.type === 'dateRange' && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Start Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !filters.timePeriod.startDate && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {filters.timePeriod.startDate ? (
-                        format(new Date(filters.timePeriod.startDate), 'PPP')
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={filters.timePeriod.startDate ? new Date(filters.timePeriod.startDate) : undefined}
-                      onSelect={(date) => handleDateRangeChange('startDate', date)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div>
-                <Label>End Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !filters.timePeriod.endDate && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {filters.timePeriod.endDate ? (
-                        format(new Date(filters.timePeriod.endDate), 'PPP')
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={filters.timePeriod.endDate ? new Date(filters.timePeriod.endDate) : undefined}
-                      onSelect={(date) => handleDateRangeChange('endDate', date)}
-                      autoFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+            <div>
+              <Label>Date Range</Label>
+              <DateRangePicker
+                startDate={filters.timePeriod.startDate ? new Date(filters.timePeriod.startDate) : undefined}
+                endDate={filters.timePeriod.endDate ? new Date(filters.timePeriod.endDate) : undefined}
+                onStartDateChange={(date) => handleDateRangeChange(date, filters.timePeriod.endDate ? new Date(filters.timePeriod.endDate) : undefined)}
+                onEndDateChange={(date) => handleDateRangeChange(filters.timePeriod.startDate ? new Date(filters.timePeriod.startDate) : undefined, date)}
+                startPlaceholder="Pick start date"
+                endPlaceholder="Pick end date"
+                className="w-full"
+              />
             </div>
           )}
         </div>
@@ -247,22 +224,16 @@ export function UserActivityReportForm({
 
           <div>
             <Label htmlFor="office">Office</Label>
-            <Select
+            <Combobox
+              options={officeOptions}
               value={filters.officeId?.toString() || 'all'}
               onValueChange={(value) => handleFilterChange('officeId', value === 'all' ? undefined : parseInt(value))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All offices" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All offices</SelectItem>
-                {offices.map((office) => (
-                  <SelectItem key={office.id} value={office.id.toString()}>
-                    {office.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Select office..."
+              searchPlaceholder="Search offices..."
+              emptyText="No offices found."
+              disabled={officesLoading}
+              width="w-full"
+            />
           </div>
         </div>
 
@@ -317,22 +288,15 @@ export function UserActivityReportForm({
 
             <div>
               <Label htmlFor="roleFilter">Role Filter</Label>
-              <Select
+              <Combobox
+                options={roleOptions}
                 value={filters.roleFilter || 'all'}
                 onValueChange={(value) => handleFilterChange('roleFilter', value === 'all' ? undefined : value as UserRole)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All roles" />
-                </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All roles</SelectItem>
-                {USER_ROLES.map((role) => (
-                  <SelectItem key={role.value} value={role.value}>
-                    {role.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-              </Select>
+                placeholder="Select role..."
+                searchPlaceholder="Search roles..."
+                emptyText="No roles found."
+                width="w-full"
+              />
             </div>
 
             {/* Activity Type Filters */}
