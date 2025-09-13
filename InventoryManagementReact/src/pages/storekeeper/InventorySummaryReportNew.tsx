@@ -19,7 +19,7 @@ import type {
 import InventorySummaryHeader from '@/components/inventory-summary-report/InventorySummaryHeader';
 import InventorysummaryEmptyState from '@/components/inventory-summary-report/InventorysummaryEmptyState';
 
-export default function InventorySummaryReport() {
+export default function InventorySummaryReportNew() {
   const { hasPermission } = usePermissions();
   const [currentFilters, setCurrentFilters] = useState<InventorySummaryReportFilters | null>(null);
   const [reportData, setReportData] = useState<InventorySummaryItemDto[]>([]);

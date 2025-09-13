@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
     Dialog,
     DialogContent,
@@ -17,13 +18,19 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-    CheckCircle, 
-    XCircle, 
-    Clock, 
-    Package
+import {
+    CheckCircle,
+    XCircle,
+    Clock,
+    Package,
+    ExternalLink,
 } from 'lucide-react';
 import type { RequestResponseDto, RequestStatus } from '@/types/request';
+import StatusHistory from './request-details-modal/StatusHistory';
+import RequestedItems from './request-details-modal/RequestedItems';
+import FulfillmentInformation from './request-details-modal/FulFillmentInformation';
+import ApprovalInformation from './request-details-modal/ApprovalInformation';
+import RequestSummary from './request-details-modal/RequestSummary';
 
 interface RequestDetailsModalProps {
     isOpen: boolean;
@@ -36,7 +43,9 @@ interface RequestDetailsModalProps {
     userRole: 'STAFF' | 'STOREKEEPER' | 'ADMIN';
 }
 
-const getStatusBadgeVariant = (status: RequestStatus) => {
+export type StatusBadgeVariant = 'secondary' | 'default' | 'destructive';
+
+const getStatusBadgeVariant = (status: RequestStatus): StatusBadgeVariant => {
     switch (status) {
         case 'PENDING':
             return 'secondary';
@@ -76,6 +85,8 @@ export default function RequestDetailsModal({
     isUpdating,
     userRole,
 }: RequestDetailsModalProps) {
+    const navigate = useNavigate();
+
     if (!request) return null;
 
     const formatDate = (date: Date) => {
@@ -121,7 +132,11 @@ export default function RequestDetailsModal({
             }
         }
 
-        if (userRole === 'STAFF' && request.status === 'APPROVED' && onFulfill) {
+        if (
+            userRole === 'STAFF' &&
+            request.status === 'APPROVED' &&
+            onFulfill
+        ) {
             buttons.push(
                 <Button
                     key="fulfill"
@@ -136,6 +151,13 @@ export default function RequestDetailsModal({
         }
 
         return buttons;
+    };
+
+    const handleViewFullScreen = () => {
+        // Close the modal first
+        onClose();
+        // Navigate to the full page view
+        navigate(`/requests/${request.id}`);
     };
 
     return (
@@ -153,155 +175,63 @@ export default function RequestDetailsModal({
 
                 <div className="space-y-6">
                     {/* Request Summary */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Request Summary</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-sm font-medium text-muted-foreground">Request ID</label>
-                                    <p className="text-lg font-semibold">#{request.id}</p>
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium text-muted-foreground">Status</label>
-                                    <div className="mt-1">
-                                        <Badge variant={getStatusBadgeVariant(request.status)}>
-                                            <div className="flex items-center space-x-1">
-                                                {getStatusIcon(request.status)}
-                                                <span>{request.status}</span>
-                                            </div>
-                                        </Badge>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium text-muted-foreground">Submitted By</label>
-                                    <p className="text-sm">User {request.user_id}</p>
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium text-muted-foreground">Submitted At</label>
-                                    <p className="text-sm">{formatDate(request.submittedAt)}</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
+                    <RequestSummary
+                        request={request}
+                        formatDate={formatDate}
+                        getStatusBadgeVariant={getStatusBadgeVariant}
+                        getStatusIcon={getStatusIcon}
+                    />
+                    
                     {/* Approval Information */}
                     {request.approvedAt && request.approver && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Approval Information</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-sm font-medium text-muted-foreground">Approved By</label>
-                                        <p className="text-sm">{request.approver.firstName} {request.approver.lastName}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-medium text-muted-foreground">Approved At</label>
-                                        <p className="text-sm">{formatDate(request.approvedAt)}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <ApprovalInformation
+                            request={request}
+                            formatDate={formatDate}
+                        />
                     )}
 
                     {/* Fulfillment Information */}
                     {request.fulfilledAt && request.fulfiller && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Fulfillment Information</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-sm font-medium text-muted-foreground">Fulfilled By</label>
-                                        <p className="text-sm">{request.fulfiller.firstName} {request.fulfiller.lastName}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-medium text-muted-foreground">Fulfilled At</label>
-                                        <p className="text-sm">{formatDate(request.fulfilledAt)}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <FulfillmentInformation
+                            formatDate={formatDate}
+                            request={request}
+                        />
                     )}
 
                     {/* Requested Items */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Requested Items</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Item Name</TableHead>
-                                        <TableHead>Quantity</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {request.items.map((item) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell className="font-medium">
-                                                {item.name}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant="outline">
-                                                    {item.quantity}
-                                                </Badge>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
+                    <RequestedItems request={request} />
 
                     {/* Status History */}
-                    {request.statusHistory && request.statusHistory.length > 0 && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Status History</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead>Changed By</TableHead>
-                                            <TableHead>Timestamp</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {request.statusHistory.map((history) => (
-                                            <TableRow key={history.id}>
-                                                <TableCell>
-                                                    <Badge variant={getStatusBadgeVariant(history.statusName)}>
-                                                        {history.statusName}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {history.changedBy.firstName} {history.changedBy.lastName}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {formatDate(history.timestamp)}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-                    )}
+                    {request.statusHistory &&
+                        request.statusHistory.length > 0 && (
+                            <StatusHistory
+                                request={request}
+                                getStatusBadgeVariant={getStatusBadgeVariant}
+                                formatDate={formatDate}
+                            />
+                        )}
                 </div>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>
-                        Close
-                    </Button>
-                    {getActionButtons()}
+                    <div className="flex items-center justify-between w-full">
+                        {/* Full Screen Button */}
+                        <Button
+                            variant="outline"
+                            onClick={handleViewFullScreen}
+                            className="flex items-center space-x-2 text-blue-600 border-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-700 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-blue-950 dark:hover:text-blue-300"
+                        >
+                            <ExternalLink className="h-4 w-4" />
+                            <span>View Full Screen</span>
+                        </Button>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center space-x-3">
+                            <Button variant="outline" onClick={onClose}>
+                                Close
+                            </Button>
+                            {getActionButtons()}
+                        </div>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
