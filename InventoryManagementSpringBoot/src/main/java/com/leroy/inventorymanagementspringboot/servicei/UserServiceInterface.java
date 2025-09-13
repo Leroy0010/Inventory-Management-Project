@@ -2,6 +2,8 @@ package com.leroy.inventorymanagementspringboot.servicei;
 
 import com.leroy.inventorymanagementspringboot.dto.request.RegisterStaffDto;
 import com.leroy.inventorymanagementspringboot.dto.request.RegisterStoreKeeperDto;
+import com.leroy.inventorymanagementspringboot.dto.request.UpdatePasswordRequest;
+import com.leroy.inventorymanagementspringboot.dto.request.UpdateProfileRequest;
 import com.leroy.inventorymanagementspringboot.dto.response.UserResponseDto;
 import com.leroy.inventorymanagementspringboot.entity.Department;
 import com.leroy.inventorymanagementspringboot.entity.User;
@@ -18,7 +20,10 @@ public interface UserServiceInterface {
     Optional<List<UserResponseDto>> getUsersByDepartment(Department department);
 
     void setStaffStatus(UserResponseDto staff);
-
-
-
+    
+    UserResponseDto fetchUserDetails(UserDetails userDetails);
+    
+    void changePassword(UpdatePasswordRequest updatePasswordRequest, UserDetails userDetails);
+    
+    UserResponseDto updateProfile(UpdateProfileRequest updateProfileRequest, UserDetails userDetails);
 }

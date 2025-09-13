@@ -3,6 +3,7 @@ package com.leroy.inventorymanagementspringboot.controller;
 import com.leroy.inventorymanagementspringboot.dto.request.RegisterStaffDto;
 import com.leroy.inventorymanagementspringboot.dto.request.RegisterStoreKeeperDto;
 import com.leroy.inventorymanagementspringboot.dto.request.UpdatePasswordRequest;
+import com.leroy.inventorymanagementspringboot.dto.request.UpdateProfileRequest;
 import com.leroy.inventorymanagementspringboot.dto.response.UserEmailAndIdDto;
 import com.leroy.inventorymanagementspringboot.dto.response.UserResponseDto;
 import com.leroy.inventorymanagementspringboot.entity.User;
@@ -94,6 +95,20 @@ public class UserController {
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e){
             return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    @PutMapping("/users/update-profile")
+    public ResponseEntity<UserResponseDto> updateProfile(@Valid @RequestBody UpdateProfileRequest updateProfileRequest, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            UserResponseDto updatedUser = userService.updateProfile(updateProfileRequest, userDetails);
+            return ResponseEntity.ok(updatedUser);
+        } catch (EntityNotFoundException e){
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 

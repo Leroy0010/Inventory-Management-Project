@@ -5,6 +5,7 @@ import com.leroy.inventorymanagementspringboot.annotation.Auditable;
 import com.leroy.inventorymanagementspringboot.dto.request.RegisterStaffDto;
 import com.leroy.inventorymanagementspringboot.dto.request.RegisterStoreKeeperDto;
 import com.leroy.inventorymanagementspringboot.dto.request.UpdatePasswordRequest;
+import com.leroy.inventorymanagementspringboot.dto.request.UpdateProfileRequest;
 import com.leroy.inventorymanagementspringboot.dto.response.UserEmailAndIdDto;
 import com.leroy.inventorymanagementspringboot.dto.response.UserResponseDto;
 import com.leroy.inventorymanagementspringboot.entity.Department;
@@ -213,8 +214,46 @@ public class UserService implements UserServiceInterface {
 
     public void changePassword(UpdatePasswordRequest updatePasswordRequest, UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        
+        // Validate old password
+        if (!passwordEncoder.matches(updatePasswordRequest.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+        
+        // Validate new password and confirmation match
+        if (!updatePasswordRequest.getNewPassword().equals(updatePasswordRequest.getConfirmPassword())) {
+            throw new IllegalArgumentException("New password and confirmation do not match");
+        }
+        
+        // Validate new password is different from old password
+        if (passwordEncoder.matches(updatePasswordRequest.getNewPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("New password must be different from current password");
+        }
+        
         user.setPassword(passwordEncoder.encode(updatePasswordRequest.getNewPassword()));
         userRepository.save(user);
+    }
+    
+    public UserResponseDto updateProfile(UpdateProfileRequest updateProfileRequest, UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        
+        // Check if email is being changed and if it's already taken by another user
+        if (!user.getEmail().equals(updateProfileRequest.getEmail())) {
+            Optional<User> existingUser = userRepository.findByEmail(updateProfileRequest.getEmail());
+            if (existingUser.isPresent() && !existingUser.get().getId().equals(user.getId())) {
+                throw new IllegalArgumentException("Email is already taken by another user");
+            }
+        }
+        
+        // Update user fields
+        user.setFirstName(updateProfileRequest.getFirstName());
+        user.setLastName(updateProfileRequest.getLastName());
+        user.setEmail(updateProfileRequest.getEmail());
+        user.setPhone(updateProfileRequest.getPhone());
+        user.setBio(updateProfileRequest.getBio());
+        
+        User savedUser = userRepository.save(user);
+        return userMapper.toUserResponseDto(savedUser);
     }
 
     public Optional<List<UserEmailAndIdDto>> getEmailsAndIds(UserDetails userDetails) {

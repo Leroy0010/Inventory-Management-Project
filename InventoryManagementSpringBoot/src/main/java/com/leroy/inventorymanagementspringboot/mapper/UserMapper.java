@@ -42,6 +42,8 @@ public interface UserMapper {
     List<UserResponseDto> toUserResponseDtoList(List<User> users);
 
     @Mapping(target = "officeName", source = "office.name")
+    @Mapping(target = "departmentName", source = "office.department.name")
+    @Mapping(target = "roleName", source = "role.name")
     UserResponseDto toUserResponseDto(User user);
 
     UserEmailAndIdDto toUserEmailAndIdDto(User user);
