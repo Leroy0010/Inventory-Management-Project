@@ -13,7 +13,6 @@ import {
   CheckCircle,
   XCircle,
   Search,
-  Filter
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
@@ -31,7 +30,7 @@ export function StaffDashboard() {
       title: 'Browse Inventory',
       description: 'Search and view available items',
       icon: Package,
-      action: () => navigate('/inventory'),
+      action: () => navigate('/inventory-items'),
       color: 'bg-blue-500',
     },
     {
@@ -286,7 +285,7 @@ export function StaffDashboard() {
             <Button 
               variant="outline" 
               className="h-auto p-4 flex flex-col items-center gap-2"
-              onClick={() => navigate('/inventory')}
+              onClick={() => navigate('/inventory-items')}
             >
               <Package className="h-6 w-6" />
               <span className="font-medium">Browse All Items</span>
@@ -295,7 +294,7 @@ export function StaffDashboard() {
             <Button 
               variant="outline" 
               className="h-auto p-4 flex flex-col items-center gap-2"
-              onClick={() => navigate('/inventory?category=office-supplies')}
+              onClick={() => navigate('/inventory-items?category=office-supplies')}
             >
               <FileText className="h-6 w-6" />
               <span className="font-medium">Office Supplies</span>

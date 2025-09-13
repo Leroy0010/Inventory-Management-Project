@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bell, Send, Settings } from 'lucide-react';
@@ -8,7 +9,18 @@ import { useWebSocketNotification } from '@/hooks/useWebSocketNotification';
 import { useUnreadCount } from '@/hooks/queries/useNotification';
 
 export default function Notifications() {
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('list');
+
+  // Auto-select send tab if specified in URL parameters
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'send') 
+      setActiveTab('send');
+    else 
+        setActiveTab('list');
+    
+  }, [searchParams]);
   const { connectionState } = useWebSocketNotification();
   const { data: unreadCount = 0 } = useUnreadCount();
 

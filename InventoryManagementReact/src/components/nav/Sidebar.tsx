@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissionCheck } from '@/hooks/usePermissionCheck';
@@ -123,6 +123,8 @@ export function Sidebar({
         'Dashboard',
     ]);
 
+    const location = useLocation();
+
     const handleLogout = () => {
         logout();
         navigate('/login');
@@ -141,8 +143,7 @@ export function Sidebar({
     };
 
     const renderNavItem = (item: NavItem) => {
-        const hasPermission =
-            !item.permissions || canAccess(item.permissions);
+        const hasPermission = !item.permissions || canAccess(item.permissions);
         if (!hasPermission) return null;
 
         const handleItemClick = () => {
@@ -157,18 +158,33 @@ export function Sidebar({
                 key={item.to}
                 to={item.to}
                 onClick={handleItemClick}
-                className={({ isActive }) =>
-                    cn(
+                className={({ isActive }) => {
+                    let isActiveState = isActive;
+
+                    // Special handling for notifications page
+                    if (location.pathname === '/notifications') {
+                        const hasSendTab = location.search.includes('tab=send');
+                        
+                        if (item.to === '/notifications') {
+                            // Notifications sidebar item: active only when send tab is NOT selected
+                            isActiveState = !hasSendTab;
+                        } else if (item.to === '/send-message') {
+                            // Send Message sidebar item: active only when send tab IS selected
+                            isActiveState = hasSendTab;
+                        }
+                    }
+
+                    return cn(
                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
                         'relative group',
                         // Inactive state styling
-                        !isActive && [
+                        !isActiveState && [
                             'text-slate-300 hover:text-white',
                             'hover:bg-slate-700/60 hover:shadow-md hover:scale-[1.02]',
                             'hover:border-l-2 hover:border-slate-500',
                         ],
                         // Active state styling
-                        isActive && [
+                        isActiveState && [
                             'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg',
                             'border-l-4 border-blue-400',
                             'font-semibold',
@@ -178,8 +194,8 @@ export function Sidebar({
                             'ring-2 ring-blue-400/20',
                             'backdrop-blur-sm',
                         ]
-                    )
-                }
+                    );
+                }}
             >
                 <item.icon className="w-5 h-5 flex-shrink-0 transition-all duration-200 group-hover:scale-110" />
                 <span className="truncate transition-all duration-200">

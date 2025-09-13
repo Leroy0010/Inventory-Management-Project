@@ -50,7 +50,7 @@ export function AdminDashboard() {
       title: 'Send Notification',
       description: 'Send system-wide notifications',
       icon: Bell,
-      action: () => navigate('/notifications'),
+      action: () => navigate('/notifications?tab=send'),
       color: 'bg-orange-500',
     },
   ];
