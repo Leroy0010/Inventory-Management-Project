@@ -26,7 +26,7 @@ export const DEV_CONFIG = {
         email: 'admin@inventory.com',
         firstName: 'John',
         lastName: 'Doe',
-        role: 'ADMIN' as const,
+        role: 'STOREKEEPER' as const,
         isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

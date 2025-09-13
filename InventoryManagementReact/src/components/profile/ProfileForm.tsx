@@ -180,6 +180,7 @@ export function ProfileForm({
               {...register('email')}
               disabled={!isEditing || isSubmitting}
               className={errors.email ? 'border-red-500' : ''}
+              readOnly
             />
             {errors.email && (
               <p className="text-sm text-red-500">{errors.email.message}</p>

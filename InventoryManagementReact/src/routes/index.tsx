@@ -16,20 +16,20 @@ const RequestDetails = React.lazy(
     () => import('@/pages/common/RequestDetails')
 );
 const Notifications = React.lazy(() => import('@/pages/Notifications'));
+const Dashboard = React.lazy(() => import('@/pages/common/Dashboard'));
 
 // Admin pages
-const AdminDashboard = React.lazy(() => import('@/pages/Dashboard'));
+
 const Departments = React.lazy(() => import('@/pages/admin/Departments'));
 const AddStorekeeper = React.lazy(() => import('@/pages/admin/AddStorekeeper'));
 const AddDepartment = React.lazy(() => import('@/pages/admin/AddDepartment'));
 
 // Staff pages
-const StaffDashboard = React.lazy(() => import('@/pages/Dashboard'));
 const StaffCart = React.lazy(() => import('@/pages/staff/Cart'));
 const StaffRequests = React.lazy(() => import('@/pages/staff/MyRequests'));
 
 // Storekeeper pages
-const StorekeeperDashboard = React.lazy(() => import('@/pages/Dashboard'));
+
 const Staff = React.lazy(() => import('@/pages/storekeeper/Staff'));
 const AddStaff = React.lazy(() => import('@/pages/storekeeper/AddStaff'));
 const AddInventory = React.lazy(
@@ -110,12 +110,13 @@ const router = createBrowserRouter([
             // Dashboard - role-based
             {
                 index: true,
+                path: "",
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.VIEW_DASHBOARD]}
                         >
-                            <AdminDashboard />
+                            <Dashboard />
                         </ProtectedRoute>
                     </Suspense>
                 ),
@@ -160,18 +161,7 @@ const router = createBrowserRouter([
             },
 
             // Staff routes
-            {
-                path: 'staff-dashboard',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <ProtectedRoute
-                            requiredPermissions={[Permission.VIEW_DASHBOARD]}
-                        >
-                            <StaffDashboard />
-                        </ProtectedRoute>
-                    </Suspense>
-                ),
-            },
+            
             {
                 path: 'cart',
                 element: (
@@ -198,18 +188,6 @@ const router = createBrowserRouter([
             },
 
             // Storekeeper routes
-            {
-                path: 'storekeeper-dashboard',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <ProtectedRoute
-                            requiredPermissions={[Permission.VIEW_DASHBOARD]}
-                        >
-                            <StorekeeperDashboard />
-                        </ProtectedRoute>
-                    </Suspense>
-                ),
-            },
             {
                 path: 'staff',
                 element: (
