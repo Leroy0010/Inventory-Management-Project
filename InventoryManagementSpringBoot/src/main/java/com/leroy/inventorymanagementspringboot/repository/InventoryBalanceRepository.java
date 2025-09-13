@@ -3,6 +3,7 @@ package com.leroy.inventorymanagementspringboot.repository;
 import com.leroy.inventorymanagementspringboot.entity.Department;
 import com.leroy.inventorymanagementspringboot.entity.InventoryBalance;
 import com.leroy.inventorymanagementspringboot.entity.InventoryItem;
+import com.leroy.inventorymanagementspringboot.enums.CostFlowMethod;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.sql.Date;
@@ -14,5 +15,11 @@ public interface InventoryBalanceRepository extends JpaRepository<InventoryBalan
             Department department,
             Date snapshotDate
     );
-
+    
+    boolean existsByInventoryItemAndDepartmentAndSnapshotDateAndMethod(
+            InventoryItem inventoryItem,
+            Department department,
+            Date snapshotDate,
+            CostFlowMethod method
+    );
 }

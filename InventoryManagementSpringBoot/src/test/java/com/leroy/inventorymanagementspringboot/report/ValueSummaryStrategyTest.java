@@ -64,7 +64,7 @@ class ValueSummaryStrategyTest {
                 .thenReturn(Optional.of(new InventoryBalance(item, dept, 5, new BigDecimal("5000"), Date.valueOf("2023-12-31"))));
         when(txRepo.findByInventoryItemAndTransactionDateBetween(any(), any(), any()))
                 .thenReturn(List.of(
-                        new StockTransaction(item, StockTransactionType.RECEIVED, 10, new BigDecimal("900"), Timestamp.valueOf("2024-01-10 00:00:00"))));
+                        new StockTransaction(item, StockTransactionType.IN, 10, new BigDecimal("900"), Timestamp.valueOf("2024-01-10 00:00:00"))));
 
 
         when(fifoCalc.calculateIssuedValue(item, dept, start, end)).thenReturn(new BigDecimal("4800"));

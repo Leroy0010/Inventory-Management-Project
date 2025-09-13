@@ -22,11 +22,11 @@ public class FifoCostCalculator implements CostCalculatorStrategy {
     @Override
     public BigDecimal calculateIssuedValue(InventoryItem item, Department department, LocalDate start, LocalDate end) {
         Timestamp startDate = Timestamp.valueOf(start.atStartOfDay());
-        Timestamp endDate = Timestamp.valueOf(end.atStartOfDay());
+        Timestamp endDate = Timestamp.valueOf(end.plusDays(1).atStartOfDay());
         String query = """
             SELECT ii.quantity, b.unit_price
             FROM inventory_issuance ii
-            JOIN request_items ri ON ii.requested_item_id = ri.id
+            JOIN request_items ri ON ii.request_item_id = ri.id
             JOIN requests r ON ri.request_id = r.id
             JOIN inventory_batches b ON ii.batch_id = b.id
             WHERE ri.item_id = :itemId
@@ -37,8 +37,8 @@ public class FifoCostCalculator implements CostCalculatorStrategy {
         List<Object[]> results = entityManager.createNativeQuery(query)
                 .setParameter("itemId", item.getId())
                 .setParameter("deptId", department.getId())
-                .setParameter("start", startDate)
-                .setParameter("end", endDate)
+                .setParameter("startDate", startDate)
+                .setParameter("endDate", endDate)
                 .getResultList();
 
         BigDecimal total = BigDecimal.ZERO;

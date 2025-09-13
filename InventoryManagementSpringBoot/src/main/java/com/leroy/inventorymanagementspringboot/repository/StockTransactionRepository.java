@@ -18,7 +18,7 @@ public interface StockTransactionRepository extends JpaRepository<StockTransacti
     List<StockTransaction> findByInventoryItemAndTransactionDateBetweenOrderByTransactionDateAsc(
             InventoryItem item, Timestamp start, Timestamp end);
 
-    @Query("SELECT COALESCE(SUM(CASE WHEN st.transactionType = 'RECEIVED' THEN st.quantity ELSE -st.quantity END), 0) " +
+    @Query("SELECT COALESCE(SUM(CASE WHEN st.transactionType = 'IN' THEN st.quantity ELSE -st.quantity END), 0) " +
             "FROM StockTransaction st WHERE st.inventoryItem.id = :itemId AND st.transactionDate < :start")
     int getBalanceBefore(int itemId, Timestamp start);
 

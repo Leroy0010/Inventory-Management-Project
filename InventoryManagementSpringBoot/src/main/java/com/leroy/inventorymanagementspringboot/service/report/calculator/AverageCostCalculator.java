@@ -24,20 +24,20 @@ public class AverageCostCalculator implements CostCalculatorStrategy {
     @Override
     public BigDecimal calculateIssuedValue(InventoryItem item, Department department, LocalDate start, LocalDate end) {
         List<com.leroy.inventorymanagementspringboot.entity.StockTransaction> issued =
-                transactionRepo.findByInventoryItemAndTransactionDateBetween(item, Timestamp.valueOf(start.atStartOfDay()), Timestamp.valueOf(end.atStartOfDay()));
+                transactionRepo.findByInventoryItemAndTransactionDateBetween(item, Timestamp.valueOf(start.atStartOfDay()), Timestamp.valueOf(end.plusDays(1).atStartOfDay()));
 
         // Compute average price based on all stock received before end
         Timestamp firstTx = transactionRepo.getFirstTransactionDate(item);
         if (firstTx == null) firstTx = Timestamp.valueOf("2000-01-01 00:00:00");
 
         List<com.leroy.inventorymanagementspringboot.entity.StockTransaction> allBefore =
-                transactionRepo.findByInventoryItemAndTransactionDateBetween(item, firstTx, Timestamp.valueOf(end.atStartOfDay()));
+                transactionRepo.findByInventoryItemAndTransactionDateBetween(item, firstTx, Timestamp.valueOf(end.plusDays(1).atStartOfDay()));
 
         int totalQty = 0;
         BigDecimal totalCost = BigDecimal.ZERO;
 
         for (var tx : allBefore) {
-            if (tx.getTransactionType().name().equals("RECEIVED")) {
+            if (tx.getTransactionType().name().equals("IN")) {
                 totalQty += tx.getQuantity();
                 totalCost = totalCost.add(tx.getUnitPrice().multiply(BigDecimal.valueOf(tx.getQuantity())));
             }
@@ -46,7 +46,7 @@ public class AverageCostCalculator implements CostCalculatorStrategy {
         BigDecimal avgPrice = totalQty > 0 ? totalCost.divide(BigDecimal.valueOf(totalQty), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
 
         int issuedQty = issued.stream()
-                .filter(tx -> tx.getTransactionType().name().equals("ISSUED"))
+                .filter(tx -> tx.getTransactionType().name().equals("OUT"))
                 .mapToInt(com.leroy.inventorymanagementspringboot.entity.StockTransaction::getQuantity)
                 .sum();
 

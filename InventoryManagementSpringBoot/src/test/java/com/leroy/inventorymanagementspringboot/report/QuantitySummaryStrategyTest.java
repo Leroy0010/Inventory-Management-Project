@@ -61,11 +61,11 @@ class QuantitySummaryStrategyTest {
         when(balanceRepo.findTopByInventoryItemAndDepartmentAndSnapshotDateBeforeOrderBySnapshotDateDesc(any(), any(), any()))
                 .thenReturn(Optional.of(balance));
 
-        // Mock transactions: RECEIVED = 10, ISSUED = 3 + 2 = 5
+        // Mock transactions: IN = 10, OUT = 3 + 2 = 5
         List<StockTransaction> transactions = List.of(
-                new StockTransaction(item, StockTransactionType.RECEIVED, 10, BigDecimal.ZERO, Timestamp.valueOf("2024-01-10 00:00:00")),
-                new StockTransaction(item, StockTransactionType.ISSUED, 3, BigDecimal.ZERO, Timestamp.valueOf("2024-01-20 00:00:00")),
-                new StockTransaction(item, StockTransactionType.ISSUED, 2, BigDecimal.ZERO, Timestamp.valueOf("2024-01-25 00:00:00"))
+                new StockTransaction(item, StockTransactionType.IN, 10, BigDecimal.ZERO, Timestamp.valueOf("2024-01-10 00:00:00")),
+                new StockTransaction(item, StockTransactionType.OUT, 3, BigDecimal.ZERO, Timestamp.valueOf("2024-01-20 00:00:00")),
+                new StockTransaction(item, StockTransactionType.OUT, 2, BigDecimal.ZERO, Timestamp.valueOf("2024-01-25 00:00:00"))
         );
         when(txRepo.findByInventoryItemAndTransactionDateBetween(any(), any(), any()))
                 .thenReturn(transactions);
@@ -105,8 +105,8 @@ class QuantitySummaryStrategyTest {
 
         // Transactions
         List<StockTransaction> transactions = List.of(
-                new StockTransaction(item, StockTransactionType.RECEIVED, 5, BigDecimal.ZERO, Timestamp.valueOf("2024-01-15 00:00:00")),
-                new StockTransaction(item, StockTransactionType.ISSUED, 2, BigDecimal.ZERO, Timestamp.valueOf("2024-01-18 00:00:00"))
+                new StockTransaction(item, StockTransactionType.IN, 5, BigDecimal.ZERO, Timestamp.valueOf("2024-01-15 00:00:00")),
+                new StockTransaction(item, StockTransactionType.OUT, 2, BigDecimal.ZERO, Timestamp.valueOf("2024-01-18 00:00:00"))
         );
         when(txRepo.findByInventoryItemAndTransactionDateBetween(any(), any(), any()))
                 .thenReturn(transactions);

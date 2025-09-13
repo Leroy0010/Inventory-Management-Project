@@ -586,3 +586,67 @@ databaseChangeLog:
                   name: created_at
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
+
+        # Performance indexes for inventory summary reports
+        - createIndex:
+            tableName: stock_transactions
+            indexName: idx_stock_transactions_item_date
+            columns:
+              - column:
+                  name: item_id
+              - column:
+                  name: transaction_date
+
+        - createIndex:
+            tableName: stock_transactions
+            indexName: idx_stock_transactions_type_date
+            columns:
+              - column:
+                  name: transaction_type
+              - column:
+                  name: transaction_date
+
+        - createIndex:
+            tableName: stock_transactions
+            indexName: idx_stock_transactions_item_type_date
+            columns:
+              - column:
+                  name: item_id
+              - column:
+                  name: transaction_type
+              - column:
+                  name: transaction_date
+
+        - createIndex:
+            tableName: inventory_balances
+            indexName: idx_inventory_balances_item_date
+            columns:
+              - column:
+                  name: item_id
+              - column:
+                  name: snapshot_date
+
+        - createIndex:
+            tableName: inventory_balances
+            indexName: idx_inventory_balances_dept_date
+            columns:
+              - column:
+                  name: department_id
+              - column:
+                  name: snapshot_date
+
+        - createIndex:
+            tableName: inventory_issuance
+            indexName: idx_inventory_issuance_item_date
+            columns:
+              - column:
+                  name: issued_at
+
+        - createIndex:
+            tableName: inventory_batches
+            indexName: idx_inventory_batches_item_date
+            columns:
+              - column:
+                  name: item_id
+              - column:
+                  name: batch_date
