@@ -37,4 +37,11 @@ public interface UserRepository extends JpaRepository<User,Integer> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.office.department = :department")
     long countByDepartment(@Param("department") Department department);
+
+    // User Activity Report methods
+    List<User> findByDepartmentId(Integer departmentId);
+    
+    @Query("SELECT u FROM User u WHERE u.department.id = :departmentId AND u.office.id = :officeId")
+    List<User> findByDepartmentIdAndOfficeId(@Param("departmentId") Integer departmentId, 
+                                           @Param("officeId") Integer officeId);
 }

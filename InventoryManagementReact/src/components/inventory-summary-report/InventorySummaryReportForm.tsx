@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,18 +18,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { CalendarIcon, Filter, Download } from 'lucide-react';
-import { format } from 'date-fns';
+import { DatePicker, DateRangePicker } from '@/components/ui/date-picker';
+import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
+import { Filter, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useQuery } from '@tanstack/react-query';
+import { officeApi } from '@/api/office';
 import type { 
   InventorySummaryReportFilters,
   InventorySummaryType,
@@ -40,13 +37,14 @@ import type {
 const reportFormSchema = z.object({
   inventorySummaryType: z.enum(['BY_QUANTITY', 'BY_VALUE']),
   costFlowMethod: z.enum(['FIFO', 'AVG']).optional(),
+  officeId: z.number().optional(),
   dateRange: z.object({
     type: z.enum(['year', 'yearRange', 'custom']),
     year: z.number().min(2000).max(2100).optional(),
     startYear: z.number().min(2000).max(2100).optional(),
     endYear: z.number().min(2000).max(2100).optional(),
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
+    startDate: z.date().optional(),
+    endDate: z.date().optional(),
   })
 }).refine((data) => {
   // Validate based on date range type
@@ -59,7 +57,7 @@ const reportFormSchema = z.object({
   }
   if (data.dateRange.type === 'custom') {
     return !!data.dateRange.startDate && !!data.dateRange.endDate &&
-           new Date(data.dateRange.startDate) <= new Date(data.dateRange.endDate);
+           data.dateRange.startDate <= data.dateRange.endDate;
   }
   return false;
 }, {
@@ -92,14 +90,29 @@ export default function InventorySummaryReportForm({
   className
 }: InventorySummaryReportFormProps) {
   const [dateRangeType, setDateRangeType] = useState<'year' | 'yearRange' | 'custom'>('year');
-  const [startDateOpen, setStartDateOpen] = useState(false);
-  const [endDateOpen, setEndDateOpen] = useState(false);
+
+  // Fetch offices data
+  const { data: offices = [], isLoading: officesLoading } = useQuery({
+    queryKey: ['offices'],
+    queryFn: officeApi.getOffices,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Convert offices to combobox options
+  const officeOptions: ComboboxOption[] = [
+    { value: 'all', label: 'All Offices' },
+    ...offices.map(office => ({
+      value: office.id.toString(),
+      label: office.name
+    }))
+  ];
 
   const form = useForm<ReportFormData>({
     resolver: zodResolver(reportFormSchema),
     defaultValues: {
       inventorySummaryType: 'BY_QUANTITY',
       costFlowMethod: 'FIFO',
+      officeId: undefined,
       dateRange: {
         type: 'year',
         year: new Date().getFullYear(),
@@ -114,7 +127,13 @@ export default function InventorySummaryReportForm({
     const filters: InventorySummaryReportFilters = {
       inventorySummaryType: data.inventorySummaryType,
       costFlowMethod: data.costFlowMethod,
-      dateRange: data.dateRange
+      officeId: data.officeId,
+      dateRange: {
+        ...data.dateRange,
+        // Convert Date objects to ISO strings for custom date range
+        startDate: data.dateRange.startDate?.toISOString().split('T')[0],
+        endDate: data.dateRange.endDate?.toISOString().split('T')[0],
+      }
     };
     onGenerate(filters);
   };
@@ -124,7 +143,13 @@ export default function InventorySummaryReportForm({
     const filters: InventorySummaryReportFilters = {
       inventorySummaryType: data.inventorySummaryType,
       costFlowMethod: data.costFlowMethod,
-      dateRange: data.dateRange
+      officeId: data.officeId,
+      dateRange: {
+        ...data.dateRange,
+        // Convert Date objects to ISO strings for custom date range
+        startDate: data.dateRange.startDate?.toISOString().split('T')[0],
+        endDate: data.dateRange.endDate?.toISOString().split('T')[0],
+      }
     };
     onExport?.(filters);
   };
@@ -158,6 +183,32 @@ export default function InventorySummaryReportForm({
                       <SelectItem value="BY_VALUE">By Value</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Office Filter */}
+            <FormField
+              control={form.control}
+              name="officeId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Office Filter</FormLabel>
+                  <FormControl>
+                    <Combobox
+                      options={officeOptions}
+                      value={field.value?.toString() || 'all'}
+                      onValueChange={(value) => {
+                        field.onChange(value === 'all' ? undefined : parseInt(value));
+                      }}
+                      placeholder="Select office..."
+                      searchPlaceholder="Search offices..."
+                      emptyText="No offices found."
+                      disabled={officesLoading}
+                      width="w-full"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -290,96 +341,37 @@ export default function InventorySummaryReportForm({
 
             {/* Custom Date Range */}
             {watchDateRangeType === 'custom' && (
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="dateRange.startDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Start Date</FormLabel>
-                      <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(new Date(field.value), "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value ? new Date(field.value) : undefined}
-                            onSelect={(date) => {
-                              field.onChange(date ? date.toISOString().split('T')[0] : '');
-                              setStartDateOpen(false);
-                            }}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="dateRange.endDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>End Date</FormLabel>
-                      <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(new Date(field.value), "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value ? new Date(field.value) : undefined}
-                            onSelect={(date) => {
-                              field.onChange(date ? date.toISOString().split('T')[0] : '');
-                              setEndDateOpen(false);
-                            }}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="dateRange"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date Range</FormLabel>
+                    <FormControl>
+                      <DateRangePicker
+                        startDate={field.value?.startDate}
+                        endDate={field.value?.endDate}
+                        onStartDateChange={(date) => {
+                          field.onChange({
+                            ...field.value,
+                            startDate: date
+                          });
+                        }}
+                        onEndDateChange={(date) => {
+                          field.onChange({
+                            ...field.value,
+                            endDate: date
+                          });
+                        }}
+                        startPlaceholder="Pick start date"
+                        endPlaceholder="Pick end date"
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
 
             {/* Action Buttons */}

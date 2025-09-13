@@ -39,11 +39,12 @@ export default function InventorySummaryReport() {
   const apiRequest = useMemo((): InventorySummaryReportRequest | null => {
     if (!currentFilters) return null;
 
-    const { inventorySummaryType, costFlowMethod, dateRange } = currentFilters;
+    const { inventorySummaryType, costFlowMethod, officeId, dateRange } = currentFilters;
     
     const request: InventorySummaryReportRequest = {
       inventorySummaryType,
       costFlowMethod,
+      officeId,
     };
 
     // Add date parameters based on type

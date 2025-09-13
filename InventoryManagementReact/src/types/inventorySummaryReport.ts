@@ -29,6 +29,9 @@ export interface InventorySummaryReportRequest {
 
     // Only required if inventorySummaryType == BY_VALUE
     costFlowMethod?: CostFlowMethod;
+
+    // Optional filtering
+    officeId?: number; // Optional - filter by specific office
 }
 
 // Response DTO matching backend
@@ -54,6 +57,7 @@ export interface InventorySummaryItemDto {
 export interface InventorySummaryReportFilters {
     inventorySummaryType: InventorySummaryType;
     costFlowMethod?: CostFlowMethod;
+    officeId?: number;
     dateRange: {
         type: 'year' | 'yearRange' | 'custom';
         year?: number;
