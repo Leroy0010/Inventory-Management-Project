@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Loader2, Eye, EyeOff, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useResetPassword } from '@/hooks/queries/usePasswordReset';
 import { validatePasswordStrength, getPasswordStrengthColor, getPasswordStrengthLabel } from '@/lib/password-utils';
+import type { PasswordStrength } from '@/types/profile';
 import type { ResetPasswordFormData } from '@/types/passwordReset';
 
 // Validation schema
@@ -156,24 +157,19 @@ export function ResetPasswordForm({
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span>Password Strength:</span>
-                  <span className={getPasswordStrengthColor(passwordStrength.score)}>
-                    {getPasswordStrengthLabel(passwordStrength.score)}
+                  <span className={getPasswordStrengthColor(passwordStrength)}>
+                    {getPasswordStrengthLabel(passwordStrength)}
                   </span>
                 </div>
                 <Progress 
-                  value={(passwordStrength.score / 4) * 100} 
+                  value={
+                    passwordStrength === 'Very Weak' ? 20 :
+                    passwordStrength === 'Weak' ? 40 :
+                    passwordStrength === 'Moderate' ? 60 :
+                    passwordStrength === 'Strong' ? 80 : 100
+                  } 
                   className="h-2"
                 />
-                {passwordStrength.feedback.length > 0 && (
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    {passwordStrength.feedback.map((feedback, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <span className="text-red-500">•</span>
-                        {feedback}
-                      </li>
-                    ))}
-                  </ul>
-                )}
               </div>
             )}
           </div>
@@ -213,7 +209,7 @@ export function ResetPasswordForm({
           <Button
             type="submit"
             className="w-full"
-            disabled={isSubmitting || resetPassword.isPending || !passwordStrength.isValid}
+            disabled={isSubmitting || resetPassword.isPending || passwordStrength === 'Very Weak'}
           >
             {isSubmitting || resetPassword.isPending ? (
               <>

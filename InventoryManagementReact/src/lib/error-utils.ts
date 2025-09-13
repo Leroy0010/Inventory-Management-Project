@@ -99,3 +99,19 @@ export function getFriendlyErrorMessage(error: ApiError): string {
     // Return the original message if no specific handling
     return message;
 }
+
+/**
+ * Gets a user-friendly error message from any error
+ */
+export function getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+        return error.message;
+    }
+    
+    if (typeof error === 'string') {
+        return error;
+    }
+    
+    const apiError = formatApiError(error);
+    return apiError.message;
+}

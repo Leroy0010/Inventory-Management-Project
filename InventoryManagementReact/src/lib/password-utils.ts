@@ -1,64 +1,105 @@
-import type { PasswordStrength } from '@/types/passwordReset';
+import type { PasswordStrength } from '@/types/profile';
 
-// Password strength validation
 export function validatePasswordStrength(password: string): PasswordStrength {
-  const feedback: string[] = [];
-  let score = 0;
+  let strength = 0;
+  const minLength = 8;
 
   // Length check
-  if (password.length < 8) {
-    feedback.push('Password must be at least 8 characters long');
-  } else {
-    score += 1;
+  if (password.length >= minLength) {
+    strength++;
+  }
+  
+  // Character type checks
+  if (/[a-z]/.test(password)) {
+    strength++;
+  }
+  if (/[A-Z]/.test(password)) {
+    strength++;
+  }
+  if (/[0-9]/.test(password)) {
+    strength++;
+  }
+  if (/[^a-zA-Z0-9]/.test(password)) {
+    strength++;
   }
 
-  // Uppercase check
-  if (!/[A-Z]/.test(password)) {
-    feedback.push('Password must contain at least one uppercase letter');
-  } else {
-    score += 1;
+  // Additional length bonus
+  if (password.length >= 12) {
+    strength++;
   }
 
-  // Lowercase check
-  if (!/[a-z]/.test(password)) {
-    feedback.push('Password must contain at least one lowercase letter');
-  } else {
-    score += 1;
-  }
+  // Determine strength level
+  if (strength <= 1) return 'Very Weak';
+  if (strength === 2) return 'Weak';
+  if (strength === 3) return 'Moderate';
+  if (strength === 4) return 'Strong';
+  if (strength >= 5) return 'Very Strong';
 
-  // Number check
-  if (!/\d/.test(password)) {
-    feedback.push('Password must contain at least one number');
-  } else {
-    score += 1;
-  }
-
-  // Special character check
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    feedback.push('Password must contain at least one special character');
-  } else {
-    score += 1;
-  }
-
-  return {
-    score: Math.min(score, 4), // Cap at 4
-    feedback,
-    isValid: score >= 4 && password.length >= 8,
-  };
+  return 'Very Weak';
 }
 
-// Get password strength color
-export function getPasswordStrengthColor(score: number): string {
-  if (score < 2) return 'text-red-500';
-  if (score < 3) return 'text-orange-500';
-  if (score < 4) return 'text-yellow-500';
-  return 'text-green-500';
+export function getPasswordStrengthColor(strength: PasswordStrength): string {
+  switch (strength) {
+    case 'Very Weak':
+      return 'text-red-500';
+    case 'Weak':
+      return 'text-orange-500';
+    case 'Moderate':
+      return 'text-yellow-500';
+    case 'Strong':
+      return 'text-green-500';
+    case 'Very Strong':
+      return 'text-blue-500';
+    default:
+      return 'text-gray-500';
+  }
 }
 
-// Get password strength label
-export function getPasswordStrengthLabel(score: number): string {
-  if (score < 2) return 'Very Weak';
-  if (score < 3) return 'Weak';
-  if (score < 4) return 'Medium';
-  return 'Strong';
+export function getPasswordStrengthLabel(strength: PasswordStrength): string {
+  return strength;
+}
+
+export function getPasswordStrengthWidth(strength: PasswordStrength): string {
+  switch (strength) {
+    case 'Very Weak':
+      return 'w-1/5';
+    case 'Weak':
+      return 'w-2/5';
+    case 'Moderate':
+      return 'w-3/5';
+    case 'Strong':
+      return 'w-4/5';
+    case 'Very Strong':
+      return 'w-full';
+    default:
+      return 'w-0';
+  }
+}
+
+export function getPasswordRequirements(): Array<{
+  text: string;
+  test: (password: string) => boolean;
+}> {
+  return [
+    {
+      text: 'At least 8 characters',
+      test: (password) => password.length >= 8,
+    },
+    {
+      text: 'Contains lowercase letter',
+      test: (password) => /[a-z]/.test(password),
+    },
+    {
+      text: 'Contains uppercase letter',
+      test: (password) => /[A-Z]/.test(password),
+    },
+    {
+      text: 'Contains number',
+      test: (password) => /[0-9]/.test(password),
+    },
+    {
+      text: 'Contains special character',
+      test: (password) => /[^a-zA-Z0-9]/.test(password),
+    },
+  ];
 }
