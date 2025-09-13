@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Bell, Menu, User, Settings, LogOut, Sun, Moon } from 'lucide-react';
+import { Menu, User, Settings, LogOut, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,10 +11,9 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/stores/authStore';
-import { useNotificationsSafe } from '@/hooks/useNotificationsSafe';
 import { SearchBar } from '@/components/SearchBar';
-import { cn } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 interface TopbarProps {
     onMenuToggle?: () => void;
@@ -27,8 +25,6 @@ export function Topbar({
     isSidebarCollapsed = false,
 }: TopbarProps) {
     const { user, logout } = useAuthStore();
-    const { unreadCount, notifications } = useNotificationsSafe();
-    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const { theme, setTheme } = useTheme();
 
     const handleLogout = () => {
@@ -97,79 +93,7 @@ export function Topbar({
                 </Button>
 
                 {/* Notifications */}
-                <DropdownMenu
-                    open={isNotificationOpen}
-                    onOpenChange={setIsNotificationOpen}
-                >
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="relative text-slate-300 hover:text-white hover:bg-slate-600"
-                            aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
-                        >
-                            <Bell className="w-5 h-5" />
-                            {unreadCount > 0 && (
-                                <Badge
-                                    variant="destructive"
-                                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                                >
-                                    {unreadCount > 99 ? '99+' : unreadCount}
-                                </Badge>
-                            )}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-80">
-                        <DropdownMenuLabel className="flex items-center justify-between">
-                            <span>Notifications</span>
-                            {unreadCount > 0 && (
-                                <Badge variant="secondary" className="text-xs">
-                                    {unreadCount} new
-                                </Badge>
-                            )}
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {notifications.length === 0 ? (
-                            <div className="p-4 text-center text-slate-500">
-                                <Bell className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-                                <p className="text-sm">No notifications</p>
-                            </div>
-                        ) : (
-                            <div className="max-h-64 overflow-y-auto">
-                                {notifications
-                                    .slice(0, 5)
-                                    .map((notification) => (
-                                        <DropdownMenuItem
-                                            key={notification.id}
-                                            className="flex flex-col items-start p-3"
-                                        >
-                                            <div className="flex items-center gap-2 w-full">
-                                                <div
-                                                    className={cn(
-                                                        'w-2 h-2 rounded-full flex-shrink-0',
-                                                        notification.isRead
-                                                            ? 'bg-slate-300'
-                                                            : 'bg-blue-500'
-                                                    )}
-                                                />
-                                                <span className="font-medium text-sm truncate">
-                                                    {notification.title}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                                                {notification.message}
-                                            </p>
-                                            <span className="text-xs text-slate-400 mt-1">
-                                                {new Date(
-                                                    notification.createdAt
-                                                ).toLocaleTimeString()}
-                                            </span>
-                                        </DropdownMenuItem>
-                                    ))}
-                            </div>
-                        )}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <NotificationBell />
 
                 {/* User menu */}
                 <DropdownMenu>

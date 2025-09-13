@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,6 +33,7 @@ interface LoginFormProps {
 
 export function LoginForm({ onSuccess, className }: LoginFormProps) {
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
 
     const { error, clearError } = useAuthStore();
     const { loginMutation, googleLoginMutation } = useAuthQueries();
@@ -160,7 +162,11 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
 
                 {/* Forgot Password Link */}
                 <div className="text-center">
-                    <Button variant="link" className="text-sm">
+                    <Button 
+                        variant="link" 
+                        className="text-sm"
+                        onClick={() => navigate('/forgot-password')}
+                    >
                         Forgot your password?
                     </Button>
                 </div>

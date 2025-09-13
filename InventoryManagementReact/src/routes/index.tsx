@@ -8,12 +8,14 @@ import { Permission } from '@/types/permissions';
 // Lazy load pages for better performance
 // Common pages
 const Login = React.lazy(() => import('@/pages/auth/Login'));
+const ForgotPassword = React.lazy(() => import('@/pages/auth/ForgotPassword'));
 const Unauthorized = React.lazy(() => import('@/pages/Unauthorized'));
 const NotFound = React.lazy(() => import('@/pages/NotFound'));
 const Profile = React.lazy(() => import('@/pages/common/Profile'));
 const RequestDetails = React.lazy(
     () => import('@/pages/common/RequestDetails')
 );
+const Notifications = React.lazy(() => import('@/pages/Notifications'));
 
 // Admin pages
 const AdminDashboard = React.lazy(() => import('@/pages/Dashboard'));
@@ -56,7 +58,6 @@ const InventorySummaryReport = React.lazy(
 );
 
 // Common pages
-const Notifications = React.lazy(() => import('@/pages/Notifications'));
 const SendMessage = React.lazy(() => import('@/pages/SendMessage'));
 const Settings = React.lazy(() => import('@/pages/Settings'));
 
@@ -77,6 +78,14 @@ const router = createBrowserRouter([
         element: (
             <Suspense fallback={<PageLoader />}>
                 <Login />
+            </Suspense>
+        ),
+    },
+    {
+        path: '/forgot-password',
+        element: (
+            <Suspense fallback={<PageLoader />}>
+                <ForgotPassword />
             </Suspense>
         ),
     },
@@ -388,6 +397,16 @@ const router = createBrowserRouter([
                 ),
             },
             {
+                path: 'notifications',
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <ProtectedRoute>
+                            <Notifications />
+                        </ProtectedRoute>
+                    </Suspense>
+                ),
+            },
+            {
                 path: 'requests/:requestId',
                 element: (
                     <Suspense fallback={<PageLoader />}>
@@ -397,20 +416,6 @@ const router = createBrowserRouter([
                             ]}
                         >
                             <RequestDetails />
-                        </ProtectedRoute>
-                    </Suspense>
-                ),
-            },
-            {
-                path: 'notifications',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <ProtectedRoute
-                            requiredPermissions={[
-                                Permission.VIEW_NOTIFICATIONS,
-                            ]}
-                        >
-                            <Notifications />
                         </ProtectedRoute>
                     </Suspense>
                 ),

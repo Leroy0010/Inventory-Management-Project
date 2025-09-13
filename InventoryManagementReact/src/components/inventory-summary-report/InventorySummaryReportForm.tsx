@@ -165,6 +165,8 @@ export default function InventorySummaryReportForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+
+            <div className='flex space-x-20'>
             {/* Report Type */}
             <FormField
               control={form.control}
@@ -207,12 +209,14 @@ export default function InventorySummaryReportForm({
                       emptyText="No offices found."
                       disabled={officesLoading}
                       width="w-full"
+                      className="w-max-md w-min-sm"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            </div>
 
             {/* Cost Flow Method (only for value reports) */}
             {watchInventorySummaryType === 'BY_VALUE' && (
