@@ -48,6 +48,15 @@ public class Request {
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RequestItem> items = new HashSet<>();
 
+    // Helper methods for dashboard
+    public Set<RequestItem> getRequestItems() {
+        return items;
+    }
+
+    public RequestStatus getStatus() {
+        return requestStatus;
+    }
+
     @JsonManagedReference
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     // Add this to link request to its status history

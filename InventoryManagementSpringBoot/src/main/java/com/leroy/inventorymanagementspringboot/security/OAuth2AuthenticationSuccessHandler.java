@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -67,7 +68,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
                     .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
             // Generate JWT token
-            String jwt = jwtUtil.generateToken(user);
+            String jwt = jwtUtil.generateToken((UserDetails) user);
 
             // Create refresh token
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);

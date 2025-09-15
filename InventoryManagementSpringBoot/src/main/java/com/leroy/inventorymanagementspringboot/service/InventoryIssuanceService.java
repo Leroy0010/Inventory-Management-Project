@@ -62,7 +62,7 @@ public class InventoryIssuanceService implements InventoryIssuanceServiceInterfa
             // Create issuance
             InventoryIssuance issuance = new InventoryIssuance(requestItem, batch, toIssue);
             issuanceRepository.save(issuance);
-            stockTransactionService.recordTransaction(inventoryItem, StockTransactionType.ISSUED, toIssue, batch.getUnitPrice(), request, null, null, batch, staff);
+            stockTransactionService.recordTransaction(inventoryItem, StockTransactionType.OUT, toIssue, batch.getUnitPrice(), request, null, null, batch, staff);
 
 
 

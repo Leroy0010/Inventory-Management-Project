@@ -4,6 +4,7 @@ import com.leroy.inventorymanagementspringboot.dto.request.RegisterStaffDto;
 import com.leroy.inventorymanagementspringboot.dto.request.RegisterStoreKeeperDto;
 import com.leroy.inventorymanagementspringboot.dto.request.UpdatePasswordRequest;
 import com.leroy.inventorymanagementspringboot.dto.request.UpdateProfileRequest;
+import com.leroy.inventorymanagementspringboot.dto.response.StaffResponseDto;
 import com.leroy.inventorymanagementspringboot.dto.response.UserEmailAndIdDto;
 import com.leroy.inventorymanagementspringboot.dto.response.UserResponseDto;
 import com.leroy.inventorymanagementspringboot.entity.User;
@@ -51,23 +52,30 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredStaff);
     }
 
-    @GetMapping("/storekeeper/get-users")
-    @PreAuthorize("hasAuthority('STOREKEEPER')")
+    @GetMapping("/admin/get-users")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<UserResponseDto>> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
         User storekeeper = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Optional<List<UserResponseDto>> users = userService.getUsersByDepartment(storekeeper.getDepartment());
+        Optional<List<UserResponseDto>> users = userService.getUsers(storekeeper.getDepartment());
         return users.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }
 
-    @PutMapping("user/update-status") // Changed to PUT for updating state
+    @GetMapping("/storekeeper/get-users")
+    @PreAuthorize("hasAuthority('STOREKEEPER')")
+    public ResponseEntity<List<StaffResponseDto>> getAllDepartmentUsers(@AuthenticationPrincipal UserDetails userDetails) {
+        List<StaffResponseDto> users = userService.getDepartmentStaff(userDetails);
+        return ResponseEntity.ok(users);
+    }
+
+    @PutMapping("/user/update-status") // Changed to PUT for updating state
     @PreAuthorize("hasAnyRole('STOREKEEPER', 'ADMIN')")
     public ResponseEntity<?> updateUserStatus(@Valid @RequestBody UserResponseDto userResponseDto) {
         userService.setStaffStatus(userResponseDto);
         return ResponseEntity.ok(userResponseDto);
     }
 
-    @GetMapping("users/get-general-notification-service-emails")
+    @GetMapping("/users/get-general-notification-service-emails")
     @PreAuthorize("hasAnyAuthority('STOREKEEPER', 'ADMIN')")
     public ResponseEntity<Optional<List<String>>> getGeneralNotificationServiceEmails(@AuthenticationPrincipal UserDetails userDetails) {
         try {

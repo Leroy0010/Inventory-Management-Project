@@ -10,6 +10,7 @@ export interface CreateStorekeeperDto {
     firstName: string;
     lastName: string;
     departmentName: string;
+    roleName: "STOREKEEPER"; 
 }
 
 export interface UserResponseDto {
@@ -18,7 +19,7 @@ export interface UserResponseDto {
     firstName: string;
     lastName: string;
     fullName: string;
-    role: string;
+    roleName: string;
     officeName?: string;
     departmentName?: string;
     active: boolean;

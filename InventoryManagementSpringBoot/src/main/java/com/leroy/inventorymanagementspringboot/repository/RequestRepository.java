@@ -76,4 +76,15 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     @Query("SELECT r FROM Request r JOIN r.user u WHERE " +
             "(u.department = :department OR (u.office IS NOT NULL AND u.office.department = :department))")
     List<Request> findRequestsForDepartment(Department department);
+
+    // Dashboard methods
+    List<Request> findTop5ByOrderByCreatedAtDesc();
+    
+    List<Request> findTop5ByUserOrderByCreatedAtDesc(User user);
+    
+    List<Request> findTop5ByStorekeeperOrderByCreatedAtDesc(User storekeeper);
+    
+    long countByStatusNameAndStorekeeper(String statusName, User storekeeper);
+    
+    long countByUserAndStatusName(User user, String statusName);
 }

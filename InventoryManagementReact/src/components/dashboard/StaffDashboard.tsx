@@ -14,78 +14,63 @@ import {
   XCircle,
   Search,
 } from 'lucide-react';
+
+// Icon mapping for dynamic icons
+const iconMap = {
+  Package,
+  ShoppingCart,
+  FileText,
+  TrendingUp,
+  AlertTriangle,
+  Plus,
+  Bell,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Search,
+} as const;
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useGetProfile } from '@/hooks/queries/useProfile';
 import { useUnreadCount } from '@/hooks/queries/useNotification';
+import { useStaffDashboard } from '@/hooks/queries/useDashboard';
+import StaffWelcome from '../staff-dashboard/StaffWelcome';
+import StaffStatsGrid from '../staff-dashboard/StaffStatsGrid';
 
 export function StaffDashboard() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { data: profile } = useGetProfile();
   const { data: unreadCount = 0 } = useUnreadCount();
+  const { data: dashboardData, isLoading, error } = useStaffDashboard();
 
-  const quickActions = [
-    {
-      title: 'Browse Inventory',
-      description: 'Search and view available items',
-      icon: Package,
-      action: () => navigate('/inventory-items'),
-      color: 'bg-blue-500',
-    },
-    {
-      title: 'My Cart',
-      description: 'View and manage your cart',
-      icon: ShoppingCart,
-      action: () => navigate('/cart'),
-      color: 'bg-green-500',
-    },
-    {
-      title: 'My Requests',
-      description: 'View your submitted requests',
-      icon: FileText,
-      action: () => navigate('/my-requests'),
-      color: 'bg-purple-500',
-    },
-    {
-      title: 'Notifications',
-      description: 'View your notifications',
-      icon: Bell,
-      action: () => navigate('/notifications'),
-      color: 'bg-orange-500',
-    },
-  ];
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const stats = [
-    {
-      title: 'Items in Cart',
-      value: '3',
-      change: 'Ready for checkout',
-      icon: ShoppingCart,
-      color: 'text-blue-600',
-    },
-    {
-      title: 'Pending Requests',
-      value: '2',
-      change: 'Awaiting approval',
-      icon: Clock,
-      color: 'text-orange-600',
-    },
-    {
-      title: 'Approved Requests',
-      value: '15',
-      change: 'This month',
-      icon: CheckCircle,
-      color: 'text-green-600',
-    },
-    {
-      title: 'Available Items',
-      value: '1,247',
-      change: 'In inventory',
-      icon: Package,
-      color: 'text-purple-600',
-    },
-  ];
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600">Failed to load dashboard data</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Use real data from backend
+  const quickActions = dashboardData?.quickActions || [];
+  const stats = dashboardData?.stats || [];
+  const cartItems = dashboardData?.cartItems || [];
+  const cartTotal = dashboardData?.cartTotal || 0;
 
   const recentRequests = [
     { id: 1, item: 'Office Supplies', status: 'approved', date: '2 days ago', quantity: 5 },
@@ -93,11 +78,7 @@ export function StaffDashboard() {
     { id: 3, item: 'Cleaning Supplies', status: 'rejected', date: '3 days ago', quantity: 10 },
   ];
 
-  const cartItems = [
-    { id: 1, name: 'Notebooks', quantity: 5, price: 2.50 },
-    { id: 2, name: 'Pens', quantity: 10, price: 1.25 },
-    { id: 3, name: 'Stapler', quantity: 1, price: 15.00 },
-  ];
+  // Cart items are now fetched from backend data
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -115,76 +96,43 @@ export function StaffDashboard() {
     }
   };
 
-  const totalCartValue = cartItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+  // Cart total is now provided by backend
 
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">
-              Welcome back, {profile?.firstName || user?.firstName}!
-            </h1>
-            <p className="text-purple-100 text-lg">
-              Staff Dashboard - {profile?.officeName || 'Your Office'}
-            </p>
-            <p className="text-purple-200 text-sm mt-1">
-              Browse inventory, manage requests, and track your orders
-            </p>
-          </div>
-          <div className="text-right">
-            <Badge variant="secondary" className="mb-2">
-              <Package className="h-3 w-3 mr-1" />
-              Staff Member
-            </Badge>
-            <p className="text-sm text-purple-200">
-              Office: {profile?.officeName || 'N/A'}
-            </p>
-          </div>
-        </div>
-      </div>
+      <StaffWelcome profile={profile} user={user} />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-xs text-gray-500 mt-1">{stat.change}</p>
-                </div>
-                <div className={`p-3 rounded-full ${stat.color.replace('text', 'bg').replace('-600', '-100')}`}>
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {stats.length > 0 && (
+        <StaffStatsGrid stats={stats}  />
+      )}
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {quickActions.map((action, index) => (
-          <Card key={index} className="hover:shadow-lg transition-all cursor-pointer group" onClick={action.action}>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-full ${action.color} group-hover:scale-110 transition-transform`}>
-                  <action.icon className="h-6 w-6 text-white" />
+      {quickActions.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {quickActions.map((action, index) => (
+            <Card key={index} className="hover:shadow-lg transition-all cursor-pointer group" onClick={action.action}>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4">
+                  <div className={`p-3 rounded-full ${action.color} group-hover:scale-110 transition-transform`}>
+                    {(() => {
+                      const IconComponent = iconMap[action.icon as keyof typeof iconMap];
+                      return IconComponent ? <IconComponent className="h-6 w-6 text-white" /> : null;
+                    })()}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                      {action.title}
+                    </h3>
+                    <p className="text-sm text-gray-600">{action.description}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
-                    {action.title}
-                  </h3>
-                  <p className="text-sm text-gray-600">{action.description}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -246,24 +194,40 @@ export function StaffDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-2 border rounded">
-                  <div>
-                    <p className="font-medium text-sm">{item.name}</p>
-                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+              {cartItems.length > 0 ? (
+                <>
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-2 border rounded">
+                      <div>
+                        <p className="font-medium text-sm">{item.name}</p>
+                        <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="border-t pt-3 mt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">Total Items:</span>
+                      <span className="font-bold text-lg">{cartTotal}</span>
+                    </div>
+                    <Button className="w-full mt-2" onClick={() => navigate('/cart')}>
+                      Proceed to Checkout
+                    </Button>
                   </div>
-                  <p className="text-sm font-medium">${(item.quantity * item.price).toFixed(2)}</p>
+                </>
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  <ShoppingCart className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Your cart is empty</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2" 
+                    onClick={() => navigate('/inventory-items')}
+                  >
+                    Browse Items
+                  </Button>
                 </div>
-              ))}
-              <div className="border-t pt-3 mt-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">Total:</span>
-                  <span className="font-bold text-lg">${totalCartValue.toFixed(2)}</span>
-                </div>
-                <Button className="w-full mt-2" onClick={() => navigate('/cart')}>
-                  Proceed to Checkout
-                </Button>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>

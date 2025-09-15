@@ -9,13 +9,15 @@ import { Permission } from '@/types/permissions';
 // Common pages
 const Login = React.lazy(() => import('@/pages/auth/Login'));
 const ForgotPassword = React.lazy(() => import('@/pages/auth/ForgotPassword'));
+
+
 const Unauthorized = React.lazy(() => import('@/pages/Unauthorized'));
 const NotFound = React.lazy(() => import('@/pages/NotFound'));
 const Profile = React.lazy(() => import('@/pages/common/Profile'));
 const RequestDetails = React.lazy(
     () => import('@/pages/common/RequestDetails')
 );
-const Notifications = React.lazy(() => import('@/pages/Notifications'));
+const Notifications = React.lazy(() => import('@/pages/common/Notifications'));
 const Dashboard = React.lazy(() => import('@/pages/common/Dashboard'));
 
 // Admin pages
@@ -31,17 +33,19 @@ const StaffRequests = React.lazy(() => import('@/pages/staff/MyRequests'));
 // Storekeeper pages
 
 const Staff = React.lazy(() => import('@/pages/storekeeper/Staff'));
+const StaffDetails = React.lazy(() => import('@/pages/storekeeper/StaffDetails'));
 const AddStaff = React.lazy(() => import('@/pages/storekeeper/AddStaff'));
 const AddInventory = React.lazy(
     () => import('@/pages/storekeeper/AddInventory')
 );
 const Office = React.lazy(() => import('@/pages/storekeeper/Office'));
+const OfficeDetails = React.lazy(() => import('@/pages/storekeeper/OfficeDetails'));
 const AddOffice = React.lazy(() => import('@/pages/storekeeper/AddOffice'));
 const Batch = React.lazy(() => import('@/pages/storekeeper/Batch'));
 const AddBatch = React.lazy(() => import('@/pages/storekeeper/AddBatch'));
-const InventoryItems = React.lazy(() => import('@/pages/InventoryItems'));
+const InventoryItems = React.lazy(() => import('@/pages/common/InventoryItems'));
 const InventoryItemDetails = React.lazy(
-    () => import('@/pages/InventoryItemDetails')
+    () => import('@/pages/common/InventoryItemDetails')
 );
 const StorekeeperRequests = React.lazy(() => import('@/pages/storekeeper/ManageRequests'));
 const TransactionReport = React.lazy(
@@ -68,19 +72,19 @@ const Settings = React.lazy(() => import('@/pages/Settings'));
 
 // Loading component
 const PageLoader = () => (
-    <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-    </div>
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+  </div>
 );
 
 // Route configuration
 const router = createBrowserRouter([
-    {
-        path: '/login',
-        element: (
-            <Suspense fallback={<PageLoader />}>
-                <Login />
-            </Suspense>
+  {
+    path: '/login',
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <Login />
+      </Suspense>
         ),
     },
     {
@@ -90,35 +94,35 @@ const router = createBrowserRouter([
                 <ForgotPassword />
             </Suspense>
         ),
-    },
-    {
-        path: '/unauthorized',
-        element: (
-            <Suspense fallback={<PageLoader />}>
-                <Unauthorized />
-            </Suspense>
+  },
+  {
+    path: '/unauthorized',
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <Unauthorized />
+      </Suspense>
         ),
-    },
-    {
-        path: '/',
-        element: (
+  },
+  {
+    path: '/',
+    element: (
             <ProtectedRoute>
-                <AppLayout />
+        <AppLayout />
             </ProtectedRoute>
-        ),
-        children: [
+    ),
+    children: [
             // Dashboard - role-based
-            {
-                index: true,
+      {
+        index: true,
                 path: "",
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.VIEW_DASHBOARD]}
                         >
-                            <Dashboard />
-                        </ProtectedRoute>
-                    </Suspense>
+              <Dashboard />
+            </ProtectedRoute>
+          </Suspense>
                 ),
             },
 
@@ -136,7 +140,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'admin/add-storekeeper',
+                path: '/storekeeper/add',
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
@@ -188,100 +192,124 @@ const router = createBrowserRouter([
             },
 
             // Storekeeper routes
+      {
+        path: 'staff',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+                        <ProtectedRoute
+                            requiredPermissions={[Permission.VIEW_STAFF]}
+                        >
+              <Staff />
+            </ProtectedRoute>
+          </Suspense>
+                ),
+            },
             {
-                path: 'staff',
+                path: 'staff/:id',
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.VIEW_STAFF]}
                         >
-                            <Staff />
+                            <StaffDetails />
                         </ProtectedRoute>
                     </Suspense>
                 ),
-            },
-            {
-                path: 'staff/add',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+      },
+      {
+        path: 'staff/add',
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.ADD_STAFF]}
                         >
-                            <AddStaff />
-                        </ProtectedRoute>
-                    </Suspense>
+              <AddStaff />
+            </ProtectedRoute>
+          </Suspense>
                 ),
-            },
-            {
-                path: 'inventory/add',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+      },
+      {
+        path: 'inventory/add',
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.ADD_INVENTORY]}
                         >
-                            <AddInventory />
-                        </ProtectedRoute>
-                    </Suspense>
+              <AddInventory />
+            </ProtectedRoute>
+          </Suspense>
+                ),
+      },
+      {
+        path: 'office',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+                        <ProtectedRoute
+                            requiredPermissions={[Permission.VIEW_OFFICE]}
+                        >
+              <Office />
+            </ProtectedRoute>
+          </Suspense>
                 ),
             },
             {
-                path: 'office',
+                path: 'office/:id',
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.VIEW_OFFICE]}
                         >
-                            <Office />
+                            <OfficeDetails />
                         </ProtectedRoute>
                     </Suspense>
                 ),
-            },
-            {
-                path: 'office/add',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+      },
+      {
+        path: 'office/add',
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.ADD_OFFICE]}
                         >
-                            <AddOffice />
-                        </ProtectedRoute>
-                    </Suspense>
+              <AddOffice />
+            </ProtectedRoute>
+          </Suspense>
                 ),
-            },
-            {
-                path: 'batch',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+      },
+      {
+        path: 'batch',
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.VIEW_BATCH]}
                         >
-                            <Batch />
-                        </ProtectedRoute>
-                    </Suspense>
+              <Batch />
+            </ProtectedRoute>
+          </Suspense>
                 ),
-            },
-            {
-                path: 'batch/add',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+      },
+      {
+        path: 'batch/add',
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.ADD_BATCH]}
                         >
-                            <AddBatch />
-                        </ProtectedRoute>
-                    </Suspense>
+              <AddBatch />
+            </ProtectedRoute>
+          </Suspense>
                 ),
-            },
-            {
-                path: 'inventory-items',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+      },
+      {
+        path: 'inventory-items',
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.VIEW_INVENTORY]}
                         >
-                            <InventoryItems />
-                        </ProtectedRoute>
-                    </Suspense>
+              <InventoryItems />
+            </ProtectedRoute>
+          </Suspense>
                 ),
             },
             {
@@ -295,11 +323,11 @@ const router = createBrowserRouter([
                         </ProtectedRoute>
                     </Suspense>
                 ),
-            },
-            {
-                path: 'requests',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+      },
+      {
+        path: 'requests',
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.VIEW_REQUESTS]}
                         >
@@ -372,18 +400,18 @@ const router = createBrowserRouter([
                             requiredPermissions={[Permission.VIEW_PROFILE]}
                         >
                             <Profile />
-                        </ProtectedRoute>
-                    </Suspense>
+            </ProtectedRoute>
+          </Suspense>
                 ),
-            },
-            {
-                path: 'notifications',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+      },
+      {
+        path: 'notifications',
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute>
-                            <Notifications />
-                        </ProtectedRoute>
-                    </Suspense>
+              <Notifications />
+            </ProtectedRoute>
+          </Suspense>
                 ),
             },
             {
@@ -399,45 +427,45 @@ const router = createBrowserRouter([
                         </ProtectedRoute>
                     </Suspense>
                 ),
-            },
-            {
-                path: 'send-message',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+      },
+      {
+        path: 'send-message',
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.SEND_MESSAGES]}
                         >
-                            <SendMessage />
-                        </ProtectedRoute>
-                    </Suspense>
+              <SendMessage />
+            </ProtectedRoute>
+          </Suspense>
                 ),
-            },
-            {
-                path: 'settings',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
+      },
+      {
+        path: 'settings',
+        element: (
+          <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
                             requiredPermissions={[Permission.VIEW_SETTINGS]}
                         >
-                            <Settings />
-                        </ProtectedRoute>
-                    </Suspense>
+              <Settings />
+            </ProtectedRoute>
+          </Suspense>
                 ),
             },
 
             // Development/Test routes (removed for production)
         ],
-    },
-    {
-        path: '*',
-        element: (
-            <Suspense fallback={<PageLoader />}>
-                <NotFound />
-            </Suspense>
+  },
+  {
+    path: '*',
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <NotFound />
+      </Suspense>
         ),
     },
 ]);
 
 export function AppRouter() {
-    return <RouterProvider router={router} />;
+  return <RouterProvider router={router} />;
 }

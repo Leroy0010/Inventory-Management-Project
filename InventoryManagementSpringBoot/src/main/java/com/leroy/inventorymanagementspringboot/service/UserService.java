@@ -1,4 +1,3 @@
-// UserService.java
 package com.leroy.inventorymanagementspringboot.service;
 
 import com.leroy.inventorymanagementspringboot.annotation.Auditable;
@@ -8,6 +7,7 @@ import com.leroy.inventorymanagementspringboot.dto.request.UpdatePasswordRequest
 import com.leroy.inventorymanagementspringboot.dto.request.UpdateProfileRequest;
 import com.leroy.inventorymanagementspringboot.dto.response.UserEmailAndIdDto;
 import com.leroy.inventorymanagementspringboot.dto.response.UserResponseDto;
+import com.leroy.inventorymanagementspringboot.dto.response.StaffResponseDto;
 import com.leroy.inventorymanagementspringboot.entity.Department;
 import com.leroy.inventorymanagementspringboot.entity.Office;
 import com.leroy.inventorymanagementspringboot.entity.Role;
@@ -118,7 +118,7 @@ public class UserService implements UserServiceInterface {
         User savedUser = userRepository.save(user);
 
         // Send a notification that the account is created and they need to use change password
-        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName(), generatedPassword);
+        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName());
 
         return savedUser;
     }
@@ -162,14 +162,14 @@ public class UserService implements UserServiceInterface {
         User savedUser = userRepository.save(user);
 
         // Send a notification that the account is created and they need to use change password
-        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName(), generatedPassword);
+        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName());
         logger.info("password: {}", generatedPassword);
 
         return savedUser;
     }
 
     @Override
-    public Optional<List<UserResponseDto>> getUsersByDepartment(Department department) {
+    public Optional<List<UserResponseDto>> getUsers(Department department) {
         if (department == null) {
             throw new IllegalArgumentException("Department cannot be null.");
         }
@@ -207,11 +207,13 @@ public class UserService implements UserServiceInterface {
         } else throw new SecurityException("Only ADMIN or STOREKEEPER roles can be found.");
     }
 
+    @Override
     public UserResponseDto fetchUserDetails(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         return userMapper.toUserResponseDto(user);
     }
 
+    @Override
     public void changePassword(UpdatePasswordRequest updatePasswordRequest, UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         
@@ -234,13 +236,14 @@ public class UserService implements UserServiceInterface {
         userRepository.save(user);
     }
     
+    @Override
     public UserResponseDto updateProfile(UpdateProfileRequest updateProfileRequest, UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         
         // Check if email is being changed and if it's already taken by another user
         if (!user.getEmail().equals(updateProfileRequest.getEmail())) {
             Optional<User> existingUser = userRepository.findByEmail(updateProfileRequest.getEmail());
-            if (existingUser.isPresent() && !existingUser.get().getId().equals(user.getId())) {
+            if (existingUser.isPresent() && !(existingUser.get().getId() == user.getId())) {
                 throw new IllegalArgumentException("Email is already taken by another user");
             }
         }
@@ -269,6 +272,22 @@ public class UserService implements UserServiceInterface {
         var users = userRepository.findAllByOffice_Department(department);
 
         return users
-                .map(userdto -> userdto.stream().map(userMapper::toUserEmailAndIdDto).collect(Collectors.toList())); // Use toList()
+                .map(userDto -> userDto.stream().map(userMapper::toUserEmailAndIdDto).collect(Collectors.toList())); // Use toList()
+    }
+
+    public List<StaffResponseDto> getDepartmentStaff(UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (!user.getRole().getName().equals("STOREKEEPER"))
+            throw new IllegalStateException("Only storekeepers are allowed.");
+
+        
+
+        Department department = user.getDepartment();
+
+        List<User> users = userRepository.findAllByOffice_Department(department).orElse(null);
+        assert users != null;
+
+        return users.stream().map(userMapper::toStaffResponseDto).toList();
     }
 }

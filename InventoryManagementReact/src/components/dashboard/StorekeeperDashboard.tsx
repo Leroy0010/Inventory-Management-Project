@@ -25,74 +25,41 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useGetProfile } from '@/hooks/queries/useProfile';
 import { useUnreadCount } from '@/hooks/queries/useNotification';
+import { useStorekeeperDashboard } from '@/hooks/queries/useDashboard';
 
 export function StorekeeperDashboard() {
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const { data: profile } = useGetProfile();
     const { data: unreadCount = 0 } = useUnreadCount();
+    const { data: dashboardData, isLoading, error } = useStorekeeperDashboard();
 
-    const quickActions = [
-        {
-            title: 'Manage Inventory',
-            description: 'Add and manage inventory items',
-            icon: Package,
-            action: () => navigate('/inventory/add'),
-            color: 'bg-blue-500',
-        },
-        {
-            title: 'Manage Staff',
-            description: 'Add and manage department staff',
-            icon: Users,
-            action: () => navigate('/staff/add'),
-            color: 'bg-green-500',
-        },
-        {
-            title: 'Manage Offices',
-            description: 'Create and manage offices',
-            icon: Building2,
-            action: () => navigate('/office/add'),
-            color: 'bg-purple-500',
-        },
-        {
-            title: 'Send Notification',
-            description: 'Send messages to all department staff or specific staff',
-            icon: Bell,
-            action: () => navigate('/notifications?tab=send'),
-            color: 'bg-orange-500',
-        },
-    ];
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading dashboard...</p>
+                </div>
+            </div>
+        );
+    }
 
-    const stats = [
-        {
-            title: 'Total Inventory Items',
-            value: '1,247',
-            change: '+23 this week',
-            icon: Package,
-            color: 'text-blue-600',
-        },
-        {
-            title: 'Pending Requests',
-            value: '12',
-            change: 'Awaiting approval',
-            icon: Clock,
-            color: 'text-orange-600',
-        },
-        {
-            title: 'Department Staff',
-            value: '45',
-            change: '+3 this month',
-            icon: Users,
-            color: 'text-green-600',
-        },
-        {
-            title: 'Low Stock Items',
-            value: '8',
-            change: 'Need restocking',
-            icon: AlertTriangle,
-            color: 'text-red-600',
-        },
-    ];
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center">
+                    <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+                    <p className="text-red-600">Failed to load dashboard data</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Use real data from backend
+    const quickActions = dashboardData?.quickActions || [];
+    const stats = dashboardData?.stats || [];
+    const departmentOverview = dashboardData?.departmentOverview;
 
     const recentRequests = [
         {
@@ -171,66 +138,70 @@ export function StorekeeperDashboard() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, index) => (
-                    <Card
-                        key={index}
-                        className="hover:shadow-lg transition-shadow"
-                    >
-                        <CardContent className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-600">
-                                        {stat.title}
-                                    </p>
-                                    <p className="text-2xl font-bold">
-                                        {stat.value}
-                                    </p>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        {stat.change}
-                                    </p>
+            {stats.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {stats.map((stat, index) => (
+                        <Card
+                            key={index}
+                            className="hover:shadow-lg transition-shadow"
+                        >
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-600">
+                                            {stat.title}
+                                        </p>
+                                        <p className="text-2xl font-bold">
+                                            {stat.value}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {stat.change}
+                                        </p>
+                                    </div>
+                                    <div
+                                        className={`p-3 rounded-full ${stat.color.replace('text', 'bg').replace('-600', '-100')}`}
+                                    >
+                                        <stat.icon
+                                            className={`h-6 w-6 ${stat.color}`}
+                                        />
+                                    </div>
                                 </div>
-                                <div
-                                    className={`p-3 rounded-full ${stat.color.replace('text', 'bg').replace('-600', '-100')}`}
-                                >
-                                    <stat.icon
-                                        className={`h-6 w-6 ${stat.color}`}
-                                    />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {quickActions.map((action, index) => (
-                    <Card
-                        key={index}
-                        className="hover:shadow-lg transition-all cursor-pointer group"
-                        onClick={action.action}
-                    >
-                        <CardContent className="p-6">
-                            <div className="flex items-center space-x-4">
-                                <div
-                                    className={`p-3 rounded-full ${action.color} group-hover:scale-110 transition-transform`}
-                                >
-                                    <action.icon className="h-6 w-6 text-white" />
+            {quickActions.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {quickActions.map((action, index) => (
+                        <Card
+                            key={index}
+                            className="hover:shadow-lg transition-all cursor-pointer group"
+                            onClick={action.action}
+                        >
+                            <CardContent className="p-6">
+                                <div className="flex items-center space-x-4">
+                                    <div
+                                        className={`p-3 rounded-full ${action.color} group-hover:scale-110 transition-transform`}
+                                    >
+                                        <action.icon className="h-6 w-6 text-white" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">
+                                            {action.title}
+                                        </h3>
+                                        <p className="text-sm text-gray-600">
+                                            {action.description}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">
-                                        {action.title}
-                                    </h3>
-                                    <p className="text-sm text-gray-600">
-                                        {action.description}
-                                    </p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -312,7 +283,7 @@ export function StorekeeperDashboard() {
                                     </span>
                                 </div>
                                 <span className="text-lg font-bold text-blue-600">
-                                    45
+                                    {departmentOverview?.totalStaff || 0}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
@@ -323,7 +294,7 @@ export function StorekeeperDashboard() {
                                     </span>
                                 </div>
                                 <span className="text-lg font-bold text-green-600">
-                                    1,247
+                                    {departmentOverview?.inventoryItems || 0}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
@@ -334,7 +305,7 @@ export function StorekeeperDashboard() {
                                     </span>
                                 </div>
                                 <span className="text-lg font-bold text-orange-600">
-                                    12
+                                    {departmentOverview?.pendingRequests || 0}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
@@ -345,7 +316,7 @@ export function StorekeeperDashboard() {
                                     </span>
                                 </div>
                                 <span className="text-lg font-bold text-red-600">
-                                    8
+                                    {departmentOverview?.lowStockItems || 0}
                                 </span>
                             </div>
                         </div>

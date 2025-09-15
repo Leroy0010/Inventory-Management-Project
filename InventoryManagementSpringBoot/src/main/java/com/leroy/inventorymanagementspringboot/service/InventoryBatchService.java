@@ -69,7 +69,7 @@ public class InventoryBatchService implements InventoryBatchServiceInterface {
         InventoryBatchResponseDto inventoryBatchResponseDto = inventoryBatchMapper.toInventoryBatchResponseDto(inventoryBatch);
         inventoryBatchResponseDto.setTotalPrice(createBatchDto.getTotalPrice());
         stockTransactionService
-                .recordTransaction(inventoryItem, StockTransactionType.RECEIVED, createBatchDto.getQuantity(), unitPrice, null, createBatchDto.getSupplierName(), createBatchDto.getInvoiceId(), inventoryBatch, storeKeeper);
+                .recordTransaction(inventoryItem, StockTransactionType.IN, createBatchDto.getQuantity(), unitPrice, null, createBatchDto.getSupplierName(), createBatchDto.getInvoiceId(), inventoryBatch, storeKeeper);
 
         return inventoryBatchResponseDto;
     }

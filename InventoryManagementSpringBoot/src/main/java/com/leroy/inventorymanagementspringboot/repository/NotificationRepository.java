@@ -38,4 +38,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
 
     void deleteAllByCreatedAtBefore(Timestamp cutoff);
+    
+    // Dashboard methods
+    long countByIsReadFalse();
+    
+    long countByUserAndIsReadFalse(User user);
 }

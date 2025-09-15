@@ -52,40 +52,60 @@ const navGroups: NavGroup[] = [
         label: 'Management',
         icon: Users,
         items: [
-            { to: '/staff/add', label: 'Add Staff', icon: Users },
-            { to: '/inventory/add', label: 'Add Inventory', icon: Package },
-            { to: '/office/add', label: 'Add Office', icon: Building },
-            { to: '/batch/add', label: 'Add Batch', icon: Layers },
+            { to: '/staff/add', label: 'Add Staff', icon: Users, permissions: ['ADD_STAFF'] },
+            { to: '/inventory/add', label: 'Add Inventory', icon: Package, permissions: ['ADD_INVENTORY'] },
+            { to: '/office/add', label: 'Add Office', icon: Building, permissions: ['ADD_OFFICE'] },
+            { to: '/batch/add', label: 'Add Batch', icon: Layers, permissions: ['ADD_BATCH'] },
+            { to: "/storekeeper/add", label: "Add Storekeeper", icon: Users, permissions: ['ADD_STOREKEEPER'] },
+            { to: '/departments/add', label: 'Add Department', icon: Building, permissions: ['ADD_DEPARTMENT'] },
         ],
     },
     {
         label: 'Inventory',
         icon: Package2,
         items: [
-            {
-                to: '/inventory-items',
-                label: 'Inventory Items',
-                icon: Package2,
-            },
+            { to: '/inventory-items', label: 'Inventory Items', icon: Package2, permissions: ['VIEW_INVENTORY'] },
+            { to: '/batch', label: 'Batches', icon: Layers, permissions: ['VIEW_BATCH'] },
+        ],
+    },
+    {
+        label: 'Staff & Offices',
+        icon: Users,
+        items: [
+            { to: '/staff', label: 'Staff', icon: Users, permissions: ['VIEW_STAFF'] },
+            { to: '/office', label: 'Offices', icon: Building, permissions: ['VIEW_OFFICE'] },
         ],
     },
     {
         label: 'Requests',
         icon: FileText,
-        items: [{ to: '/requests', label: 'Requests', icon: FileText }],
+        items: [
+            { to: '/requests', label: 'Manage Requests', icon: FileText, permissions: ['VIEW_REQUESTS'] },
+            { to: '/staff-requests', label: 'My Requests', icon: FileText, permissions: ['VIEW_REQUESTS'] },
+        ],
+    },
+    {
+        label: 'Cart',
+        icon: Package2,
+        items: [
+            { to: '/cart', label: 'Shopping Cart', icon: Package2, permissions: ['VIEW_CART'] },
+        ],
     },
     {
         label: 'Communication',
         icon: Bell,
         items: [
-            { to: '/notifications', label: 'Notifications', icon: Bell },
-            { to: '/send-message', label: 'Send Message', icon: MessageSquare },
+            { to: '/notifications', label: 'Notifications', icon: Bell, permissions: ['VIEW_NOTIFICATIONS'] },
+            { to: '/send-message', label: 'Send Message', icon: MessageSquare, permissions: ['SEND_MESSAGES'] },
         ],
     },
     {
         label: 'System',
         icon: Settings,
-        items: [{ to: '/settings', label: 'Settings', icon: Settings }],
+        items: [
+            { to: '/settings', label: 'Settings', icon: Settings, permissions: ['VIEW_SETTINGS'] },
+            { to: '/profile', label: 'Profile', icon: Users, permissions: ['VIEW_PROFILE'] },
+        ],
     },
 ];
 
@@ -93,19 +113,12 @@ const reportsGroup: NavGroup = {
     label: 'Reports',
     icon: FileText,
     items: [
-        { to: '/reports/transaction', label: 'Transaction', icon: FileText },
-        {
-            to: '/reports/inventory-summary',
-            label: 'Inventory Summary',
-            icon: FileText,
-        },
-        { to: '/reports/user', label: 'User', icon: FileText },
-        {
-            to: '/reports/user-activity',
-            label: 'User Activity',
-            icon: Activity,
-        },
+        { to: '/reports/transaction', label: 'Transaction Report', icon: FileText, permissions: ['VIEW_TRANSACTION_REPORTS'] },
+        { to: '/reports/inventory-summary', label: 'Inventory Summary', icon: FileText, permissions: ['VIEW_INVENTORY_SUMMARY_REPORTS'] },
+        { to: '/reports/user', label: 'User Report', icon: FileText, permissions: ['VIEW_USER_REPORTS'] },
+        { to: '/reports/user-activity', label: 'User Activity', icon: Activity, permissions: ['VIEW_ACTIVITY_REPORTS'] },
     ],
+    permissions: ['VIEW_REPORTS'],
 };
 
 export function Sidebar({

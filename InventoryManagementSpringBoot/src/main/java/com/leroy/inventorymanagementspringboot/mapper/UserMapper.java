@@ -5,6 +5,7 @@ import com.leroy.inventorymanagementspringboot.dto.request.RegisterStoreKeeperDt
 import com.leroy.inventorymanagementspringboot.dto.response.AuthenticationResponse;
 import com.leroy.inventorymanagementspringboot.dto.response.UserEmailAndIdDto;
 import com.leroy.inventorymanagementspringboot.dto.response.UserResponseDto;
+import com.leroy.inventorymanagementspringboot.dto.response.StaffResponseDto;
 import com.leroy.inventorymanagementspringboot.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,6 +23,9 @@ public interface UserMapper {
     @Mapping(target = "office", ignore = true) // Will be set manually or left null
     @Mapping(target = "department", ignore = true) // Will be set manually or left null
     @Mapping(target = "active" , ignore = true)
+    @Mapping(target = "bio", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "phone", ignore = true)
     User toUser(RegisterStoreKeeperDto registerStoreKeeperDto);
 
     // Mapping for StaffRegistrationDto
@@ -32,6 +36,7 @@ public interface UserMapper {
     @Mapping(target = "office", ignore = true) // Will be set manually
     @Mapping(target = "department", ignore = true) // Will be null for STAFF
     @Mapping(target = "active" , ignore = true)
+
     User toStaffUser(RegisterStaffDto registerStaffDto);
 
     @Mapping(target = "jwt", ignore = true)
@@ -44,7 +49,11 @@ public interface UserMapper {
     @Mapping(target = "officeName", source = "office.name")
     @Mapping(target = "departmentName", source = "office.department.name")
     @Mapping(target = "roleName", source = "role.name")
+    @Mapping(target = "fullName", expression = "java(user.getFullName())")
     UserResponseDto toUserResponseDto(User user);
 
     UserEmailAndIdDto toUserEmailAndIdDto(User user);
+
+    @Mapping(target = "officeName", source = "office.name")
+    StaffResponseDto toStaffResponseDto(User user);
 }

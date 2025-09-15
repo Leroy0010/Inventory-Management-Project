@@ -2,6 +2,7 @@ package com.leroy.inventorymanagementspringboot.service.report.calculator;
 
 import com.leroy.inventorymanagementspringboot.entity.InventoryItem;
 import com.leroy.inventorymanagementspringboot.entity.Department;
+import com.leroy.inventorymanagementspringboot.entity.StockTransaction;
 import com.leroy.inventorymanagementspringboot.repository.StockTransactionRepository;
 import com.leroy.inventorymanagementspringboot.strategy.CostCalculatorStrategy;
 import org.springframework.stereotype.Component;
@@ -47,7 +48,7 @@ public class AverageCostCalculator implements CostCalculatorStrategy {
 
         int issuedQty = issued.stream()
                 .filter(tx -> tx.getTransactionType().name().equals("OUT"))
-                .mapToInt(com.leroy.inventorymanagementspringboot.entity.StockTransaction::getQuantity)
+                .mapToInt(StockTransaction::getQuantity)
                 .sum();
 
         return avgPrice.multiply(BigDecimal.valueOf(issuedQty));

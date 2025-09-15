@@ -14,6 +14,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { SearchBar } from '@/components/SearchBar';
 import { useTheme } from '@/hooks/useTheme';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { CartIcon } from '@/components/cart/CartIcon';
 
 interface TopbarProps {
     onMenuToggle?: () => void;
@@ -91,6 +92,9 @@ export function Topbar({
                         <Moon className="w-5 h-5" />
                     )}
                 </Button>
+
+                {/* Cart */}
+                <CartIcon />
 
                 {/* Notifications */}
                 <NotificationBell />

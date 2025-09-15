@@ -74,6 +74,7 @@ export default function AddStorekeeperForm({
                 firstName: data.firstName,
                 lastName: data.lastName,
                 departmentName: data.departmentName,
+                roleName: 'STOREKEEPER'
             });
             reset();
             setValue('');

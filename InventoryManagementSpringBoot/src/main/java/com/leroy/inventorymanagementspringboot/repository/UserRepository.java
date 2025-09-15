@@ -1,16 +1,18 @@
 package com.leroy.inventorymanagementspringboot.repository;
 
-import com.leroy.inventorymanagementspringboot.entity.Department;
-import com.leroy.inventorymanagementspringboot.entity.Role;
-import com.leroy.inventorymanagementspringboot.entity.User;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
+import com.leroy.inventorymanagementspringboot.entity.Department;
+import com.leroy.inventorymanagementspringboot.entity.Office;
+import com.leroy.inventorymanagementspringboot.entity.Role;
+import com.leroy.inventorymanagementspringboot.entity.User;
 
 public interface UserRepository extends JpaRepository<User,Integer> {
 
@@ -37,6 +39,9 @@ public interface UserRepository extends JpaRepository<User,Integer> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.office.department = :department")
     long countByDepartment(@Param("department") Department department);
+    
+    @Query("SELECT COUNT(u) FROM User u WHERE (u.department = :department OR (u.office IS NOT NULL AND u.office.department = :department))")
+    long countByDepartmentIncludingOffice(@Param("department") Department department);
 
     // User Activity Report methods
     List<User> findByDepartmentId(Integer departmentId);
@@ -44,4 +49,13 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     @Query("SELECT u FROM User u WHERE u.department.id = :departmentId AND u.office.id = :officeId")
     List<User> findByDepartmentIdAndOfficeId(@Param("departmentId") Integer departmentId, 
                                            @Param("officeId") Integer officeId);
+    
+    // Dashboard methods
+    long countByRoleName(String roleName);
+    
+    // Office staff count methods
+    long countByOffice(Office office);
+    
+    @Query("SELECT COUNT(u) FROM User u WHERE u.office.id = :officeId")
+    long countByOfficeId(@Param("officeId") int officeId);
 }

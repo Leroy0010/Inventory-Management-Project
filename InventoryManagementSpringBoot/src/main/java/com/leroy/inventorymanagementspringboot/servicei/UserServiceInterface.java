@@ -17,7 +17,7 @@ public interface UserServiceInterface {
 
     User registerStaffByStoreKeeper(RegisterStaffDto registrationDto, UserDetails userDetails);
 
-    Optional<List<UserResponseDto>> getUsersByDepartment(Department department);
+    Optional<List<UserResponseDto>> getUsers(Department department);
 
     void setStaffStatus(UserResponseDto staff);
     

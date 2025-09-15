@@ -115,6 +115,7 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
         Permission.CHECKOUT_CART,
         Permission.VIEW_REQUESTS,
         Permission.VIEW_REQUEST_DETAILS,
+        Permission.MANAGE_REQUESTS
     ],
     'STOREKEEPER': [
         // Dashboard

@@ -14,6 +14,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Year;
 
 @Service
 public class EmailService {
@@ -22,6 +23,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
+    private final PasswordResetService passwordResetService;
 
     @Value("${spring.mail.username}")
     private String senderEmail;
@@ -29,20 +31,24 @@ public class EmailService {
     @Value("${app.frontend.base-url}")
     private String frontendBaseUrl; // For building links in emails
 
-    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
+    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine, PasswordResetService passwordResetService, PasswordResetService passwordResetService1) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
+        this.passwordResetService = passwordResetService1;
     }
 
     @Async
-    public void sendAccountCreatedNotification(String toEmail, String userName, String generatedPassword) { // Added generatedPassword parameter
+    public void sendAccountCreatedNotification(String toEmail, String userName) { // Added generatedPassword parameter
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
             Context context = new Context();
+            var map = passwordResetService.generateTokenForUser(toEmail);
+            String secureLink = frontendBaseUrl + "/reset-password?token=" + map.get("token");
             context.setVariable("userName", userName);
-            context.setVariable("generatedPassword", generatedPassword); // Pass the generated password to the template
+            context.setVariable("currentYear", Year.now().getValue());
+            context.setVariable("secureLink", secureLink);
             String htmlContent = templateEngine.process("email/account-created", context);
 
             helper.setTo(toEmail);

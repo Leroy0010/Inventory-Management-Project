@@ -1,5 +1,7 @@
 package com.leroy.inventorymanagementspringboot.service.report;
 
+import com.leroy.inventorymanagementspringboot.dto.TransactionReportDto;
+import com.leroy.inventorymanagementspringboot.dto.TransactionReportRequest;
 import com.leroy.inventorymanagementspringboot.dto.report.*;
 import com.leroy.inventorymanagementspringboot.entity.*;
 import com.leroy.inventorymanagementspringboot.enums.StockTransactionType;
@@ -98,7 +100,7 @@ public class TransactionReportService implements TransactionReportServiceInterfa
         // Second pass: calculate running balance
         int runningBalance = initialBalance;
         for (TransactionDto dto : txDtos) {
-            if (dto.getTransactionType() == StockTransactionType.RECEIVED) {
+            if (dto.getTransactionType() == StockTransactionType.IN) {
                 totalReceived += dto.getQuantity();
                 runningBalance += dto.getQuantity();
             } else {

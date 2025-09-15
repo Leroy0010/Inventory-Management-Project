@@ -1,215 +1,99 @@
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
-import { api, handleApiError } from '@/api/client';
-import type { CartItem, CartItemRequestDto } from '@/types/cart';
+import { persist } from 'zustand/middleware';
+import { cartApi } from '@/api/cart';
+import type { CartItem } from '@/types/cart';
 
-// Types
-
-export interface CartState {
-    items: CartItem[];
-    isLoading: boolean;
-    error: string | null;
+interface CartState {
+    cartItems: CartItem[];
     totalItems: number;
-    isEmpty: boolean;
-}
-
-export interface CartActions {
-    // Cart management
-    fetchCart: () => Promise<void>;
-    addItem: (item: CartItemRequestDto) => Promise<void>;
-    updateItemQuantity: (itemId: number, quantity: number) => Promise<void>;
-    removeItem: (itemId: number) => Promise<void>;
+    isLoading: boolean;
+    setCartItems: (items: CartItem[]) => void;
+    addItem: (itemId: number, quantity: number) => Promise<void>;
+    removeItem: (itemId: number, quantity: number) => Promise<void>;
+    updateQuantity: (itemId: number, quantity: number) => Promise<void>;
     clearCart: () => Promise<void>;
-
-    // Cart submission
-    submitCartAsRequest: () => Promise<void>;
-
-    // Error handling
-    setError: (error: string | null) => void;
-    clearError: () => void;
+    fetchCart: () => Promise<void>;
 }
 
-export type CartStore = CartState & CartActions;
-
-// Initial state
-const initialState: CartState = {
-    items: [],
-    isLoading: false,
-    error: null,
-    totalItems: 0,
-    isEmpty: true,
-};
-
-// Cart store
-export const useCartStore = create<CartStore>()(
-    devtools(
+export const useCartStore = create<CartState>()(
+    persist(
         (set, get) => ({
-            ...initialState,
-
-            // Fetch cart items
-            fetchCart: async () => {
-                set({ isLoading: true, error: null });
-
+            cartItems: [],
+            totalItems: 0,
+            isLoading: false,
+            
+            setCartItems: (items) => {
+                const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+                set({ cartItems: items, totalItems });
+            },
+            
+            addItem: async (itemId, quantity) => {
+                set({ isLoading: true });
                 try {
-                    const cartData = await api.get<{ items: CartItem[] }>('/api/cart');
-                    const items = cartData.items || [];
-
-                    set({
-                        items,
-                        totalItems: items.reduce(
-                            (sum: number, item: CartItem) =>
-                                sum + item.quantity,
-                            0
-                        ),
-                        isEmpty: items.length === 0,
-                        isLoading: false,
-                    });
+                    await cartApi.addItem(itemId, quantity);
+                    await get().fetchCart();
                 } catch (error) {
-                    set({
-                        error: handleApiError(error),
-                        isLoading: false,
-                    });
+                    console.error('Failed to add item to cart:', error);
+                } finally {
+                    set({ isLoading: false });
                 }
             },
-
-            // Add item to cart
-            addItem: async (item: CartItemRequestDto) => {
-                set({ isLoading: true, error: null });
-
+            
+            removeItem: async (itemId, quantity) => {
+                set({ isLoading: true });
                 try {
-                    const cartData = await api.post<{ items: CartItem[] }>('/api/cart/add', item);
-                    const items = cartData.items || [];
-
-                    set({
-                        items,
-                        totalItems: items.reduce(
-                            (sum: number, item: CartItem) =>
-                                sum + item.quantity,
-                            0
-                        ),
-                        isEmpty: items.length === 0,
-                        isLoading: false,
-                    });
+                    await cartApi.removeItem(itemId, quantity);
+                    await get().fetchCart();
                 } catch (error) {
-                    set({
-                        error: handleApiError(error),
-                        isLoading: false,
-                    });
-                    throw error;
+                    console.error('Failed to remove item from cart:', error);
+                } finally {
+                    set({ isLoading: false });
                 }
             },
-
-            // Update item quantity
-            updateItemQuantity: async (itemId: number, quantity: number) => {
-                set({ isLoading: true, error: null });
-
+            
+            updateQuantity: async (itemId, quantity) => {
+                set({ isLoading: true });
                 try {
-                    const cartData = await api.put<{ items: CartItem[] }>('/api/cart/update', { itemId, quantity });
-                    const items = cartData.items || [];
-
-                    set({
-                        items,
-                        totalItems: items.reduce(
-                            (sum: number, item: CartItem) =>
-                                sum + item.quantity,
-                            0
-                        ),
-                        isEmpty: items.length === 0,
-                        isLoading: false,
-                    });
+                    if (quantity <= 0) {
+                        await cartApi.removeItem(itemId, 0);
+                    } else {
+                        await cartApi.updateItem(itemId, quantity);
+                    }
+                    await get().fetchCart();
                 } catch (error) {
-                    set({
-                        error: handleApiError(error),
-                        isLoading: false,
-                    });
-                    throw error;
+                    console.error('Failed to update item quantity:', error);
+                } finally {
+                    set({ isLoading: false });
                 }
             },
-
-            // Remove item from cart
-            removeItem: async (itemId: number) => {
-                set({ isLoading: true, error: null });
-
-                try {
-                    const cartData = await api.delete<{ items: CartItem[] }>('/api/cart/remove', { data: { itemId } });
-                    const items = cartData.items || [];
-
-                    set({
-                        items,
-                        totalItems: items.reduce(
-                            (sum: number, item: CartItem) =>
-                                sum + item.quantity,
-                            0
-                        ),
-                        isEmpty: items.length === 0,
-                        isLoading: false,
-                    });
-                } catch (error) {
-                    set({
-                        error: handleApiError(error),
-                        isLoading: false,
-                    });
-                    throw error;
-                }
-            },
-
-            // Clear cart
+            
             clearCart: async () => {
-                set({ isLoading: true, error: null });
-
+                set({ isLoading: true });
                 try {
-                    await api.delete('/api/cart/clear');
-
-                    set({
-                        items: [],
-                        totalItems: 0,
-                        isEmpty: true,
-                        isLoading: false,
-                    });
+                    await cartApi.clearCart();
+                    set({ cartItems: [], totalItems: 0 });
                 } catch (error) {
-                    set({
-                        error: handleApiError(error),
-                        isLoading: false,
-                    });
-                    throw error;
+                    console.error('Failed to clear cart:', error);
+                } finally {
+                    set({ isLoading: false });
                 }
             },
-
-            // Submit cart as request
-            submitCartAsRequest: async () => {
-                set({ isLoading: true, error: null });
-
+            
+            fetchCart: async () => {
+                set({ isLoading: true });
                 try {
-                    await api.post('/api/requests');
-
-                    // Clear cart after successful submission
-                    set({
-                        items: [],
-                        totalItems: 0,
-                        isEmpty: true,
-                        isLoading: false,
-                    });
+                    const items = await cartApi.getCart();
+                    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+                    set({ cartItems: items, totalItems });
                 } catch (error) {
-                    set({
-                        error: handleApiError(error),
-                        isLoading: false,
-                    });
-                    throw error;
+                    console.error('Failed to fetch cart:', error);
+                } finally {
+                    set({ isLoading: false });
                 }
-            },
-
-            // Set error
-            setError: (error) => {
-                set({ error });
-            },
-
-            // Clear error
-            clearError: () => {
-                set({ error: null });
             },
         }),
         {
-            name: 'cart-store',
+            name: 'cart-storage',
         }
     )
 );

@@ -8,4 +8,8 @@ import lombok.Setter;
 public class CreateOfficeDto {
     @NotBlank(message = "Office name can't be empty")
     private String name;
+    
+    private String location;
+    
+    private String description;
 }

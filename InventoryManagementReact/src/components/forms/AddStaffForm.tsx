@@ -6,11 +6,10 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
-import { useOfficeQueries } from '@/hooks/queries/useOffice';
+import { useOfficeNames } from '@/hooks/queries/useOffice';
 import { useUserQueries } from '@/hooks/queries/useUser';
 import { toast } from 'sonner';
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
-
 interface AddStaffFormProps {
     className?: string;
 }
@@ -27,11 +26,11 @@ export default function AddStaffForm({ className }: AddStaffFormProps) {
     const [value, setValue] = useState('');
 
     // Queries
-    const { officeNamesQuery } = useOfficeQueries();
+    const officeNames  = useOfficeNames();
     const { createStaffMutation } = useUserQueries();
 
     // Convert offices to combobox options
-    const officeOptions: ComboboxOption[] = officeNamesQuery.data?.map((office) => ({
+    const officeOptions: ComboboxOption[] = officeNames.data?.map((office) => ({
         value: office,
         label: office,
     })) || [];

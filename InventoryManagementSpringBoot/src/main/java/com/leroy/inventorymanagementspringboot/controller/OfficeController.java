@@ -1,6 +1,7 @@
 package com.leroy.inventorymanagementspringboot.controller;
 
 import com.leroy.inventorymanagementspringboot.dto.request.CreateOfficeDto;
+import com.leroy.inventorymanagementspringboot.dto.request.UpdateOfficeDto;
 import com.leroy.inventorymanagementspringboot.dto.response.OfficeResponseDto;
 import com.leroy.inventorymanagementspringboot.entity.Office;
 import com.leroy.inventorymanagementspringboot.entity.User;
@@ -39,9 +40,17 @@ public class OfficeController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<Optional<List<OfficeResponseDto>>> getAllOffices(@AuthenticationPrincipal UserDetails authenticatedUser) {
-        User user = userRepository.findByEmail(authenticatedUser.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not not found"));
-        return ResponseEntity.status(HttpStatus.OK).body(officeService.getOfficesByDepartment(user.getDepartment()));
+    public ResponseEntity<List<OfficeResponseDto>> getAllOffices(@AuthenticationPrincipal UserDetails authenticatedUser) {
+        User user = userRepository.findByEmail(authenticatedUser.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        List<OfficeResponseDto> offices = officeService.getOfficesByDepartment(user.getDepartment()).orElse(List.of());
+        
+        // Add staff count for each office
+        for (OfficeResponseDto office : offices) {
+            long staffCount = userRepository.countByOfficeId(office.getId());
+            office.setStaffCount((int) staffCount);
+        }
+        
+        return ResponseEntity.ok(offices);
     }
 
     @GetMapping("/names")
@@ -58,5 +67,26 @@ public class OfficeController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('STOREKEEPER')")
+    public ResponseEntity<OfficeResponseDto> getOfficeById(@PathVariable int id, @AuthenticationPrincipal UserDetails authenticatedUser) {
+        OfficeResponseDto office = officeService.getOfficeWithStaffCount(id, authenticatedUser);
+        return ResponseEntity.ok(office);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('STOREKEEPER')")
+    public ResponseEntity<Office> updateOffice(@PathVariable int id, @Valid @RequestBody UpdateOfficeDto officeDto, @AuthenticationPrincipal UserDetails authenticatedUser) {
+        Office office = officeService.updateOffice(id, officeDto, authenticatedUser);
+        return ResponseEntity.ok(office);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('STOREKEEPER')")
+    public ResponseEntity<?> deleteOffice(@PathVariable int id, @AuthenticationPrincipal UserDetails authenticatedUser) {
+        officeService.deleteOffice(id, authenticatedUser);
+        return ResponseEntity.ok().build();
     }
 }

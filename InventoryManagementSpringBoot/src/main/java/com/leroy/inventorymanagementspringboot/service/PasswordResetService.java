@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp; // Using Timestamp as per your User entity
 import java.time.LocalDateTime;
 import java.time.ZoneOffset; // For converting LocalDateTime to Timestamp
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -45,8 +47,7 @@ public class PasswordResetService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Transactional
-    public void createPasswordResetTokenForUser(String userEmail) {
+    public Map<String, Object> generateTokenForUser(String userEmail){
         // Apply rate limiting
         try {
             LocalDateTime lastRequestTime = resetRequestCache.get(userEmail);
@@ -74,7 +75,18 @@ public class PasswordResetService {
         user.setPasswordResetToken(newToken);
         user.setResetPasswordExpiresAt(expiryTime);
         userRepository.save(user); // Save the token and expiry on the user entity
+        Map<String, Object> map = new HashMap<>();
+        map.put("token", newToken);
+        map.put("user", user);
+        return map;
 
+    }
+
+    @Transactional
+    public void createPasswordResetTokenForUser(String userEmail) {
+        var map = generateTokenForUser(userEmail);
+        User user = (User) map.get("user");
+        String newToken =  (String) map.get("token");
         // Send email with the token link
         emailService.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), newToken);
         logger.info("Password reset token generated and email sent for user: {}", userEmail);

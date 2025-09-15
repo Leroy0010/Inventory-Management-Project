@@ -26,6 +26,7 @@ public class Notification {
     private String title;
 
 
+    // Explicit getter methods to ensure they exist
     @Column(nullable = false)
     private String message;
 

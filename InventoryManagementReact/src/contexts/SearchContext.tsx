@@ -87,16 +87,6 @@ const applicationData: SearchResult[] = [
 
     // Staff Pages
     {
-        id: 'staff-dashboard',
-        title: 'Staff Dashboard',
-        description: 'Staff-specific dashboard and tools',
-        category: 'page',
-        path: '/staff-dashboard',
-        icon: 'LayoutDashboard',
-        keywords: ['staff', 'dashboard', 'employee', 'tools'],
-        permissions: ['VIEW_DASHBOARD'],
-    },
-    {
         id: 'cart',
         title: 'Shopping Cart',
         description: 'Manage your shopping cart and requests',
@@ -119,16 +109,6 @@ const applicationData: SearchResult[] = [
 
     // Storekeeper Pages
     {
-        id: 'storekeeper-dashboard',
-        title: 'Storekeeper Dashboard',
-        description: 'Storekeeper management dashboard',
-        category: 'page',
-        path: '/storekeeper-dashboard',
-        icon: 'LayoutDashboard',
-        keywords: ['storekeeper', 'dashboard', 'management'],
-        permissions: ['VIEW_DASHBOARD'],
-    },
-    {
         id: 'staff-management',
         title: 'Staff Management',
         description: 'Manage staff members and accounts',
@@ -141,7 +121,7 @@ const applicationData: SearchResult[] = [
     {
         id: 'add-staff',
         title: 'Add Staff',
-        description: 'Add new staff members to the system',
+        description: 'Add new staff members to your department',
         category: 'page',
         path: '/staff/add',
         icon: 'UserPlus',
@@ -236,6 +216,16 @@ const applicationData: SearchResult[] = [
         keywords: ['requests', 'management', 'process', 'approve', 'reject'],
         permissions: ['VIEW_REQUESTS'],
     },
+    {
+        id: 'requests-management',
+        title: 'Request Management',
+        description: 'Manage and process all requests',
+        category: 'page',
+        path: '/staff-requests',
+        icon: 'FileText',
+        keywords: ['requests', 'management', 'process', 'fulfill'],
+        permissions: ['VIEW_REQUESTS'],
+    },
 
     // Reports
     {
@@ -305,7 +295,7 @@ const applicationData: SearchResult[] = [
         title: 'Send Message',
         description: 'Send messages to other users',
         category: 'page',
-        path: '/send-message',
+        path: '/notifications?tab=send',
         icon: 'MessageSquare',
         keywords: ['send', 'message', 'communication', 'chat', 'email'],
         permissions: ['SEND_MESSAGES'],

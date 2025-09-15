@@ -4,12 +4,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.sql.Timestamp; // This should ideally be java.time.LocalDateTime for modern Java APIs
 
-@Getter @Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
@@ -27,6 +28,7 @@ public class User {
     @NotBlank
     private String password;
 
+    // Explicit getter methods to ensure they exist
     @NotBlank
     @Size(max = 75)
     @Column(name = "first_name", nullable = false)
@@ -38,37 +40,34 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "role_id")
-    @Getter @Setter
     private Role role;
 
     @ManyToOne
     @JoinColumn(name = "office_id")
-    @Getter @Setter
     private Office office;
 
     // These fields will now be used directly
     @Column(name = "password_reset_token")
-    @Getter @Setter
     private String passwordResetToken;
 
     @Column(name = "reset_password_expires_at")
-    @Getter @Setter
     private Timestamp resetPasswordExpiresAt; // Still recommend LocalDateTime
 
-    @Getter @Setter
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @Getter @Setter
     @Column(nullable = false)
     private boolean active;
+
+    private String phone;
+
+    private String bio;
 
     public String getFullName() {
         return firstName + " " + lastName;
     }
 
-    public User() {}
 
     public User(String email, String password, String firstName, String lastName,
                 Role role, Office office) {

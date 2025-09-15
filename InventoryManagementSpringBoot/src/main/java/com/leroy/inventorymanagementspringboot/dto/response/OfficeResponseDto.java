@@ -7,4 +7,7 @@ import lombok.Setter;
 public class OfficeResponseDto {
     private int id;
     private String name;
+    private String location;
+    private String description;
+    private int staffCount;
 }

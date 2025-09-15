@@ -14,5 +14,8 @@ public interface OfficeMapper {
     @Mapping(target = "department", ignore = true)
     Office toOffice(CreateOfficeDto dto);
 
+    @Mapping(target = "staffCount", constant = "0")
+    OfficeResponseDto toOfficeResponseDto(Office office);
+
     List<OfficeResponseDto> toOfficeResponseDtoList(List<Office> offices);
 }

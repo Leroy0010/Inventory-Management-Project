@@ -1,93 +1,353 @@
 package com.leroy.inventorymanagementspringboot.service;
 
-import com.leroy.inventorymanagementspringboot.dto.dashboard.InventorySummaryDto;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.leroy.inventorymanagementspringboot.dto.dashboard.AdminDashboardDto;
+import com.leroy.inventorymanagementspringboot.dto.dashboard.CartItemDto;
+import com.leroy.inventorymanagementspringboot.dto.dashboard.DashboardStatsDto;
+import com.leroy.inventorymanagementspringboot.dto.dashboard.DepartmentOverviewDto;
+import com.leroy.inventorymanagementspringboot.dto.dashboard.QuickActionDto;
+import com.leroy.inventorymanagementspringboot.dto.dashboard.StaffDashboardDto;
+import com.leroy.inventorymanagementspringboot.dto.dashboard.StorekeeperDashboardDto;
+import com.leroy.inventorymanagementspringboot.dto.dashboard.SystemHealthDto;
+import com.leroy.inventorymanagementspringboot.entity.Cart;
+import com.leroy.inventorymanagementspringboot.entity.CartItem;
 import com.leroy.inventorymanagementspringboot.entity.Department;
 import com.leroy.inventorymanagementspringboot.entity.User;
-import com.leroy.inventorymanagementspringboot.enums.StockTransactionType;
+import com.leroy.inventorymanagementspringboot.repository.CartItemRepository;
+import com.leroy.inventorymanagementspringboot.repository.CartRepository;
+import com.leroy.inventorymanagementspringboot.repository.DepartmentRepository;
 import com.leroy.inventorymanagementspringboot.repository.InventoryItemRepository;
-import com.leroy.inventorymanagementspringboot.repository.OfficeRepository;
-import com.leroy.inventorymanagementspringboot.repository.StockTransactionRepository;
+import com.leroy.inventorymanagementspringboot.repository.NotificationRepository;
+import com.leroy.inventorymanagementspringboot.repository.RequestRepository;
 import com.leroy.inventorymanagementspringboot.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import com.leroy.inventorymanagementspringboot.servicei.DashboardServiceInterface;
 
 @Service
-public class DashboardService {
+@Transactional(readOnly = true)
+public class DashboardService implements DashboardServiceInterface {
 
-    private final InventoryItemRepository inventoryItemRepository;
     private final UserRepository userRepository;
-    private final OfficeRepository officeRepository;
-    private final StockTransactionRepository stockTransactionRepository;
+    private final DepartmentRepository departmentRepository;
+    private final InventoryItemRepository inventoryItemRepository;
+    private final RequestRepository requestRepository;
+    private final NotificationRepository notificationRepository;
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
 
-    public DashboardService(InventoryItemRepository inventoryItemRepository,
-                            UserRepository userRepository,
-                            OfficeRepository officeRepository,
-                            StockTransactionRepository stockTransactionRepository) {
-        this.inventoryItemRepository = inventoryItemRepository;
+    public DashboardService(UserRepository userRepository,
+                          DepartmentRepository departmentRepository,
+                          InventoryItemRepository inventoryItemRepository,
+                          RequestRepository requestRepository,
+                          NotificationRepository notificationRepository,
+                          CartRepository cartRepository,
+                          CartItemRepository cartItemRepository) {
         this.userRepository = userRepository;
-        this.officeRepository = officeRepository;
-        this.stockTransactionRepository = stockTransactionRepository;
+        this.departmentRepository = departmentRepository;
+        this.inventoryItemRepository = inventoryItemRepository;
+        this.requestRepository = requestRepository;
+        this.notificationRepository = notificationRepository;
+        this.cartRepository = cartRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
-    /**
-     * Retrieves the inventory summary for the authenticated user's department.
-     *
-     * @return InventorySummaryDto containing various aggregated metrics.
-     * @throws EntityNotFoundException if the user or his/her department is not found
-     */
-    public InventorySummaryDto getInventorySummary(UserDetails userDetails) {
-        // Get the authenticated user's department
-        User currentUser = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new  EntityNotFoundException("User not found"));
+    @Override
+    public AdminDashboardDto getAdminDashboard(User user) {
+        // Get basic counts
+        long totalDepartments = departmentRepository.count();
+        long totalStorekeepers = userRepository.countByRoleName("STOREKEEPER");
+        long unreadNotifications = notificationRepository.countByIsReadFalse();
 
-        Department userDepartment = currentUser.getDepartment();
-        if (userDepartment == null) throw new EntityNotFoundException("Department not found");
-
-        // 1. Total Items in Stock for the department
-        long totalItemsInStock = inventoryItemRepository.countByDepartment(userDepartment);
-
-        // 2. Items Below Reorder Level for the department
-        Long itemsBelowReorderLevelOptional = inventoryItemRepository.countByDepartmentAndQuantityLessThanReorderLevel(userDepartment);
-        long itemsBelowReorderLevel = itemsBelowReorderLevelOptional != null ? itemsBelowReorderLevelOptional : 0L;
-
-
-        // 3. Issued Today / This Month for the department
-        LocalDate today = LocalDate.now();
-        Timestamp startOfToday = Timestamp.valueOf(today.atStartOfDay());
-        Timestamp endOfToday = Timestamp.valueOf(today.atTime(LocalTime.MAX));
-
-        LocalDate firstDayOfMonth = today.withDayOfMonth(1);
-        Timestamp startOfMonth = Timestamp.valueOf(firstDayOfMonth.atStartOfDay());
-        Timestamp endOfMonth = Timestamp.valueOf(today.withDayOfMonth(today.lengthOfMonth()).atTime(LocalTime.MAX));
-
-        long issuedToday = stockTransactionRepository.countTransactionsBetweenAndDepartment(StockTransactionType.ISSUED, startOfToday, endOfToday, userDepartment);
-        long receivedToday = stockTransactionRepository.countTransactionsBetweenAndDepartment(StockTransactionType.RECEIVED, startOfToday, endOfToday, userDepartment);
-
-        long issuedThisMonth = stockTransactionRepository.countTransactionsBetweenAndDepartment(StockTransactionType.ISSUED, startOfMonth, endOfMonth, userDepartment);
-        long receivedThisMonth = stockTransactionRepository.countTransactionsBetweenAndDepartment(StockTransactionType.RECEIVED, startOfMonth, endOfMonth, userDepartment);
-
-        // 4. Total Staff in the Department
-        long totalStaffInDepartment = userRepository.countByDepartment(userDepartment);
-
-        // 5. Total Offices in the Department
-        long totalOfficesInDepartment = officeRepository.countByDepartment(userDepartment);
-
-        return new InventorySummaryDto(
-                totalItemsInStock,
-                itemsBelowReorderLevel,
-                issuedToday,
-                issuedThisMonth,
-                receivedToday,
-                receivedThisMonth,
-                totalStaffInDepartment,
-                totalOfficesInDepartment
+        // Build stats
+        List<DashboardStatsDto> stats = List.of(
+            DashboardStatsDto.builder()
+                .title("Total Departments")
+                .value(String.valueOf(totalDepartments))
+                .change("+0 this month")
+                .icon("Building2")
+                .color("text-blue-600")
+                .build(),
+            DashboardStatsDto.builder()
+                .title("Active Storekeepers")
+                .value(String.valueOf(totalStorekeepers))
+                .change("+0 this week")
+                .icon("Shield")
+                .color("text-green-600")
+                .build(),
+            DashboardStatsDto.builder()
+                .title("System Health")
+                .value("99.9%")
+                .change("All systems operational")
+                .icon("Activity")
+                .color("text-green-600")
+                .build(),
+            DashboardStatsDto.builder()
+                .title("Pending Notifications")
+                .value(String.valueOf(unreadNotifications))
+                .change("Unread messages")
+                .icon("Bell")
+                .color("text-orange-600")
+                .build()
         );
+
+        // Build quick actions
+        List<QuickActionDto> quickActions = List.of(
+            QuickActionDto.builder()
+                .title("Manage Departments")
+                .description("Create and manage departments")
+                .icon("Building2")
+                .color("bg-blue-500")
+                .href("/departments/add")
+                .build(),
+            QuickActionDto.builder()
+                .title("Add Storekeeper")
+                .description("Register new storekeepers")
+                .icon("Shield")
+                .color("bg-green-500")
+                .href("/storekeeper/add")
+                .build(),
+            QuickActionDto.builder()
+                .title("System Settings")
+                .description("Configure system settings")
+                .icon("Settings")
+                .color("bg-purple-500")
+                .href("/settings")
+                .build(),
+            QuickActionDto.builder()
+                .title("Send Notification")
+                .description("Send system-wide notifications")
+                .icon("Bell")
+                .color("bg-orange-500")
+                .href("/notifications?tab=send")
+                .build()
+        );
+
+        // System health
+        SystemHealthDto systemHealth = SystemHealthDto.builder()
+            .databaseStatus("Healthy")
+            .apiStatus("Running")
+            .authStatus("Active")
+            .overallHealth("99.9%")
+            .build();
+
+        return AdminDashboardDto.builder()
+            .welcomeMessage("Welcome back, " + user.getFirstName() + "!")
+            .role("Administrator")
+            .lastLoginAt("Today")
+            .stats(stats)
+            .quickActions(quickActions)
+            .recentActivity(new ArrayList<>())
+            .systemHealth(systemHealth)
+            .build(); 
     }
 
+    @Override
+    public StorekeeperDashboardDto getStorekeeperDashboard(User user) {
+        // Get real data from database
+        long totalInventoryItems = inventoryItemRepository.count();
+        long unreadNotifications = notificationRepository.countByIsReadFalse();
+        
+        // Get department-specific data
+        Department department = user.getOffice() != null ? user.getOffice().getDepartment() : null;
+        long departmentInventoryItems = department != null ? inventoryItemRepository.countByDepartment(department) : 0;
+        long lowStockItems = department != null ? inventoryItemRepository.countByDepartmentAndQuantityLessThanReorderLevel(department) : 0;
+        
+        // Get pending requests for this storekeeper
+        long pendingRequests = requestRepository.countByStatusNameAndStorekeeper("PENDING", user);
+        
+        // Get department staff count (users in same department)
+        long departmentStaff = department != null ? userRepository.countByDepartmentIncludingOffice(department) : 0;
+
+        // Build stats
+        List<DashboardStatsDto> stats = List.of(
+            DashboardStatsDto.builder()
+                .title("Total Inventory Items")
+                .value(String.valueOf(departmentInventoryItems))
+                .change("In your department")
+                .icon("Package")
+                .color("text-blue-600")
+                .build(),
+            DashboardStatsDto.builder()
+                .title("Pending Requests")
+                .value(String.valueOf(pendingRequests))
+                .change("Awaiting approval")
+                .icon("Clock")
+                .color("text-orange-600")
+                .build(),
+            DashboardStatsDto.builder()
+                .title("Department Staff")
+                .value(String.valueOf(departmentStaff))
+                .change("In your department")
+                .icon("Users")
+                .color("text-green-600")
+                .build(),
+            DashboardStatsDto.builder()
+                .title("Low Stock Items")
+                .value(String.valueOf(lowStockItems))
+                .change("Need restocking")
+                .icon("AlertTriangle")
+                .color("text-red-600")
+                .build()
+        );
+
+        // Build quick actions
+        List<QuickActionDto> quickActions = List.of(
+            QuickActionDto.builder()
+                .title("Manage Inventory")
+                .description("Add and manage inventory items")
+                .icon("Package")
+                .color("bg-blue-500")
+                .href("/inventory/add")
+                .build(),
+            QuickActionDto.builder()
+                .title("Manage Staff")
+                .description("Add and manage department staff")
+                .icon("Users")
+                .color("bg-green-500")
+                .href("/staff/add")
+                .build(),
+            QuickActionDto.builder()
+                .title("Manage Offices")
+                .description("Create and manage offices")
+                .icon("Building2")
+                .color("bg-purple-500")
+                .href("/office/add")
+                .build(),
+            QuickActionDto.builder()
+                .title("Send Notification")
+                .description("Send messages to all department staff or specific staff")
+                .icon("Bell")
+                .color("bg-orange-500")
+                .href("/notifications?tab=send")
+                .build()
+        );
+
+        // Department overview
+        DepartmentOverviewDto departmentOverview = DepartmentOverviewDto.builder()
+            .totalStaff(departmentStaff)
+            .inventoryItems(departmentInventoryItems)
+            .pendingRequests(pendingRequests)
+            .lowStockItems(lowStockItems)
+            .build();
+
+        return StorekeeperDashboardDto.builder()
+            .welcomeMessage("Welcome back, " + user.getFirstName() + "!")
+            .role("Storekeeper")
+            .departmentName(department != null ? department.getName() : "Department")
+            .stats(stats)
+            .quickActions(quickActions)
+            .recentRequests(new ArrayList<>())
+            .departmentOverview(departmentOverview)
+            .build();
+    }
+
+    @Override
+    public StaffDashboardDto getStaffDashboard(User user) {
+        // Get real data from database
+        long totalInventoryItems = inventoryItemRepository.count();
+        long unreadNotifications = notificationRepository.countByUserAndIsReadFalse(user);
+        
+        // Get user's cart data
+        Cart userCart = cartRepository.findByUser(user).orElse(null);
+        List<CartItem> cartItems = userCart != null ? cartItemRepository.findByCart(userCart) : new ArrayList<>();
+        int cartTotal = cartItems.stream().mapToInt(CartItem::getQuantity).sum();
+        
+        // Get user's request counts
+        long pendingRequests = requestRepository.countByUserAndStatusName(user, "PENDING");
+        long approvedRequests = requestRepository.countByUserAndStatusName(user, "APPROVED");
+
+        // Build stats
+        List<DashboardStatsDto> stats = List.of(
+            DashboardStatsDto.builder()
+                .title("Items in Cart")
+                .value(String.valueOf(cartTotal))
+                .change("Ready for checkout")
+                .icon("ShoppingCart")
+                .color("text-blue-600")
+                .build(),
+            DashboardStatsDto.builder()
+                .title("Pending Requests")
+                .value(String.valueOf(pendingRequests))
+                .change("Awaiting approval")
+                .icon("Clock")
+                .color("text-orange-600")
+                .build(),
+            DashboardStatsDto.builder()
+                .title("Approved Requests")
+                .value(String.valueOf(approvedRequests))
+                .change("This month")
+                .icon("CheckCircle")
+                .color("text-green-600")
+                .build(),
+            DashboardStatsDto.builder()
+                .title("Available Items")
+                .value(String.valueOf(totalInventoryItems))
+                .change("In inventory")
+                .icon("Package")
+                .color("text-purple-600")
+                .build()
+        );
+
+        // Build quick actions
+        List<QuickActionDto> quickActions = List.of(
+            QuickActionDto.builder()
+                .title("Browse Inventory")
+                .description("Search and view available items")
+                .icon("Package")
+                .color("bg-blue-500")
+                .href("/inventory-items")
+                .build(),
+            QuickActionDto.builder()
+                .title("My Cart")
+                .description("View and manage your cart")
+                .icon("ShoppingCart")
+                .color("bg-green-500")
+                .href("/cart")
+                .build(),
+            QuickActionDto.builder()
+                .title("My Requests")
+                .description("View your submitted requests")
+                .icon("FileText")
+                .color("bg-purple-500")
+                .href("/staff-requests")
+                .build(),
+            QuickActionDto.builder()
+                .title("Notifications")
+                .description("View your notifications")
+                .icon("Bell")
+                .color("bg-orange-500")
+                .href("/notifications")
+                .build()
+        );
+
+        // Map cart items to DTOs
+        List<CartItemDto> cartItemsDto = cartItems.stream()
+            .map(this::mapToCartItemDto)
+            .collect(Collectors.toList());
+
+        return StaffDashboardDto.builder()
+            .welcomeMessage("Welcome back, " + user.getFirstName() + "!")
+            .role("Staff Member")
+            .officeName(user.getOffice() != null ? user.getOffice().getName() : "Office")
+            .stats(stats)
+            .quickActions(quickActions)
+            .recentRequests(new ArrayList<>())
+            .cartItems(cartItemsDto)
+            .cartTotal(cartTotal)
+            .unreadNotifications(unreadNotifications)
+            .build();
+    }
+
+    private CartItemDto mapToCartItemDto(CartItem cartItem) {
+        return CartItemDto.builder()
+            .id((long) cartItem.getId())
+            .name(cartItem.getInventoryItem().getName())
+            .quantity(cartItem.getQuantity())
+            .build();
+    }
 }

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { useCreateOffice } from '@/hooks/queries/useOffice';
+import { useNavigate } from 'react-router-dom';
 
 interface AddOfficeFormProps {
     classname?: string;
@@ -19,6 +21,9 @@ const addOfficeSchema = z.object({
 type AddOfficeFormData = z.infer<typeof addOfficeSchema>;
 
 export default function AddOfficeForm({ classname }: AddOfficeFormProps) {
+    const navigate = useNavigate();
+    const createOfficeMutation = useCreateOffice();
+    
     const {
         register,
         handleSubmit,
@@ -27,12 +32,21 @@ export default function AddOfficeForm({ classname }: AddOfficeFormProps) {
         resolver: zodResolver(addOfficeSchema),
     });
 
+    const onSubmit = async (data: AddOfficeFormData) => {
+        try {
+            await createOfficeMutation.mutateAsync(data);
+            navigate('/office');
+        } catch (error) {
+            // Error is handled by the mutation
+        }
+    };
+
     return (
         <Card className={`${classname}`}>
             <CardContent>
                 <form
                     className="space-y-4"
-                    onSubmit={handleSubmit(console.log)}
+                    onSubmit={handleSubmit(onSubmit)}
                 >
                     <div>
                         <Label htmlFor="name">Office Name</Label>
@@ -81,10 +95,10 @@ export default function AddOfficeForm({ classname }: AddOfficeFormProps) {
                     </div>
                     <Button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || createOfficeMutation.isPending}
                         className="cursor-pointer"
                     >
-                        {isSubmitting ? 'Adding...' : 'Add Office'}
+                        {isSubmitting || createOfficeMutation.isPending ? 'Adding...' : 'Add Office'}
                     </Button>
                 </form>
             </CardContent>

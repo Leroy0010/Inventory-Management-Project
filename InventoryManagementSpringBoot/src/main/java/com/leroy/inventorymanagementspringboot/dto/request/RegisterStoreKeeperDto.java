@@ -15,10 +15,6 @@ public class RegisterStoreKeeperDto { // For Admin to register ADMIN or STOREKEE
     @Size(max = 100, message = "Email must be less than or equal to 100 characters")
     private String email;
 
-    @NotBlank(message = "Password cannot be empty")
-    @Size(min = 6, message = "Password must be at least 6 characters long")
-    private String password;
-
     @NotBlank(message = "First name cannot be empty")
     @Size(max = 75, message = "First name must be less than or equal to 75 characters")
     private String firstName;
