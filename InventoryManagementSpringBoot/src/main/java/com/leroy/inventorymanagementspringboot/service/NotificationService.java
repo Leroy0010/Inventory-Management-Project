@@ -1,5 +1,6 @@
 package com.leroy.inventorymanagementspringboot.service;
 
+import com.leroy.inventorymanagementspringboot.dto.request.GeneralNotificationRequest;
 import com.leroy.inventorymanagementspringboot.dto.response.NotificationResponseDto;
 import com.leroy.inventorymanagementspringboot.dto.websocket.WebSocketNotificationDto;
 import com.leroy.inventorymanagementspringboot.entity.*;
@@ -11,8 +12,10 @@ import com.leroy.inventorymanagementspringboot.repository.RoleRepository;
 import com.leroy.inventorymanagementspringboot.repository.UserRepository;
 import com.leroy.inventorymanagementspringboot.servicei.NotificationServiceInterface;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class NotificationService implements NotificationServiceInterface {
 
     private final NotificationRepository notificationRepository;
@@ -28,15 +32,8 @@ public class NotificationService implements NotificationServiceInterface {
     private final InventoryBatchRepository inventoryBatchRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-
-    public NotificationService(NotificationRepository notificationRepository, NotificationMapper notificationMapper, SimpMessagingTemplate messagingTemplate, InventoryBatchRepository inventoryBatchRepository, UserRepository userRepository, RoleRepository roleRepository) {
-        this.notificationRepository = notificationRepository;
-        this.notificationMapper = notificationMapper;
-        this.messagingTemplate = messagingTemplate;
-        this.inventoryBatchRepository = inventoryBatchRepository;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-    }
+    private final EmailService emailService;
+    
 
     private void broadcast(Notification notification) {
         WebSocketNotificationDto socketDto = new WebSocketNotificationDto(
@@ -170,5 +167,105 @@ public class NotificationService implements NotificationServiceInterface {
                     now
             );
         }
+    }
+
+    public List<String> getAvailableUsers(UserDetails userDetails) {
+        User sender = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        List<User> availableUsers;
+
+        if ("ADMIN".equals(sender.getRole().getName())) {
+            // Admin can see all users except themselves
+            availableUsers = userRepository.findAllByIdNot(sender.getId()).orElse(List.of());
+        } else if ("STOREKEEPER".equals(sender.getRole().getName())) {
+            // Storekeeper can only see users from their department
+            if (sender.getDepartment() != null) {
+                availableUsers = userRepository.findAllByOffice_DepartmentAndIdNot(
+                        sender.getDepartment(),
+                        sender.getId()
+                ).orElse(List.of());
+            } else {
+                availableUsers = List.of();
+            }
+        } else {
+            availableUsers = List.of();
+        }
+
+        return availableUsers
+                .stream()
+                .map(User::getEmail)
+                .collect(Collectors.toList());
+    }
+
+    public List<User> sendGeneralNotification(UserDetails userDetails, GeneralNotificationRequest request) {
+        User sender = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        List<User> recipients = getRecipients(request, sender);
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+        // Send notification to each recipient
+        for (User recipient : recipients) {
+            notify(
+                    recipient,
+                    request.getSubject(),
+                    request.getMessage(),
+                    NotificationType.GENERAL,
+                    now
+            );
+
+            emailService.sendGeneralNotificationEmail(
+                    recipient.getEmail(),
+                    request.getSubject(),
+                    request.getMessage(),
+                    recipient.getFirstName()
+            );
+        }
+
+        return recipients;
+    }
+
+    private List<User> getRecipients(GeneralNotificationRequest request, User sender) {
+        return switch (request.getRecipientType()) {
+            case "ALL_USERS" -> {
+                // Admin can send to all users except themselves
+                if ("ADMIN".equals(sender.getRole().getName())) {
+                    yield userRepository.findAllByIdNot(sender.getId()).orElse(List.of());
+                }
+                yield List.of();
+            }
+            case "DEPARTMENT_USERS" -> {
+                // Both Admin and Storekeeper can send to department users
+                if (sender.getOffice() != null && sender.getOffice().getDepartment() != null) {
+                    yield userRepository.findAllByOffice_DepartmentAndIdNot(
+                            sender.getOffice().getDepartment(),
+                            sender.getId()
+                    ).orElse(List.of());
+                }
+                yield List.of();
+            }
+            case "SPECIFIC_USERS" -> {
+                if (request.getUserEmails() != null && !request.getUserEmails().isEmpty()) {
+                    List<User> selectedUsers = userRepository.findAllByEmailIn(request.getUserEmails());
+
+                    // For Storekeeper: filter to only include users from their department
+                    if ("STOREKEEPER".equals(sender.getRole().getName())) {
+                        if (sender.getOffice() != null && sender.getOffice().getDepartment() != null) {
+                            yield selectedUsers.stream()
+                                    .filter(user -> user.getOffice() != null &&
+                                            sender.getOffice().getDepartment().equals(user.getOffice().getDepartment()))
+                                    .toList();
+                        }
+                        yield List.of();
+                    }
+
+                    // For Admin: can send to any selected users
+                    yield selectedUsers;
+                }
+                yield List.of();
+            }
+            default -> List.of();
+        };
     }
 }

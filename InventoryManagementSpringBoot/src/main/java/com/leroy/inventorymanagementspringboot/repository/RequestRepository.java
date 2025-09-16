@@ -6,6 +6,7 @@ import com.leroy.inventorymanagementspringboot.entity.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query; // Import Query
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -77,14 +78,19 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
             "(u.department = :department OR (u.office IS NOT NULL AND u.office.department = :department))")
     List<Request> findRequestsForDepartment(Department department);
 
-    // Dashboard methods
-    List<Request> findTop5ByOrderByCreatedAtDesc();
-    
-    List<Request> findTop5ByUserOrderByCreatedAtDesc(User user);
-    
-    List<Request> findTop5ByStorekeeperOrderByCreatedAtDesc(User storekeeper);
-    
-    long countByStatusNameAndStorekeeper(String statusName, User storekeeper);
-    
-    long countByUserAndStatusName(User user, String statusName);
+    // Dashboard methods 
+    @Query("SELECT r FROM Request r ORDER BY r.submittedAt DESC LIMIT 5")
+    List<Request> findTop5ByOrderBySubmittedAtDesc();
+
+    @Query("SELECT r FROM Request r WHERE r.user = :user ORDER BY r.submittedAt DESC LIMIT 5")
+    List<Request> findTop5ByUserOrderBySubmittedAtDesc(@Param("user") User user);
+
+    @Query("SELECT r FROM Request r WHERE r.approver = :approver ORDER BY r.submittedAt DESC LIMIT 5")
+    List<Request> findTop5ByApproverOrderBySubmittedAtDesc(@Param("approver") User approver);
+
+    @Query("SELECT COUNT(r) FROM Request r JOIN r.requestStatus rs WHERE rs.name = :statusName AND r.approver = :approver")
+    long countByStatusNameAndApprover(@Param("statusName") String statusName, @Param("approver") User approver);
+
+    @Query("SELECT COUNT(r) FROM Request r JOIN r.requestStatus rs WHERE r.user = :user AND rs.name = :statusName")
+    long countByUserAndStatusName(@Param("user") User user, @Param("statusName") String statusName);
 }

@@ -1,11 +1,11 @@
 package com.leroy.inventorymanagementspringboot.dto.dashboard;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -14,9 +14,8 @@ import java.util.List;
 public class AdminDashboardDto {
     private String welcomeMessage;
     private String role;
-    private String lastLoginAt;
     private List<DashboardStatsDto> stats;
     private List<QuickActionDto> quickActions;
-    private List<RecentRequestDto> recentActivity;
     private SystemHealthDto systemHealth;
+    private Long unreadNotifications;
 }

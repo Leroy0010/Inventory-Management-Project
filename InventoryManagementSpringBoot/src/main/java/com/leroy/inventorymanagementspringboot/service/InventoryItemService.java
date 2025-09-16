@@ -1,5 +1,13 @@
 package com.leroy.inventorymanagementspringboot.service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.leroy.inventorymanagementspringboot.annotation.Auditable;
 import com.leroy.inventorymanagementspringboot.dto.request.CreateInventoryItemDto;
 import com.leroy.inventorymanagementspringboot.dto.request.UpdateInventoryItemDto;
@@ -15,13 +23,9 @@ import com.leroy.inventorymanagementspringboot.mapper.InventoryItemMapper;
 import com.leroy.inventorymanagementspringboot.repository.InventoryItemRepository;
 import com.leroy.inventorymanagementspringboot.repository.UserRepository;
 import com.leroy.inventorymanagementspringboot.servicei.InventoryItemServiceInterface;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -29,11 +33,13 @@ public class InventoryItemService implements InventoryItemServiceInterface {
     final InventoryItemRepository inventoryItemRepository;
     final InventoryItemMapper  inventoryItemMapper;
     private final UserRepository userRepository;
+    private final GoogleDriveService googleDriveService;
 
-    public InventoryItemService(InventoryItemRepository inventoryItemRepository, InventoryItemMapper inventoryItemMapper, UserRepository userRepository) {
+    public InventoryItemService(InventoryItemRepository inventoryItemRepository, InventoryItemMapper inventoryItemMapper, UserRepository userRepository, GoogleDriveService googleDriveService) {
         this.inventoryItemRepository = inventoryItemRepository;
         this.inventoryItemMapper = inventoryItemMapper;
         this.userRepository = userRepository;
+        this.googleDriveService = googleDriveService;
     }
 
 
@@ -50,6 +56,35 @@ public class InventoryItemService implements InventoryItemServiceInterface {
         }
         InventoryItem inventoryItem = inventoryItemMapper.toInventoryItem(createInventoryItemDto);
         inventoryItem.setDepartment(storekeeper.getDepartment());
+
+        return inventoryItemRepository.save(inventoryItem);
+    }
+
+    @Override
+    @Auditable(
+            action = AuditAction.CREATE,
+            entityClass = InventoryItem.class
+    )
+    public InventoryItem addInventoryItemWithImage(CreateInventoryItemDto createInventoryItemDto, MultipartFile image, UserDetails userDetails) {
+        User storekeeper = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (inventoryItemRepository.existsByNameAndDepartment(createInventoryItemDto.getName(), storekeeper.getDepartment())) {
+            throw new IllegalArgumentException("Inventory Item already exists");
+        }
+
+        InventoryItem inventoryItem = inventoryItemMapper.toInventoryItem(createInventoryItemDto);
+        inventoryItem.setDepartment(storekeeper.getDepartment());
+
+        // Upload image to Google Drive if provided
+        if (image != null && !image.isEmpty()) {
+            try {
+                String departmentName = storekeeper.getDepartment().getName();
+                String imageUrl = googleDriveService.uploadMultipartFile(image, departmentName);
+                inventoryItem.setImagePath(imageUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload image to Google Drive: " + e.getMessage(), e);
+            }
+        }
 
         return inventoryItemRepository.save(inventoryItem);
     }

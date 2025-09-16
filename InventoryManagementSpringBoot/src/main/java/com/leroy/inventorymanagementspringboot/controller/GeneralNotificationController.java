@@ -1,48 +1,47 @@
 package com.leroy.inventorymanagementspringboot.controller;
 
-import com.leroy.inventorymanagementspringboot.dto.request.GeneralNotificationRequest;
-import com.leroy.inventorymanagementspringboot.entity.User;
-import com.leroy.inventorymanagementspringboot.exception.ResourceNotFoundException;
-import com.leroy.inventorymanagementspringboot.repository.UserRepository;
-import com.leroy.inventorymanagementspringboot.service.GeneralNotificationService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import java.util.List;
+
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.leroy.inventorymanagementspringboot.dto.request.GeneralNotificationRequest;
+import com.leroy.inventorymanagementspringboot.dto.response.GeneralNotificationResponse;
+import com.leroy.inventorymanagementspringboot.service.NotificationService;
 
 @RestController
 @RequestMapping("/api/general-notifications")
+@AllArgsConstructor
 public class GeneralNotificationController {
 
-    private final GeneralNotificationService generalNotificationService;
-    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-    public GeneralNotificationController(GeneralNotificationService generalNotificationService, UserRepository userRepository) {
-        this.generalNotificationService = generalNotificationService;
-        this.userRepository = userRepository;
+
+    @GetMapping("/available-users")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STOREKEEPER')")
+    public ResponseEntity<List<String>> getAvailableUsers(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(notificationService.getAvailableUsers(userDetails));
     }
 
     @PostMapping("/send")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'STOREKEEPER')") // Only Admin or Storekeeper can send
-    public ResponseEntity<String> sendGeneralNotification(
-            @Valid @RequestBody GeneralNotificationRequest request,
-            @AuthenticationPrincipal UserDetails authenticatedUser) {
-
-        User senderUser = userRepository.findByEmail(authenticatedUser.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("Sender user not found."));
-
-        try {
-            generalNotificationService.sendGeneralNotification(request, senderUser);
-            return ResponseEntity.ok("General notification sent successfully.");
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send general notification: " + e.getMessage());
-        }
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STOREKEEPER')")
+    public ResponseEntity<GeneralNotificationResponse> sendGeneralNotification(
+            @RequestBody GeneralNotificationRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        var recipients = notificationService.sendGeneralNotification(userDetails, request);
+        var response = new GeneralNotificationResponse();
+        response.setMessage("Notification sent successfully to " + recipients.size() + " recipients");
+        return ResponseEntity.ok(response);
     }
+
 }

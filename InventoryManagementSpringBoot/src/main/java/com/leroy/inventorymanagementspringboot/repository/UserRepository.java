@@ -58,4 +58,6 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     
     @Query("SELECT COUNT(u) FROM User u WHERE u.office.id = :officeId")
     long countByOfficeId(@Param("officeId") int officeId);
+    
+
 }

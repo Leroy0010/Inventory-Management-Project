@@ -95,3 +95,9 @@ app:
         # This will be the public URL of your Spring Boot backend on Render,
         # as your JavaFX app will interact directly with your backend's public endpoint.
         base-url: ${FRONTEND_BASE_URL}
+
+google:
+  drive:
+    credentials-file: ${GOOGLE_DRIVE_CREDENTIALS}
+    root-folder-id: ${GOOGLE_DRIVE_FOLDER_ID}
+

@@ -5,7 +5,10 @@ import com.leroy.inventorymanagementspringboot.entity.User;
 import com.leroy.inventorymanagementspringboot.enums.NotificationType;
 import com.leroy.inventorymanagementspringboot.repository.UserRepository;
 import com.leroy.inventorymanagementspringboot.service.NotificationService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,14 +26,14 @@ public class NotificationController {
     }
 
     @GetMapping("/unread")
-    public ResponseEntity<List<NotificationResponseDto>> getUnreadNotifications(@RequestParam int userId) {
-        User user = userRepository.getReferenceById(userId);
+    public ResponseEntity<List<NotificationResponseDto>> getUnreadNotifications(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         return ResponseEntity.ok(notificationService.getUnreadNotifications(user));
     }
 
     @GetMapping
-    public ResponseEntity<List<NotificationResponseDto>> getAllNotifications(@RequestParam int userId) {
-        User user = userRepository.getReferenceById(userId);
+    public ResponseEntity<List<NotificationResponseDto>> getAllNotifications(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         return ResponseEntity.ok(notificationService.getAllNotifications(user));
     }
 
@@ -41,26 +44,28 @@ public class NotificationController {
     }
 
     @PutMapping("/mark-all-read")
-    public ResponseEntity<Void> markAllAsRead(@RequestParam int userId) {
-        User user = userRepository.getReferenceById(userId);
+    public ResponseEntity<Void> markAllAsRead(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         notificationService.markAllAsRead(user);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/count/unread")
-    public ResponseEntity<Long> getUnreadCount(@RequestParam int userId) {
-        User user = userRepository.getReferenceById(userId);
+    public ResponseEntity<Long> getUnreadCount(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         return ResponseEntity.ok(notificationService.getUnreadCount(user));
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<NotificationResponseDto>> getByType(@RequestParam int userId, @RequestParam NotificationType type){
-        return ResponseEntity.ok(notificationService.getNotificationsByType(userId, type));
+    public ResponseEntity<List<NotificationResponseDto>> getByType(@AuthenticationPrincipal UserDetails userDetails, @RequestParam NotificationType type){
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return ResponseEntity.ok(notificationService.getNotificationsByType(user.getId(), type));
     }
 
     @DeleteMapping("/delete-all-old")
-    public ResponseEntity<Void> deleteAllOldNotifications(@RequestParam int userId, @RequestParam int daysOld) {
-        return ResponseEntity.ok(notificationService.deleteOldNotifications(userId, daysOld));
+    public ResponseEntity<Void> deleteAllOldNotifications(@AuthenticationPrincipal UserDetails userDetails, @RequestParam int daysOld) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return ResponseEntity.ok(notificationService.deleteOldNotifications(user.getId(), daysOld));
     }
 
 }

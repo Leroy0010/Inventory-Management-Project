@@ -4,7 +4,7 @@ import com.leroy.inventorymanagementspringboot.dto.report.UserActivityReportRequ
 import com.leroy.inventorymanagementspringboot.dto.report.UserActivityReportResponseDto;
 import com.leroy.inventorymanagementspringboot.entity.User;
 import com.leroy.inventorymanagementspringboot.repository.UserRepository;
-import com.leroy.inventorymanagementspringboot.service.report.UserActivityReportService;
+import com.leroy.inventorymanagementspringboot.service.UserActivityReportService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

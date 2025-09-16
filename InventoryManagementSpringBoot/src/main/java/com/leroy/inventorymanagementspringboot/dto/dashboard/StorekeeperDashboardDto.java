@@ -1,11 +1,11 @@
 package com.leroy.inventorymanagementspringboot.dto.dashboard;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -19,4 +19,5 @@ public class StorekeeperDashboardDto {
     private List<QuickActionDto> quickActions;
     private List<RecentRequestDto> recentRequests;
     private DepartmentOverviewDto departmentOverview;
+    private Long unreadNotifications;
 }

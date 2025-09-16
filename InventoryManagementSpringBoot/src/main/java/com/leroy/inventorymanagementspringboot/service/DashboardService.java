@@ -1,9 +1,12 @@
 package com.leroy.inventorymanagementspringboot.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.leroy.inventorymanagementspringboot.entity.*;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,13 +15,10 @@ import com.leroy.inventorymanagementspringboot.dto.dashboard.CartItemDto;
 import com.leroy.inventorymanagementspringboot.dto.dashboard.DashboardStatsDto;
 import com.leroy.inventorymanagementspringboot.dto.dashboard.DepartmentOverviewDto;
 import com.leroy.inventorymanagementspringboot.dto.dashboard.QuickActionDto;
+import com.leroy.inventorymanagementspringboot.dto.dashboard.RecentRequestDto;
 import com.leroy.inventorymanagementspringboot.dto.dashboard.StaffDashboardDto;
 import com.leroy.inventorymanagementspringboot.dto.dashboard.StorekeeperDashboardDto;
 import com.leroy.inventorymanagementspringboot.dto.dashboard.SystemHealthDto;
-import com.leroy.inventorymanagementspringboot.entity.Cart;
-import com.leroy.inventorymanagementspringboot.entity.CartItem;
-import com.leroy.inventorymanagementspringboot.entity.Department;
-import com.leroy.inventorymanagementspringboot.entity.User;
 import com.leroy.inventorymanagementspringboot.repository.CartItemRepository;
 import com.leroy.inventorymanagementspringboot.repository.CartRepository;
 import com.leroy.inventorymanagementspringboot.repository.DepartmentRepository;
@@ -29,6 +29,7 @@ import com.leroy.inventorymanagementspringboot.repository.UserRepository;
 import com.leroy.inventorymanagementspringboot.servicei.DashboardServiceInterface;
 
 @Service
+@AllArgsConstructor
 @Transactional(readOnly = true)
 public class DashboardService implements DashboardServiceInterface {
 
@@ -40,28 +41,15 @@ public class DashboardService implements DashboardServiceInterface {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
 
-    public DashboardService(UserRepository userRepository,
-                          DepartmentRepository departmentRepository,
-                          InventoryItemRepository inventoryItemRepository,
-                          RequestRepository requestRepository,
-                          NotificationRepository notificationRepository,
-                          CartRepository cartRepository,
-                          CartItemRepository cartItemRepository) {
-        this.userRepository = userRepository;
-        this.departmentRepository = departmentRepository;
-        this.inventoryItemRepository = inventoryItemRepository;
-        this.requestRepository = requestRepository;
-        this.notificationRepository = notificationRepository;
-        this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
-    }
 
     @Override
     public AdminDashboardDto getAdminDashboard(User user) {
         // Get basic counts
         long totalDepartments = departmentRepository.count();
         long totalStorekeepers = userRepository.countByRoleName("STOREKEEPER");
-        long unreadNotifications = notificationRepository.countByIsReadFalse();
+        long unreadNotifications = notificationRepository.countByUserAndIsReadFalse(user);
+
+        // Admin dashboard doesn't need recent requests - they have AdminRecentActivity component
 
         // Build stats
         List<DashboardStatsDto> stats = List.of(
@@ -138,19 +126,17 @@ public class DashboardService implements DashboardServiceInterface {
         return AdminDashboardDto.builder()
             .welcomeMessage("Welcome back, " + user.getFirstName() + "!")
             .role("Administrator")
-            .lastLoginAt("Today")
             .stats(stats)
             .quickActions(quickActions)
-            .recentActivity(new ArrayList<>())
             .systemHealth(systemHealth)
+            .unreadNotifications(unreadNotifications)
             .build(); 
     }
 
     @Override
     public StorekeeperDashboardDto getStorekeeperDashboard(User user) {
         // Get real data from database
-        long totalInventoryItems = inventoryItemRepository.count();
-        long unreadNotifications = notificationRepository.countByIsReadFalse();
+        long unreadNotifications = notificationRepository.countByUserAndIsReadFalse(user);
         
         // Get department-specific data
         Department department = user.getOffice() != null ? user.getOffice().getDepartment() : null;
@@ -158,10 +144,21 @@ public class DashboardService implements DashboardServiceInterface {
         long lowStockItems = department != null ? inventoryItemRepository.countByDepartmentAndQuantityLessThanReorderLevel(department) : 0;
         
         // Get pending requests for this storekeeper
-        long pendingRequests = requestRepository.countByStatusNameAndStorekeeper("PENDING", user);
+        long pendingRequests = requestRepository.countByStatusNameAndApprover("PENDING", user);
         
         // Get department staff count (users in same department)
         long departmentStaff = department != null ? userRepository.countByDepartmentIncludingOffice(department) : 0;
+
+        // Get recent requests for storekeeper dashboard (department-specific requests)
+        List<Request> recentRequests = new ArrayList<>();
+        if (department != null) {
+            recentRequests = requestRepository.findRequestsForDepartment(department).stream()
+                .limit(5)
+                .toList();
+        }
+        List<RecentRequestDto> recentRequestsDto = recentRequests.stream()
+            .map(this::mapToRecentRequestDto)
+            .collect(Collectors.toList());
 
         // Build stats
         List<DashboardStatsDto> stats = List.of(
@@ -241,8 +238,9 @@ public class DashboardService implements DashboardServiceInterface {
             .departmentName(department != null ? department.getName() : "Department")
             .stats(stats)
             .quickActions(quickActions)
-            .recentRequests(new ArrayList<>())
+            .recentRequests(recentRequestsDto)
             .departmentOverview(departmentOverview)
+            .unreadNotifications(unreadNotifications)
             .build();
     }
 
@@ -260,6 +258,12 @@ public class DashboardService implements DashboardServiceInterface {
         // Get user's request counts
         long pendingRequests = requestRepository.countByUserAndStatusName(user, "PENDING");
         long approvedRequests = requestRepository.countByUserAndStatusName(user, "APPROVED");
+
+        // Get recent requests for staff dashboard (user's own requests)
+        List<Request> recentRequests = requestRepository.findTop5ByUserOrderBySubmittedAtDesc(user);
+        List<RecentRequestDto> recentRequestsDto = recentRequests.stream()
+            .map(this::mapToRecentRequestDto)
+            .collect(Collectors.toList());
 
         // Build stats
         List<DashboardStatsDto> stats = List.of(
@@ -336,7 +340,7 @@ public class DashboardService implements DashboardServiceInterface {
             .officeName(user.getOffice() != null ? user.getOffice().getName() : "Office")
             .stats(stats)
             .quickActions(quickActions)
-            .recentRequests(new ArrayList<>())
+            .recentRequests(recentRequestsDto)
             .cartItems(cartItemsDto)
             .cartTotal(cartTotal)
             .unreadNotifications(unreadNotifications)
@@ -349,5 +353,57 @@ public class DashboardService implements DashboardServiceInterface {
             .name(cartItem.getInventoryItem().getName())
             .quantity(cartItem.getQuantity())
             .build();
+    }
+
+    private RecentRequestDto mapToRecentRequestDto(Request request) {
+        // Get the first item from the request (for display purposes)
+        String itemName = "Multiple Items";
+        int quantity = 0;
+        
+        if (!request.getItems().isEmpty()) {
+            var firstItem = request.getItems().iterator().next();
+            itemName = firstItem.getItem().getName();
+            quantity = firstItem.getQuantity();
+            
+            // If there are multiple items, show count
+            if (request.getItems().size() > 1) {
+                itemName += " (+" + (request.getItems().size() - 1) + " more)";
+            }
+        }
+
+        // Convert Timestamp to LocalDateTime
+        LocalDateTime createdAt = request.getSubmittedAt() != null 
+            ? request.getSubmittedAt().toLocalDateTime() 
+            : LocalDateTime.now();
+
+        // Calculate time ago (simplified - you might want to use a proper time library)
+        String timeAgo = calculateTimeAgo(createdAt);
+
+        return RecentRequestDto.builder()
+            .id(request.getId())
+            .staffName(request.getUser().getFirstName() + " " + request.getUser().getLastName())
+            .itemName(itemName)
+            .status(request.getRequestStatus() != null ? request.getRequestStatus().getName() : "Unknown")
+            .createdAt(createdAt)
+            .timeAgo(timeAgo)
+            .quantity(quantity)
+            .build();
+    }
+
+    private String calculateTimeAgo(LocalDateTime dateTime) {
+        LocalDateTime now = LocalDateTime.now();
+        long days = java.time.Duration.between(dateTime, now).toDays();
+        long hours = java.time.Duration.between(dateTime, now).toHours();
+        long minutes = java.time.Duration.between(dateTime, now).toMinutes();
+
+        if (days > 0) {
+            return days + " day" + (days > 1 ? "s" : "") + " ago";
+        } else if (hours > 0) {
+            return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+        } else if (minutes > 0) {
+            return minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
+        } else {
+            return "Just now";
+        }
     }
 }

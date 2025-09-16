@@ -16,4 +16,5 @@ public class UserResponseDto {
     private String officeName;
     private String roleName;
     private String fullName;
+    private String departmentName;
 }
