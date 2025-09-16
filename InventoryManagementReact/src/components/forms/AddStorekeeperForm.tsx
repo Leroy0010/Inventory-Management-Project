@@ -80,7 +80,7 @@ export default function AddStorekeeperForm({
             setValue('');
             toast.success('Storekeeper created successfully!');
         } catch (error) {
-            console.error('Error creating storekeeper:', error);
+            // Error creating storekeeper
         }
     };
 

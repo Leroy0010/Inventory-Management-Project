@@ -87,7 +87,7 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
             setValue('');
             toast.success('Batch created successfully!');
         } catch (error) {
-            console.error('Error creating batch:', error);
+            // Error creating batch
         }
     };
 

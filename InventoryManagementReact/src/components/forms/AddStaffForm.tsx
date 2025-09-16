@@ -64,7 +64,7 @@ export default function AddStaffForm({ className }: AddStaffFormProps) {
             setValue('');
             toast.success('Staff member created successfully!');
         } catch (error) {
-            console.error('Error creating staff member:', error);
+            // Error creating staff member
         }
     };
 

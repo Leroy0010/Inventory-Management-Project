@@ -110,7 +110,7 @@ export default function Departments() {
 
     const handleCreateDepartment = () => {
         // TODO: Implement API call
-        console.log('Creating department:', formData);
+        // Creating department
         setIsCreateDialogOpen(false);
         setFormData({ name: '', description: '', headOfDepartment: '' });
     };
@@ -127,7 +127,7 @@ export default function Departments() {
 
     const handleUpdateDepartment = () => {
         // TODO: Implement API call
-        console.log('Updating department:', editingDepartment?.id, formData);
+        // Updating department
         setIsEditDialogOpen(false);
         setEditingDepartment(null);
         setFormData({ name: '', description: '', headOfDepartment: '' });
@@ -135,7 +135,7 @@ export default function Departments() {
 
     const handleDeleteDepartment = (departmentId: string) => {
         // TODO: Implement API call
-        console.log('Deleting department:', departmentId);
+        // Deleting department
     };
 
     if (loading) {

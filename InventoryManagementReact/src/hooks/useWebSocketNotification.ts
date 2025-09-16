@@ -29,7 +29,7 @@ export function useWebSocketNotification() {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('WebSocket connected');
+        // WebSocket connected
         setConnectionState({
           connected: true,
           connecting: false,
@@ -40,7 +40,7 @@ export function useWebSocketNotification() {
       ws.onmessage = (event) => {
         try {
           const data: WebSocketNotification = JSON.parse(event.data);
-          console.log('Received notification:', data);
+          // Received notification
 
           // Update the query cache with the new notification
           queryClient.setQueriesData(
@@ -65,12 +65,12 @@ export function useWebSocketNotification() {
           // Show toast notification (you can implement this separately)
           showToastNotification(data);
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          // Error parsing WebSocket message
         }
       };
 
       ws.onclose = (event) => {
-        console.log('WebSocket disconnected:', event.code, event.reason);
+        // WebSocket disconnected
         setConnectionState({
           connected: false,
           connecting: false,
@@ -86,7 +86,7 @@ export function useWebSocketNotification() {
       };
 
       ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        // WebSocket error
         setConnectionState(prev => ({
           ...prev,
           connecting: false,
@@ -94,7 +94,7 @@ export function useWebSocketNotification() {
         }));
       };
     } catch (error) {
-      console.error('Error creating WebSocket connection:', error);
+      // Error creating WebSocket connection
       setConnectionState({
         connected: false,
         connecting: false,

@@ -131,7 +131,7 @@ export default function AddInventoryForm({ className }: AddInventoryFormProps) {
             // Navigate to inventory list
             // navigate('/inventory-items');
         } catch (error) {
-            console.error('Error creating inventory item:', error);
+            // Error creating inventory item
             toast.error(
                 error instanceof Error
                     ? error.message
@@ -153,7 +153,7 @@ export default function AddInventoryForm({ className }: AddInventoryFormProps) {
         toast.error(error);
     };
 
-    return (
+  return (
         <Card className={className}>
             <CardContent className="p-6">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -340,7 +340,7 @@ export default function AddInventoryForm({ className }: AddInventoryFormProps) {
                         </div>
                     </div>
                 </form>
-            </CardContent>
-        </Card>
+    </CardContent>
+   </Card>
     );
 }

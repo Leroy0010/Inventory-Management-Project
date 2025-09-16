@@ -91,7 +91,7 @@ export default function InventorySummaryReport() {
       setReportData(data);
       setLastGenerated(new Date());
     } catch (error) {
-      console.error('Failed to generate report:', error);
+      // Failed to generate report
     }
   };
 
@@ -104,7 +104,7 @@ export default function InventorySummaryReport() {
     const result = exportToCSV(reportData, filename);
     
     if (!result.success) {
-      console.error('Export failed:', result.error);
+      // Export failed
     }
   };
 

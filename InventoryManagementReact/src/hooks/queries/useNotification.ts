@@ -29,7 +29,7 @@ export function useNotifications(
 
   return useQuery({
     queryKey: notificationKeys.list(userId!, filters, pagination),
-    queryFn: () => notificationApi.getNotifications(userId!, filters, pagination),
+    queryFn: () => notificationApi.getNotifications(filters, pagination),
     enabled: !!userId,
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: true,
@@ -43,7 +43,7 @@ export function useUnreadNotifications() {
 
   return useQuery({
     queryKey: notificationKeys.unread(userId!),
-    queryFn: () => notificationApi.getUnreadNotifications(userId!),
+    queryFn: () => notificationApi.getUnreadNotifications(),
     enabled: !!userId,
     staleTime: 10000, // 10 seconds
     refetchInterval: 30000, // Refetch every 30 seconds
@@ -58,7 +58,7 @@ export function useUnreadCount() {
 
   return useQuery({
     queryKey: notificationKeys.count(userId!),
-    queryFn: () => notificationApi.getUnreadCount(userId!),
+    queryFn: () => notificationApi.getUnreadCount(),
     enabled: !!userId,
     staleTime: 10000, // 10 seconds
     refetchInterval: 30000, // Refetch every 30 seconds
@@ -73,7 +73,7 @@ export function useNotificationsByType(type: string) {
 
   return useQuery({
     queryKey: notificationKeys.byType(userId!, type),
-    queryFn: () => notificationApi.getNotificationsByType(userId!, type),
+    queryFn: () => notificationApi.getNotificationsByType(type),
     enabled: !!userId && !!type,
     staleTime: 60000, // 1 minute
   });
@@ -111,11 +111,9 @@ export function useMarkAsRead() {
 // Hook for marking all notifications as read
 export function useMarkAllAsRead() {
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
-  const userId = user?.id;
 
   return useMutation({
-    mutationFn: () => notificationApi.markAllAsRead(userId!),
+    mutationFn: () => notificationApi.markAllAsRead(),
     onSuccess: () => {
       // Invalidate all notification queries
       queryClient.invalidateQueries({ queryKey: notificationKeys.all });
@@ -153,13 +151,22 @@ export function useSendGeneralNotification() {
   });
 }
 
+// Hook for getting available users for notifications
+export function useAvailableUsers() {
+  return useQuery({
+    queryKey: ['notifications', 'available-users'],
+    queryFn: () => notificationApi.getAvailableUsers(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
 // Hook for deleting old notifications
 export function useDeleteOldNotifications() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, daysOld }: { userId: number; daysOld: number }) =>
-      notificationApi.deleteOldNotifications(userId, daysOld),
+    mutationFn: ({ daysOld }: { daysOld: number }) =>
+      notificationApi.deleteOldNotifications(daysOld),
     onSuccess: () => {
       // Invalidate all notification queries
       queryClient.invalidateQueries({ queryKey: notificationKeys.all });

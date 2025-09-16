@@ -32,7 +32,7 @@ export const inventoryApi = {
         imageFile?: File
     ): Promise<InventoryItem> => {
         try {
-            // If there's an image file, use FormData
+            // If there's an image file, use FormData for Google Drive upload
             if (imageFile) {
                 const formData = new FormData();
                 formData.append('name', item.name);
@@ -80,39 +80,6 @@ export const inventoryApi = {
         }
     },
 
-    // Departments
-    getDepartments: async (): Promise<any[]> => {
-        try {
-            return await api.get<any[]>('/api/departments');
-        } catch (error) {
-            throw new Error(handleApiError(error));
-        }
-    },
-
-    createDepartment: async (name: string): Promise<any> => {
-        try {
-            return await api.post<any>('/api/departments', { name });
-        } catch (error) {
-            throw new Error(handleApiError(error));
-        }
-    },
-
-    updateDepartment: async (id: number, name: string): Promise<any> => {
-        try {
-            return await api.put<any>(`/api/departments/${id}`, { name });
-        } catch (error) {
-            throw new Error(handleApiError(error));
-        }
-    },
-
-    deleteDepartment: async (id: number): Promise<void> => {
-        try {
-            await api.delete(`/api/departments/${id}`);
-        } catch (error) {
-            throw new Error(handleApiError(error));
-        }
-    },
-
     // Inventory Balance
     getInventoryBalance: async (): Promise<any> => {
         try {
@@ -122,13 +89,5 @@ export const inventoryApi = {
         }
     },
 
-    // Stock Transactions
-    getStockTransactions: async (): Promise<any[]> => {
-        try {
-            return await api.get<any[]>('/api/stock-transactions');
-        } catch (error) {
-            throw new Error(handleApiError(error));
-        }
-    },
 
 };

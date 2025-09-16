@@ -21,7 +21,7 @@ export function GoogleSignInButton({
             const mockGoogleToken = 'mock-google-token-' + Date.now();
             onSuccess(mockGoogleToken);
         } catch (error) {
-            console.error('Google sign-in error:', error);
+            // Google sign-in error
         }
     };
 

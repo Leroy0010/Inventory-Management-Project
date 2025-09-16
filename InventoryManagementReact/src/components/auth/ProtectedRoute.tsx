@@ -2,7 +2,6 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import type { Permission } from '@/types/permissions';
-import { DEV_CONFIG } from '@/config/dev';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
@@ -37,8 +36,8 @@ export function ProtectedRoute({
         );
     }
 
-    // Check permissions if required (skip in development mode)
-    if (!DEV_CONFIG.BYPASS_PERMISSIONS && requiredPermissions.length > 0) {
+    // Check permissions if required
+    if (requiredPermissions.length > 0) {
         const hasRequiredPermissions = requireAll
             ? hasAllPermissions(requiredPermissions)
             : hasAnyPermission(requiredPermissions);
@@ -58,11 +57,6 @@ export function withPermission<P extends object>(
     requireAll: boolean = false
 ) {
     return function PermissionWrappedComponent(props: P) {
-        // Skip permission checks in development mode
-        if (DEV_CONFIG.BYPASS_PERMISSIONS) {
-            return <Component {...props} />;
-        }
-
         const { hasAnyPermission, hasAllPermissions } = useAuthStore();
 
         const hasRequiredPermissions = requireAll

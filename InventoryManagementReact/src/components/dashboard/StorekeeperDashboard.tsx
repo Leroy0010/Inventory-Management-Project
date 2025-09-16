@@ -44,6 +44,7 @@ import StorekeeperRecentRequests from '../storekeeper-dashboard/StorekeeperRecen
 import StorekeeperQuickActions from '../storekeeper-dashboard/StorekeeperQuickActions';
 import StorekeeperStatsGrid from '../storekeeper-dashboard/StorekeeperStatsGrid';
 import { InventorySummary } from './InventorySummary';
+import { RoleBasedQuickActions } from './RoleBasedQuickActions';
 
 export function StorekeeperDashboard() {
     const navigate = useNavigate();
@@ -114,6 +115,7 @@ export function StorekeeperDashboard() {
             {stats.length > 0 && <StorekeeperStatsGrid stats={stats} />}
 
             {/* Quick Actions */}
+            <RoleBasedQuickActions />
             {quickActions.length > 0 && (
                 <StorekeeperQuickActions quickActions={quickActions} />
             )}

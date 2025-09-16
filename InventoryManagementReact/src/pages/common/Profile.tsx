@@ -28,7 +28,7 @@ export default function Profile() {
 
   const handlePasswordChange = () => {
     // Optionally show success message or redirect
-    console.log('Password changed successfully');
+    // Password changed successfully
   };
 
   if (getProfile.isLoading) {

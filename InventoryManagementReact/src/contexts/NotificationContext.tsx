@@ -5,26 +5,16 @@ import React, {
     useEffect,
     useCallback,
 } from 'react';
-import type { Notification, NotificationType } from '@/types';
-
-// Notification Actions
-type NotificationAction =
-    | { type: 'ADD_NOTIFICATION'; payload: Notification }
-    | { type: 'REMOVE_NOTIFICATION'; payload: string }
-    | { type: 'MARK_AS_READ'; payload: string }
-    | { type: 'MARK_ALL_AS_READ' }
-    | { type: 'CLEAR_ALL' }
-    | { type: 'SET_NOTIFICATIONS'; payload: Notification[] };
-
-// Notification State
-interface NotificationState {
-    notifications: Notification[];
-    unreadCount: number;
-    isConnected: boolean;
-}
+import type { 
+    Notification, 
+    NotificationType, 
+    ContextNotificationAction,
+    ContextNotificationState,
+    NotificationContextType
+} from '@/types/notification';
 
 // Initial State
-const initialState: NotificationState = {
+const initialState: ContextNotificationState = {
     notifications: [],
     unreadCount: 0,
     isConnected: false,
@@ -32,9 +22,9 @@ const initialState: NotificationState = {
 
 // Notification Reducer
 function notificationReducer(
-    state: NotificationState,
-    action: NotificationAction
-): NotificationState {
+    state: ContextNotificationState,
+    action: ContextNotificationAction
+): ContextNotificationState {
     switch (action.type) {
         case 'ADD_NOTIFICATION':
             return {
@@ -44,12 +34,12 @@ function notificationReducer(
             };
         case 'REMOVE_NOTIFICATION': {
             const notificationToRemove = state.notifications.find(
-                (n) => n.id === action.payload
+                (n) => n.id.toString() === action.payload
             );
             return {
                 ...state,
                 notifications: state.notifications.filter(
-                    (n) => n.id !== action.payload
+                    (n) => n.id.toString() !== action.payload
                 ),
                 unreadCount:
                     notificationToRemove && !notificationToRemove.isRead
@@ -61,7 +51,7 @@ function notificationReducer(
             return {
                 ...state,
                 notifications: state.notifications.map((n) =>
-                    n.id === action.payload ? { ...n, isRead: true } : n
+                    n.id.toString() === action.payload ? { ...n, isRead: true } : n
                 ),
                 unreadCount: Math.max(0, state.unreadCount - 1),
             };
@@ -91,19 +81,6 @@ function notificationReducer(
     }
 }
 
-// Notification Context
-interface NotificationContextType extends NotificationState {
-    addNotification: (
-        notification: Omit<Notification, 'id' | 'createdAt'>
-    ) => void;
-    removeNotification: (id: string) => void;
-    markAsRead: (id: string) => void;
-    markAllAsRead: () => void;
-    clearAll: () => void;
-    connect: () => void;
-    disconnect: () => void;
-}
-
 export const NotificationContext = createContext<
     NotificationContextType | undefined
 >(undefined);
@@ -121,7 +98,6 @@ export function NotificationProvider({
     const connect = useCallback(() => {
         // TODO: Implement actual STOMP connection
         // For now, we'll simulate the connection
-        console.log('Connecting to STOMP...');
         setStompClient({ connected: true });
         dispatch({ type: 'SET_NOTIFICATIONS', payload: [] });
     }, []);
@@ -129,7 +105,6 @@ export function NotificationProvider({
     const disconnect = useCallback(() => {
         if (stompClient) {
             // TODO: Implement actual STOMP disconnection
-            console.log('Disconnecting from STOMP...');
             setStompClient(null);
         }
     }, [stompClient]);
@@ -144,7 +119,7 @@ export function NotificationProvider({
         (notification: Omit<Notification, 'id' | 'createdAt'>) => {
             const newNotification: Notification = {
                 ...notification,
-                id: Date.now().toString(),
+                id: Date.now(),
                 createdAt: new Date().toISOString(),
             };
             dispatch({ type: 'ADD_NOTIFICATION', payload: newNotification });
@@ -202,15 +177,15 @@ export function createNotification(
     type: NotificationType,
     title: string,
     message: string,
-    userId: string,
-    data?: Record<string, any>
+    requestId?: number,
+    itemId?: number
 ): Omit<Notification, 'id' | 'createdAt'> {
     return {
         type,
         title,
         message,
-        userId,
         isRead: false,
-        data,
+        requestId,
+        itemId,
     };
 }

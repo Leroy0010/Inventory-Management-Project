@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/auth';
 import type { LoginRequest } from '@/types/auth';
 import { useAuthStore } from '@/stores/authStore';
-import { DEV_CONFIG } from '@/config/dev';
 
 // Query Keys
 export const authKeys = {
@@ -20,7 +19,7 @@ export function useAuthQueries() {
     const profileQuery = useQuery({
         queryKey: authKeys.profile(),
         queryFn: authApi.getProfile,
-        enabled: !DEV_CONFIG.BYPASS_AUTH,
+        enabled: true,
         retry: false,
         staleTime: 5 * 60 * 1000, // 5 minutes
     });

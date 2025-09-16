@@ -81,7 +81,7 @@ export function NotificationList({ className = '' }: NotificationListProps) {
     try {
       await markAllAsReadMutation.mutateAsync();
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
+      // Failed to mark all notifications as read
     }
   };
 

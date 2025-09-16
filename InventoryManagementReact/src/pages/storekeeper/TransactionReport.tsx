@@ -19,7 +19,7 @@ export default function TransactionReport() {
             const result = await generateReportMutation.mutateAsync(filters);
             setReport(result);
         } catch (error) {
-            console.error('Error generating report:', error);
+            // Error generating report
         } finally {
             setIsLoading(false);
         }

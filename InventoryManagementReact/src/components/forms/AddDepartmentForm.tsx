@@ -33,7 +33,10 @@ export default function AddDepartmentForm({
             <CardContent>
                 <form
                     className="space-y-4"
-                    onSubmit={handleSubmit(console.log)}
+                    onSubmit={handleSubmit((data) => {
+                        // Handle form submission
+                        // TODO: Implement API call
+                    })}
                 >
                     <div>
                         <Label htmlFor="name">Department Name</Label>

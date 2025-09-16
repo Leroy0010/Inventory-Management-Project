@@ -76,7 +76,7 @@ export default function InventoryItems() {
                 await deleteItemMutation.mutateAsync(item.id);
                 toast.success('Item deleted successfully');
             } catch (error) {
-                console.error('Error deleting item:', error);
+                // Error deleting item
                 toast.error('Failed to delete item');
             }
         }

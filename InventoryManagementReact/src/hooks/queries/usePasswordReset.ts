@@ -12,7 +12,7 @@ export function useRequestPasswordReset() {
   return useMutation<PasswordResetResponse, Error, PasswordResetRequest>({
     mutationFn: passwordResetApi.requestPasswordReset,
     onError: (error: any) => {
-      console.error('Password reset request failed:', error);
+      // Password reset request failed
     },
   });
 }
@@ -22,7 +22,7 @@ export function useResetPassword() {
   return useMutation<PasswordChangeResponse, Error, PasswordChangeRequest>({
     mutationFn: passwordResetApi.resetPassword,
     onError: (error: any) => {
-      console.error('Password reset failed:', error);
+      // Password reset failed
     },
   });
 }

@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { User } from '@/types/auth';
 import { hasPermission as checkPermission, hasAnyPermission as checkAnyPermission, hasAllPermissions as checkAllPermissions } from '@/lib/auth-utils';
-import { DEV_CONFIG } from '@/config/dev';
 import type { Permission } from '@/types/permissions';
 
 export interface AuthState {
@@ -50,19 +49,11 @@ export type AuthStore = AuthState & AuthActions;
 
 // Initial state
 const initialState: AuthState = {
-    user: DEV_CONFIG.BYPASS_AUTH ? {
-        id: 1,
-        email: DEV_CONFIG.DEFAULT_USER.email,
-        firstName: DEV_CONFIG.DEFAULT_USER.firstName,
-        lastName: DEV_CONFIG.DEFAULT_USER.lastName,
-        fullName: DEV_CONFIG.DEFAULT_USER.firstName + ' ' + DEV_CONFIG.DEFAULT_USER.lastName, 
-        role: { id: 1, name: DEV_CONFIG.DEFAULT_USER.role as 'ADMIN' | 'STOREKEEPER' | 'STAFF' },
-        active: DEV_CONFIG.DEFAULT_USER.isActive,
-    } : null,
-    isAuthenticated: DEV_CONFIG.BYPASS_AUTH,
+    user: null,
+    isAuthenticated: false,
     isLoading: false,
-    token: DEV_CONFIG.BYPASS_AUTH ? 'dev-token' : null,
-    refreshToken: DEV_CONFIG.BYPASS_AUTH ? 'dev-refresh-token' : null,
+    token: null,
+    refreshToken: null,
     error: null,
 };
 

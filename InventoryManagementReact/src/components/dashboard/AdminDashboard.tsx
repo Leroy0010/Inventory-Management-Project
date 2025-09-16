@@ -9,6 +9,7 @@ import AdminSystemOverview from '../admin-dashboard/AdminSystemOverview';
 import AdminWelcomeSection from '../admin-dashboard/AdminWelcomeSection';
 import AdminStatsGrid from '../admin-dashboard/AdminStatsGrid';
 import AdminQuickActions from '../admin-dashboard/AdminQuickActions';
+import { RoleBasedQuickActions } from './RoleBasedQuickActions';
 
 export function AdminDashboard() {
     const { user } = useAuthStore();
@@ -58,6 +59,7 @@ export function AdminDashboard() {
             {stats.length > 0 && <AdminStatsGrid stats={stats} />}
 
             {/* Quick Actions */}
+            <RoleBasedQuickActions />
             {quickActions.length > 0 && (
                 <AdminQuickActions quickActions={quickActions} />
             )}

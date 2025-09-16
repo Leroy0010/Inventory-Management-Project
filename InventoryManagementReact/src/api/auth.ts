@@ -46,7 +46,7 @@ export const authApi = {
             await api.post('/api/auth/logout');
         } catch (error) {
             // Don't throw error for logout, just log it
-            console.error('Logout error:', handleApiError(error));
+            // Logout error
         }
     },
 

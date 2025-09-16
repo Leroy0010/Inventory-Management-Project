@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { inventoryApi } from '@/api/inventoryItem';
+import { stockTransactionApi } from '@/api/stockTransaction';
 
 // Query keys for stock transactions
 export const stockTransactionKeys = {
@@ -13,7 +13,7 @@ export const useStockTransactionQueries = () => {
     // Get stock transactions
     const transactionsQuery = useQuery({
         queryKey: stockTransactionKeys.lists(),
-        queryFn: inventoryApi.getStockTransactions,
+        queryFn: stockTransactionApi.getStockTransactions,
         staleTime: 1 * 60 * 1000, // 1 minute
     });
 

@@ -29,6 +29,30 @@ export interface Notification {
   createdAt: string;
 }
 
+// Legacy notification interface for backward compatibility (from index.ts)
+export interface LegacyNotification {
+  id: string;
+  type: LegacyNotificationType;
+  title: string;
+  message: string;
+  userId: string;
+  isRead: boolean;
+  data?: Record<string, string>;
+  createdAt: string;
+}
+
+// Legacy notification types (from index.ts)
+export const LegacyNotificationType = {
+  INFO: 'INFO',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR',
+  SUCCESS: 'SUCCESS',
+  REQUEST: 'REQUEST',
+  INVENTORY_ALERT: 'INVENTORY_ALERT',
+} as const;
+
+export type LegacyNotificationType = typeof LegacyNotificationType[keyof typeof LegacyNotificationType];
+
 export interface WebSocketNotification {
   id: number;
   title: string;
@@ -51,6 +75,8 @@ export interface GeneralNotificationRequest {
 export interface GeneralNotificationResponse {
   message: string;
 }
+
+export type AvailableUsers = string[];
 
 export interface NotificationMarkReadResponse {
   message: string;
@@ -141,4 +167,31 @@ export interface NotificationAction {
   notificationId?: number;
   targetPage?: string;
   targetId?: number;
+}
+
+// Context-specific types (from NotificationContext)
+export type ContextNotificationAction =
+  | { type: 'ADD_NOTIFICATION'; payload: Notification }
+  | { type: 'REMOVE_NOTIFICATION'; payload: string }
+  | { type: 'MARK_AS_READ'; payload: string }
+  | { type: 'MARK_ALL_AS_READ' }
+  | { type: 'CLEAR_ALL' }
+  | { type: 'SET_NOTIFICATIONS'; payload: Notification[] };
+
+export interface ContextNotificationState {
+  notifications: Notification[];
+  unreadCount: number;
+  isConnected: boolean;
+}
+
+export interface NotificationContextType extends ContextNotificationState {
+  addNotification: (
+    notification: Omit<Notification, 'id' | 'createdAt'>
+  ) => void;
+  removeNotification: (id: string) => void;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+  clearAll: () => void;
+  connect: () => void;
+  disconnect: () => void;
 }

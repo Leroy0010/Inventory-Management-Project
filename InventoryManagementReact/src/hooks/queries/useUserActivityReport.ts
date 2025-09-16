@@ -104,7 +104,7 @@ export function useGenerateUserActivityReport() {
       }
     },
     onError: (error) => {
-      console.error('Failed to generate user activity report:', error);
+      // Failed to generate user activity report
     },
   });
 }

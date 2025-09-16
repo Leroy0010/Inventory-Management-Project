@@ -1,5 +1,6 @@
 import { Sidebar } from '@/components/nav/Sidebar';
 import { Topbar } from '@/components/nav/Topbar';
+import { Breadcrumb } from '@/components/navigation/Breadcrumb';
 // import { DevBanner } from '@/components/DevBanner';
 import { SearchProvider } from '@/contexts/SearchContext';
 import { useState } from 'react';
@@ -28,7 +29,10 @@ export function AppLayout() {
                     />
                     <main className="flex-1 overflow-y-auto p-4">
                         {/* <DevBanner /> */}
-                        <Outlet /> {/* Nested routes will render here */}
+                        <div className="space-y-4">
+                            <Breadcrumb />
+                            <Outlet /> {/* Nested routes will render here */}
+                        </div>
                     </main>
                 </div>
             </div>

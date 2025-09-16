@@ -34,7 +34,7 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
     try {
       await markAsReadMutation.mutateAsync(notificationId);
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      // Failed to mark notification as read
     }
   };
 

@@ -4,22 +4,22 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissionCheck } from '@/hooks/usePermissionCheck';
 import { useResponsive } from '@/hooks/useResponsive';
-import type { Permission } from '@/types/permissions';
+import { Permission } from '@/types/permissions';
 import {
-    LayoutDashboard,
-    Users,
-    Package,
-    Building,
-    Layers,
-    Package2,
-    FileText,
-    Bell,
-    MessageSquare,
-    Settings,
-    ChevronDown,
+  LayoutDashboard,
+  Users,
+  Package,
+  Building,
+  Layers,
+  Package2,
+  FileText,
+  Bell,
+  MessageSquare,
+  Settings,
+  ChevronDown,
     Activity,
-    LogOut,
-    X,
+  LogOut,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,58 +29,65 @@ import {
 } from '@/components/ui/collapsible';
 
 interface NavItem {
-    to: string;
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
     permissions?: Permission[];
 }
 
 interface NavGroup {
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    items: NavItem[];
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  items: NavItem[];
     permissions?: Permission[];
 }
 
 const navGroups: NavGroup[] = [
-    {
+  {
         label: 'Dashboard',
-        icon: LayoutDashboard,
-        items: [{ to: '/', label: 'Dashboard', icon: LayoutDashboard }],
-    },
-    {
+    icon: LayoutDashboard,
+        items: [{ to: '/', label: 'Dashboard', icon: LayoutDashboard, permissions: [Permission.VIEW_DASHBOARD] }],
+  },
+  {
         label: 'Management',
-        icon: Users,
-        items: [
-            { to: '/staff/add', label: 'Add Staff', icon: Users, permissions: ['ADD_STAFF'] },
-            { to: '/inventory/add', label: 'Add Inventory', icon: Package, permissions: ['ADD_INVENTORY'] },
-            { to: '/office/add', label: 'Add Office', icon: Building, permissions: ['ADD_OFFICE'] },
-            { to: '/batch/add', label: 'Add Batch', icon: Layers, permissions: ['ADD_BATCH'] },
-            { to: "/storekeeper/add", label: "Add Storekeeper", icon: Users, permissions: ['ADD_STOREKEEPER'] },
-            { to: '/departments/add', label: 'Add Department', icon: Building, permissions: ['ADD_DEPARTMENT'] },
-        ],
-    },
-    {
+    icon: Users,
+    items: [
+            { to: '/staff/add', label: 'Add Staff', icon: Users, permissions: [Permission.ADD_STAFF] },
+            { to: '/inventory/add', label: 'Add Inventory', icon: Package, permissions: [Permission.ADD_INVENTORY] },
+            { to: '/office/add', label: 'Add Office', icon: Building, permissions: [Permission.ADD_OFFICE] },
+            { to: '/batch/add', label: 'Add Batch', icon: Layers, permissions: [Permission.ADD_BATCH] },
+            { to: "/storekeeper/add", label: "Add Storekeeper", icon: Users, permissions: [Permission.ADD_STOREKEEPER] },
+            { to: '/departments/add', label: 'Add Department', icon: Building, permissions: [Permission.ADD_DEPARTMENT] },
+    ],
+  },
+  {
         label: 'Inventory',
-        icon: Package2,
+    icon: Package2,
         items: [
-            { to: '/inventory-items', label: 'Inventory Items', icon: Package2, permissions: ['VIEW_INVENTORY'] },
-            { to: '/batch', label: 'Batches', icon: Layers, permissions: ['VIEW_BATCH'] },
+            { to: '/inventory-items', label: 'Inventory Items', icon: Package2, permissions: [Permission.VIEW_INVENTORY] },
+            { to: '/batch', label: 'Batches', icon: Layers, permissions: [Permission.VIEW_BATCH] },
         ],
     },
     {
         label: 'Staff & Offices',
         icon: Users,
         items: [
-            { to: '/staff', label: 'Staff', icon: Users, permissions: ['VIEW_STAFF'] },
-            { to: '/office', label: 'Offices', icon: Building, permissions: ['VIEW_OFFICE'] },
+            { to: '/staff', label: 'Staff', icon: Users, permissions: [Permission.VIEW_STAFF] },
+            { to: '/office', label: 'Offices', icon: Building, permissions: [Permission.VIEW_OFFICE] },
+        ],
+    },
+    {
+        label: 'Departments',
+        icon: Building,
+        items: [
+            { to: '/departments', label: 'Departments', icon: Building, permissions: [Permission.VIEW_DEPARTMENTS] },
         ],
     },
     {
         label: 'Requests',
-        icon: FileText,
+    icon: FileText,
         items: [
-            { to: '/requests', label: 'Manage Requests', icon: FileText, permissions: ['VIEW_REQUESTS'] },
+            { to: '/requests', label: 'Manage Requests', icon: FileText, permissions: [Permission.MANAGE_REQUESTS] },
             { to: '/staff-requests', label: 'My Requests', icon: FileText, permissions: ['VIEW_REQUESTS'] },
         ],
     },
@@ -88,37 +95,37 @@ const navGroups: NavGroup[] = [
         label: 'Cart',
         icon: Package2,
         items: [
-            { to: '/cart', label: 'Shopping Cart', icon: Package2, permissions: ['VIEW_CART'] },
+            { to: '/cart', label: 'Shopping Cart', icon: Package2, permissions: [Permission.VIEW_CART] },
         ],
     },
     {
         label: 'Communication',
-        icon: Bell,
-        items: [
-            { to: '/notifications', label: 'Notifications', icon: Bell, permissions: ['VIEW_NOTIFICATIONS'] },
-            { to: '/send-message', label: 'Send Message', icon: MessageSquare, permissions: ['SEND_MESSAGES'] },
-        ],
-    },
-    {
+    icon: Bell,
+    items: [
+            { to: '/notifications', label: 'Notifications', icon: Bell, permissions: [Permission.VIEW_NOTIFICATIONS] },
+            { to: '/send-message', label: 'Send Message', icon: MessageSquare, permissions: [Permission.SEND_MESSAGES] },
+    ],
+  },
+  {
         label: 'System',
-        icon: Settings,
+    icon: Settings,
         items: [
-            { to: '/settings', label: 'Settings', icon: Settings, permissions: ['VIEW_SETTINGS'] },
-            { to: '/profile', label: 'Profile', icon: Users, permissions: ['VIEW_PROFILE'] },
+            { to: '/profile', label: 'Profile', icon: Users, permissions: [Permission.VIEW_PROFILE] },
+            { to: '/settings', label: 'Settings', icon: Settings, permissions: [Permission.VIEW_SETTINGS] },
         ],
-    },
+  },
 ];
 
 const reportsGroup: NavGroup = {
     label: 'Reports',
-    icon: FileText,
+  icon: FileText,
     items: [
-        { to: '/reports/transaction', label: 'Transaction Report', icon: FileText, permissions: ['VIEW_TRANSACTION_REPORTS'] },
-        { to: '/reports/inventory-summary', label: 'Inventory Summary', icon: FileText, permissions: ['VIEW_INVENTORY_SUMMARY_REPORTS'] },
-        { to: '/reports/user', label: 'User Report', icon: FileText, permissions: ['VIEW_USER_REPORTS'] },
-        { to: '/reports/user-activity', label: 'User Activity', icon: Activity, permissions: ['VIEW_ACTIVITY_REPORTS'] },
+        { to: '/reports/transaction', label: 'Transaction Report', icon: FileText, permissions: [Permission.VIEW_TRANSACTION_REPORTS] },
+        { to: '/reports/inventory-summary', label: 'Inventory Summary', icon: FileText, permissions: [Permission.VIEW_INVENTORY_SUMMARY_REPORTS] },
+        { to: '/reports/user', label: 'User Report', icon: FileText, permissions: [Permission.VIEW_USER_REPORTS] },
+        { to: '/reports/user-activity', label: 'User Activity', icon: Activity, permissions: [Permission.VIEW_USER_REPORTS] },
     ],
-    permissions: ['VIEW_REPORTS'],
+    permissions: [Permission.VIEW_REPORTS],
 };
 
 export function Sidebar({
@@ -129,35 +136,35 @@ export function Sidebar({
     toggleSidebar: () => void;
 }) {
     const { logout, user } = useAuthStore();
-    const { canAccess } = usePermissionCheck();
+  const { canAccess } = usePermissionCheck();
     const { isMobile } = useResponsive();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
     const [expandedGroups, setExpandedGroups] = useState<string[]>([
         'Dashboard',
     ]);
 
     const location = useLocation();
 
-    const handleLogout = () => {
-        logout();
+  const handleLogout = () => {
+    logout();
         navigate('/login');
         // Close sidebar on mobile when logging out
         if (isMobile) {
             toggleSidebar();
         }
-    };
+  };
 
-    const toggleGroup = (groupLabel: string) => {
-        setExpandedGroups((prev) =>
+  const toggleGroup = (groupLabel: string) => {
+    setExpandedGroups((prev) =>
             prev.includes(groupLabel)
                 ? prev.filter((g) => g !== groupLabel)
                 : [...prev, groupLabel]
-        );
-    };
+    );
+  };
 
-    const renderNavItem = (item: NavItem) => {
+  const renderNavItem = (item: NavItem) => {
         const hasPermission = !item.permissions || canAccess(item.permissions);
-        if (!hasPermission) return null;
+    if (!hasPermission) return null;
 
         const handleItemClick = () => {
             // Close sidebar on mobile when item is clicked
@@ -166,10 +173,10 @@ export function Sidebar({
             }
         };
 
-        return (
-            <NavLink
-                key={item.to}
-                to={item.to}
+    return (
+      <NavLink
+        key={item.to}
+        to={item.to}
                 onClick={handleItemClick}
                 className={({ isActive }) => {
                     let isActiveState = isActive;
@@ -214,54 +221,54 @@ export function Sidebar({
                 <span className="truncate transition-all duration-200">
                     {item.label}
                 </span>
-            </NavLink>
-        );
-    };
+      </NavLink>
+    );
+  };
 
-    const renderNavGroup = (group: NavGroup) => {
+  const renderNavGroup = (group: NavGroup) => {
         const hasPermission =
             !group.permissions || canAccess(group.permissions as []);
-        const isExpanded = expandedGroups.includes(group.label);
-        if (!hasPermission) return null;
+    const isExpanded = expandedGroups.includes(group.label);
+    if (!hasPermission) return null;
 
         const visibleItems = group.items.filter(
             (item) => !item.permissions || canAccess(item.permissions as [])
         );
-        if (visibleItems.length === 0) return null;
+    if (visibleItems.length === 0) return null;
 
-        return (
+    return (
             <Collapsible
                 key={group.label}
                 open={isExpanded}
                 onOpenChange={() => toggleGroup(group.label)}
             >
-                <CollapsibleTrigger asChild>
-                    <Button
-                        variant="ghost"
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
                         className="w-full justify-between px-3 py-2.5 text-sm font-medium text-slate-300 dark:text-slate-400 hover:text-white hover:bg-slate-700/60 hover:shadow-md transition-all duration-200 group"
-                    >
-                        <div className="flex items-center gap-3">
+          >
+            <div className="flex items-center gap-3">
                             <group.icon className="w-5 h-5 flex-shrink-0 transition-all duration-200 group-hover:scale-110" />
-                            <span className="truncate">{group.label}</span>
-                        </div>
+              <span className="truncate">{group.label}</span>
+            </div>
                         <ChevronDown
                             className={cn(
                                 'w-4 h-4 transition-all duration-200 group-hover:scale-110',
                                 isExpanded && 'rotate-180'
                             )}
                         />
-                    </Button>
-                </CollapsibleTrigger>
+          </Button>
+        </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-1 pl-6">
                     {visibleItems.map(renderNavItem)}
                 </CollapsibleContent>
-            </Collapsible>
-        );
-    };
+      </Collapsible>
+    );
+  };
 
-    return (
-        <>
-            {/* Overlay for mobile */}
+  return (
+    <>
+      {/* Overlay for mobile */}
             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -269,96 +276,104 @@ export function Sidebar({
                 />
             )}
 
-            <aside
-                className={cn(
+      <aside
+        className={cn(
                     'bg-slate-800 dark:bg-slate-900 text-slate-100 flex flex-col h-full transition-all duration-300',
                     'w-64 fixed inset-y-0 left-0 z-50 md:static md:translate-x-0',
                     isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                )}
-            >
-                {/* Header with Close button (mobile only) */}
+        )}
+      >
+        {/* Header with Close button (mobile only) */}
                 <div className="h-16 flex items-center justify-between px-4 border-b border-slate-700 bg-slate-800/50 backdrop-blur-sm">
-                    <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg ring-2 ring-blue-400/20">
                             <Package className="w-5 h-5 text-white drop-shadow-sm" />
-                        </div>
+            </div>
                         <span className="font-bold text-lg text-white">
                             Inventory
                         </span>
-                    </div>
+          </div>
                     <Button
                         variant="ghost"
                         size="icon"
                         className="md:hidden"
                         onClick={toggleSidebar}
                     >
-                        <X className="w-5 h-5" />
-                    </Button>
-                </div>
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
 
-                {/* Navigation */}
-                <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    {navGroups.map(renderNavGroup)}
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          {navGroups.map(renderNavGroup)}
 
-                    {/* Reports group */}
+          {/* Reports group */}
                     <Collapsible
                         open={expandedGroups.includes('Reports')}
                         onOpenChange={() => toggleGroup('Reports')}
                     >
-                        <CollapsibleTrigger asChild>
-                            <Button
-                                variant="ghost"
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
                                 className="w-full justify-between px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/60 hover:shadow-md transition-all duration-200 group"
-                            >
-                                <div className="flex items-center gap-3">
+              >
+                <div className="flex items-center gap-3">
                                     <reportsGroup.icon className="w-5 h-5 transition-all duration-200 group-hover:scale-110" />
-                                    <span className="truncate">Reports</span>
-                                </div>
-                                <ChevronDown
+                  <span className="truncate">Reports</span>
+                </div>
+                <ChevronDown
                                     className={cn(
                                         'w-4 h-4 transition-all duration-200 group-hover:scale-110',
                                         expandedGroups.includes('Reports') &&
                                             'rotate-180'
                                     )}
-                                />
-                            </Button>
-                        </CollapsibleTrigger>
+                />
+              </Button>
+            </CollapsibleTrigger>
                         <CollapsibleContent className="space-y-1 pl-6">
                             {reportsGroup.items.map(renderNavItem)}
                         </CollapsibleContent>
-                    </Collapsible>
-                </nav>
+          </Collapsible>
+        </nav>
 
-                {/* User Info & Logout */}
-                <div className="border-t border-slate-700 p-4">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-white">
-                                {user?.firstName?.[0]}
-                                {user?.lastName?.[0]}
-                            </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                                {user?.firstName} {user?.lastName}
-                            </p>
-                            <p className="text-xs text-slate-400 truncate">
-                                {user?.role.name}
-                            </p>
-                        </div>
-                    </div>
-                    <Button
-                        variant="ghost"
-                        onClick={handleLogout}
+        {/* User Info & Logout */}
+        <div className="border-t border-slate-700 p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
+              <span className="text-sm font-medium text-white">
+                {user?.firstName?.[0]}
+                {user?.lastName?.[0]}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">
+                {user?.firstName} {user?.lastName}
+              </p>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                    user?.role.name === 'ADMIN' 
+                                        ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                        : user?.role.name === 'STOREKEEPER'
+                                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                        : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                }`}>
+                                    {user?.role.name}
+                                </span>
+                            </div>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
                         className="w-full justify-start gap-3 px-3 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-slate-700/60 hover:shadow-md transition-all duration-200 group"
-                    >
+          >
                         <LogOut className="w-4 h-4 transition-all duration-200 group-hover:scale-110" />
                         <span className="transition-all duration-200">
-                            Logout
+            Logout
                         </span>
-                    </Button>
-                </div>
-            </aside>
-        </>
-    );
+          </Button>
+        </div>
+      </aside>
+    </>
+  );
 }

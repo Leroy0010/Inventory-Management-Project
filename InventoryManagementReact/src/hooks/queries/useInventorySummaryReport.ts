@@ -39,7 +39,7 @@ export function useInventorySummaryReport() {
       });
     },
     onError: (error) => {
-      console.error('Failed to generate inventory summary report:', error);
+      // Failed to generate inventory summary report
     }
   });
 

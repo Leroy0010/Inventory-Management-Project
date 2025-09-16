@@ -33,7 +33,7 @@ export const useCartStore = create<CartState>()(
                     await cartApi.addItem(itemId, quantity);
                     await get().fetchCart();
                 } catch (error) {
-                    console.error('Failed to add item to cart:', error);
+                    // Failed to add item to cart
                 } finally {
                     set({ isLoading: false });
                 }
@@ -45,7 +45,7 @@ export const useCartStore = create<CartState>()(
                     await cartApi.removeItem(itemId, quantity);
                     await get().fetchCart();
                 } catch (error) {
-                    console.error('Failed to remove item from cart:', error);
+                    // Failed to remove item from cart
                 } finally {
                     set({ isLoading: false });
                 }
@@ -61,7 +61,7 @@ export const useCartStore = create<CartState>()(
                     }
                     await get().fetchCart();
                 } catch (error) {
-                    console.error('Failed to update item quantity:', error);
+                    // Failed to update item quantity
                 } finally {
                     set({ isLoading: false });
                 }
@@ -73,7 +73,7 @@ export const useCartStore = create<CartState>()(
                     await cartApi.clearCart();
                     set({ cartItems: [], totalItems: 0 });
                 } catch (error) {
-                    console.error('Failed to clear cart:', error);
+                    // Failed to clear cart
                 } finally {
                     set({ isLoading: false });
                 }
@@ -86,7 +86,7 @@ export const useCartStore = create<CartState>()(
                     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
                     set({ cartItems: items, totalItems });
                 } catch (error) {
-                    console.error('Failed to fetch cart:', error);
+                    // Failed to fetch cart
                 } finally {
                     set({ isLoading: false });
                 }

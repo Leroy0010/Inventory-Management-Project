@@ -9,6 +9,7 @@ import StaffQuickSearchAndBrowse from '../staff-dashboard/StaffQuickSearchAndBro
 import StaffShoppingCart from '../staff-dashboard/StaffShoppingCart';
 import StaffRecentRequests from '../staff-dashboard/StaffRecentRequests';
 import StaffQuickActions from '../staff-dashboard/StaffQuickActions';
+import { RoleBasedQuickActions } from './RoleBasedQuickActions';
 import { AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 export function StaffDashboard() {
@@ -85,6 +86,7 @@ export function StaffDashboard() {
             {stats.length > 0 && <StaffStatsGrid stats={stats} />}
 
             {/* Quick Actions */}
+            <RoleBasedQuickActions />
             {quickActions.length > 0 && (
                 <StaffQuickActions quickActions={quickActions} />
             )}

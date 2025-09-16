@@ -133,29 +133,12 @@ export interface RequestItem {
     notes?: string;
 }
 
-// Notification Types
-export interface Notification {
-    id: string;
-    type: NotificationType;
-    title: string;
-    message: string;
-    userId: string;
-    isRead: boolean;
-    data?: Record<string, string>;
-    createdAt: string;
-}
-
-export const NotificationType = {
-    INFO: 'INFO',
-    WARNING: 'WARNING',
-    ERROR: 'ERROR',
-    SUCCESS: 'SUCCESS',
-    REQUEST: 'REQUEST',
-    INVENTORY_ALERT: 'INVENTORY_ALERT',
-} as const;
-
-export type NotificationType =
-    (typeof NotificationType)[keyof typeof NotificationType];
+// Notification Types - moved to notification.ts
+// Re-export for backward compatibility
+export type { 
+    Notification as LegacyNotification,
+    NotificationType as LegacyNotificationType 
+} from './notification';
 
 // API Response Types
 export interface ApiResponse<T> {

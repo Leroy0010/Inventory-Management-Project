@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { inventoryApi } from '@/api/inventoryItem';
+import { departmentApi } from '@/api/department';
 import { toast } from 'sonner';
 import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
 
@@ -19,13 +19,13 @@ export const useDepartmentQueries = () => {
     // Get departments
     const departmentsQuery = useQuery({
         queryKey: departmentKeys.lists(),
-        queryFn: inventoryApi.getDepartments,
+        queryFn: departmentApi.getDepartments,
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
 
     // Create department mutation
     const createDepartmentMutation = useMutation({
-        mutationFn: inventoryApi.createDepartment,
+        mutationFn: departmentApi.createDepartment,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: departmentKeys.lists() });
             toast.success('Department created successfully!');
@@ -40,7 +40,7 @@ export const useDepartmentQueries = () => {
     // Update department mutation
     const updateDepartmentMutation = useMutation({
         mutationFn: ({ id, name }: { id: number; name: string }) =>
-            inventoryApi.updateDepartment(id, name),
+            departmentApi.updateDepartment(id, name),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: departmentKeys.lists() });
             toast.success('Department updated successfully!');
@@ -54,7 +54,7 @@ export const useDepartmentQueries = () => {
 
     // Delete department mutation
     const deleteDepartmentMutation = useMutation({
-        mutationFn: inventoryApi.deleteDepartment,
+        mutationFn: departmentApi.deleteDepartment,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: departmentKeys.lists() });
             toast.success('Department deleted successfully!');

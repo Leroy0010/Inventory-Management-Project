@@ -23,7 +23,7 @@ export function useNotificationsSafe() {
         return context;
     } catch (error) {
         // Fallback for any other errors
-        console.warn('NotificationProvider not available, using mock data');
+        // NotificationProvider not available, using mock data
         return {
             notifications: [],
             unreadCount: 0,

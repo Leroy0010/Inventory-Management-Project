@@ -56,7 +56,7 @@ export default function InventoryItemDetails() {
                 toast.success('Item deleted successfully');
                 navigate('/inventory-items');
             } catch (error) {
-                console.error('Error deleting item:', error);
+                // Error deleting item
                 toast.error('Failed to delete item');
             }
         }
