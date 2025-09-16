@@ -14,8 +14,13 @@ services:
                 - action: sync
                   path: ./target
                   target: /app/target
+        volumes:
+          - ./credentials.json:/etc/secrets/credentials.json
+          - ~/.m2:/root/.m2
         ports:
             - "8080:8080" # Maps port 8080 on your host to port 8080 in the container
+        env_file:
+          - .env
         environment:
             # Spring Boot database connection properties (adjust as per your needs)
             # These tell your Spring Boot app how to connect to the 'database' service

@@ -46,10 +46,11 @@ public class UserService implements UserServiceInterface {
     private static final int PASSWORD_LENGTH = 12;
     private static final SecureRandom random = new SecureRandom();
     private static final Logger logger = LogManager.getLogger(UserService.class);
+    private final PasswordResetService passwordResetService;
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository,
                        OfficeRepository officeRepository, DepartmentRepository departmentRepository,
-                       UserMapper userMapper, PasswordEncoder passwordEncoder, EmailService emailService) {
+                       UserMapper userMapper, PasswordEncoder passwordEncoder, EmailService emailService, PasswordResetService passwordResetService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.officeRepository = officeRepository;
@@ -57,6 +58,7 @@ public class UserService implements UserServiceInterface {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.passwordResetService = passwordResetService;
     }
 
     /**
@@ -117,8 +119,12 @@ public class UserService implements UserServiceInterface {
 
         User savedUser = userRepository.save(user);
 
+        var map = passwordResetService.generateTokenForUser(savedUser.getEmail());
+
+        String newToken =  (String) map.get("token");
+
         // Send a notification that the account is created and they need to use change password
-        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName());
+        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName(), newToken);
 
         return savedUser;
     }
@@ -161,8 +167,11 @@ public class UserService implements UserServiceInterface {
 
         User savedUser = userRepository.save(user);
 
+        var map = passwordResetService.generateTokenForUser(savedUser.getEmail());
+        String newToken =  (String) map.get("token");
+
         // Send a notification that the account is created and they need to use change password
-        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName());
+        emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName(), newToken);
         logger.info("password: {}", generatedPassword);
 
         return savedUser;

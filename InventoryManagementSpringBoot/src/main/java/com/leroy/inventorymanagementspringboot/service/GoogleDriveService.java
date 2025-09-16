@@ -1,6 +1,6 @@
 package com.leroy.inventorymanagementspringboot.service;
 
-import java.io.File;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.model.File as GoogleDriveFile;
+import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.Permission;
 
@@ -38,7 +38,7 @@ public class GoogleDriveService {
         String departmentFolderId = getOrCreateDepartmentFolder(departmentName);
 
         // 2. File metadata
-        GoogleDriveFile fileMetadata = new GoogleDriveFile();
+        File fileMetadata = new File();
         fileMetadata.setName(localFile.getName());
         fileMetadata.setParents(Collections.singletonList(departmentFolderId));
 
@@ -46,7 +46,7 @@ public class GoogleDriveService {
                 new com.google.api.client.http.FileContent(mimeType, localFile);
 
         // 3. Upload file
-        GoogleDriveFile uploadedFile = driveService.files()
+        File uploadedFile = driveService.files()
                 .create(fileMetadata, mediaContent)
                 .setFields("id")
                 .execute();
@@ -72,7 +72,7 @@ public class GoogleDriveService {
         String departmentFolderId = getOrCreateDepartmentFolder(departmentName);
 
         // 2. File metadata
-        GoogleDriveFile fileMetadata = new GoogleDriveFile();
+        File fileMetadata = new File();
         fileMetadata.setName(multipartFile.getOriginalFilename());
         fileMetadata.setParents(Collections.singletonList(departmentFolderId));
 
@@ -83,7 +83,7 @@ public class GoogleDriveService {
                 );
 
         // 3. Upload file
-        GoogleDriveFile uploadedFile = driveService.files()
+        File uploadedFile = driveService.files()
                 .create(fileMetadata, mediaContent)
                 .setFields("id")
                 .execute();
@@ -113,19 +113,19 @@ public class GoogleDriveService {
                 .setFields("files(id, name)")
                 .execute();
 
-        List<GoogleDriveFile> files = result.getFiles();
+        List<File> files = result.getFiles();
 
         if (files != null && !files.isEmpty()) {
             return files.getFirst().getId(); // Folder exists
         }
 
         // Create new folder
-        GoogleDriveFile folderMetadata = new GoogleDriveFile();
+        File folderMetadata = new File();
         folderMetadata.setName(departmentName);
         folderMetadata.setMimeType("application/vnd.google-apps.folder");
         folderMetadata.setParents(Collections.singletonList(rootFolderId));
 
-        GoogleDriveFile folder = driveService.files()
+        File folder = driveService.files()
                 .create(folderMetadata)
                 .setFields("id")
                 .execute();

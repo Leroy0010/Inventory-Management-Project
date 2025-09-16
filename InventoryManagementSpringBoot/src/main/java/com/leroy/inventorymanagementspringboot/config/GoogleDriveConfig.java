@@ -23,7 +23,7 @@ public class GoogleDriveConfig {
     private String credentialsFilePath;
 
     @Bean
-    public Drive googleDriveService() throws IOException, GeneralSecurityException {
+    public Drive googleDrive() throws IOException, GeneralSecurityException {
         var credentials = (ServiceAccountCredentials) ServiceAccountCredentials
                 .fromStream(new FileInputStream(credentialsFilePath))
                 .createScoped(Collections.singleton(DriveScopes.DRIVE));

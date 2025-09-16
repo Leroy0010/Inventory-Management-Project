@@ -23,7 +23,6 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
-    private final PasswordResetService passwordResetService;
 
     @Value("${spring.mail.username}")
     private String senderEmail;
@@ -34,18 +33,17 @@ public class EmailService {
     public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine, PasswordResetService passwordResetService, PasswordResetService passwordResetService1) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
-        this.passwordResetService = passwordResetService1;
     }
 
     @Async
-    public void sendAccountCreatedNotification(String toEmail, String userName) { // Added generatedPassword parameter
+    public void sendAccountCreatedNotification(String toEmail, String userName, String token) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
+            String secureLink = frontendBaseUrl + "/reset-password?token=" + token;
+
             Context context = new Context();
-            var map = passwordResetService.generateTokenForUser(toEmail);
-            String secureLink = frontendBaseUrl + "/reset-password?token=" + map.get("token");
             context.setVariable("userName", userName);
             context.setVariable("currentYear", Year.now().getValue());
             context.setVariable("secureLink", secureLink);
@@ -58,10 +56,8 @@ public class EmailService {
 
             mailSender.send(mimeMessage);
             logger.info("Async: Account created notification sent successfully to {}", toEmail);
-        } catch (MailException e) {
-            logger.error("Async: Failed to send account created notification to {}: {}", toEmail, e.getMessage());
         } catch (Exception e) {
-            logger.error("Async: Error preparing or sending account created notification to {}: {}", toEmail, e.getMessage(), e);
+            logger.error("Async: Failed to send account created notification", e);
         }
     }
 

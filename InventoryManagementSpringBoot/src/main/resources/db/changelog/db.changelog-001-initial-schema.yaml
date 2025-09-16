@@ -130,11 +130,13 @@ databaseChangeLog:
               - column:
                   name: phone
                   type: VARCHAR(20)
-                  nullable: true
+                  constraints:
+                    nullable: true
               - column:
                   name: bio
                   type: TEXT
-                  nullable: true
+                  constraints:
+                    nullable: true
 
 
         - createTable:
