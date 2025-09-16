@@ -49,11 +49,10 @@ export interface DepartmentOverview {
 export interface AdminDashboard {
   welcomeMessage: string;
   role: string;
-  lastLoginAt: string;
   stats: DashboardStats[];
   quickActions: QuickAction[];
-  recentActivity: RecentRequest[];
   systemHealth: SystemHealth;
+  unreadNotifications: number;
 }
 
 export interface StorekeeperDashboard {
@@ -64,6 +63,7 @@ export interface StorekeeperDashboard {
   quickActions: QuickAction[];
   recentRequests: RecentRequest[];
   departmentOverview: DepartmentOverview;
+  unreadNotifications: number;
 }
 
 export interface StaffDashboard {

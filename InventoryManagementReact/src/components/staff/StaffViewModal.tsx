@@ -106,7 +106,7 @@ export function StaffViewModal({ staff, isOpen, onClose, onEdit }: StaffViewModa
                       variant="outline"
                       size="sm"
                       onClick={handleDelete}
-                      disabled={isDeleting}
+                      disabled // disabled={isDeleting}
                       className="flex items-center gap-2 text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="w-4 h-4" />

@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { officeApi } from '@/api/office';
 import type { UserActivityReportFilters, UserRole } from '@/types/userActivityReport';
+import { useOffices } from '@/hooks/queries/useOffice';
 
 interface UserActivityReportFormProps {
   onGenerate: (filters: UserActivityReportFilters) => void;
@@ -55,11 +56,7 @@ export function UserActivityReportForm({
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Fetch offices data
-  const { data: offices = [], isLoading: officesLoading } = useQuery({
-    queryKey: ['offices'],
-    queryFn: officeApi.getOffices,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  const { data: offices = [], isLoading: officesLoading } = useOffices();
 
   // Convert offices to combobox options
   const officeOptions: ComboboxOption[] = [

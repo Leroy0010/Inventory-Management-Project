@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/card';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
-import { Package, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
+import { Package, AlertTriangle,  TrendingDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface InventorySummaryProps {

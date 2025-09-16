@@ -18,12 +18,12 @@ export interface CreateStaffRequest {
 
 export interface UpdateStaffRequest {
   id: number;
-  email?: string;
-  firstName?: string;
-  lastName?: string;
+  email: string;
+  firstName: string;
+  lastName: string;
   phone?: string;
   bio?: string;
-  officeName?: string;
+  officeName: string;
 }
 
 export interface ToggleStaffStatusRequest {

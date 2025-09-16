@@ -1,8 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Card, CardContent} from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
-  FileText, 
   AlertCircle,
   CheckCircle
 } from 'lucide-react';

@@ -28,6 +28,58 @@ export function ProfileInfo({ profile, className = '' }: ProfileInfoProps) {
 
   return (
     <div className={className}>
+      {/* Personal Information Card */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            <CardTitle>Personal Information</CardTitle>
+          </div>
+          <CardDescription>
+            Your personal details and contact information.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">User ID</span>
+            <span className="text-sm text-gray-600 font-mono">#{profile.id}</span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Full Name</span>
+            <span className="text-sm text-gray-600">{profile.firstName} {profile.lastName}</span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Email
+            </span>
+            <span className="text-sm text-gray-600">{profile.email}</span>
+          </div>
+
+          {profile.phone && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                Phone
+              </span>
+              <span className="text-sm text-gray-600">{profile.phone}</span>
+            </div>
+          )}
+
+          {profile.bio && (
+            <div className="flex items-start justify-between">
+              <span className="text-sm font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Bio
+              </span>
+              <span className="text-sm text-gray-600 text-right max-w-xs">{profile.bio}</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Account Status Card */}
       <Card className="mb-6">
         <CardHeader>
@@ -64,12 +116,12 @@ export function ProfileInfo({ profile, className = '' }: ProfileInfoProps) {
 
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Department</span>
-            <span className="text-sm text-gray-600">{profile.departmentName}</span>
+            <span className="text-sm text-gray-600">{profile.departmentName || 'Not assigned'}</span>
           </div>
 
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Office</span>
-            <span className="text-sm text-gray-600">{profile.officeName}</span>
+            <span className="text-sm text-gray-600">{profile.officeName || 'Not assigned'}</span>
           </div>
         </CardContent>
       </Card>
@@ -96,15 +148,6 @@ export function ProfileInfo({ profile, className = '' }: ProfileInfoProps) {
             </span>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Last Login
-            </span>
-            <span className="text-sm text-gray-600">
-              {formatDate(profile.lastLoginAt)}
-            </span>
-          </div>
         </CardContent>
       </Card>
     </div>

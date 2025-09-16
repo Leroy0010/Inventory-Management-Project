@@ -96,6 +96,7 @@ export function StaffCard({ staff, onEdit, onView }: StaffCardProps) {
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={handleDelete}
+                  disabled
                   className="text-red-600 focus:text-red-600"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />

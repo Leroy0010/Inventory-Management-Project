@@ -9,11 +9,10 @@ export interface UserProfile {
   phone?: string;
   bio?: string;
   active: boolean;
-  officeName: string;
-  departmentName: string;
+  officeName?: string;
+  departmentName?: string;
   roleName: string;
   createdAt: string;
-  lastLoginAt?: string;
 }
 
 export interface UpdateProfileRequest {
@@ -45,7 +44,6 @@ export const updateProfileSchema = z.object({
     .min(2, 'Last name must be at least 2 characters')
     .max(50, 'Last name must not exceed 50 characters'),
   email: z
-    .string()
     .email('Please provide a valid email address')
     .max(100, 'Email must not exceed 100 characters'),
   phone: z
