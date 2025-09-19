@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { userApi } from '@/api/user';
 import { toast } from 'sonner';
-import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
+import {
+    formatApiError,
+    getFriendlyErrorMessage,
+    formatValidationErrors,
+} from '@/lib/error-utils';
 
 // Query keys for user operations
 export const userKeys = {
@@ -28,12 +32,29 @@ export const useUserQueries = () => {
         mutationFn: userApi.createStaff,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-            toast.success(`Staff member "${data.fullName}" created successfully!`);
+            toast.success(
+                `Staff member "${data.fullName}" created successfully!`
+            );
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to create staff member: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(
+                    `Failed to create staff member: ${friendlyMessage}`,
+                    {
+                        description: validationErrors.join(', '),
+                    }
+                );
+            } else {
+                toast.error(
+                    `Failed to create staff member: ${friendlyMessage}`
+                );
+            }
         },
     });
 
@@ -42,19 +63,34 @@ export const useUserQueries = () => {
         mutationFn: userApi.createStorekeeper,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-            toast.success(`Storekeeper "${data.fullName}" created successfully!`);
+            toast.success(
+                `Storekeeper "${data.fullName}" created successfully!`
+            );
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to create storekeeper: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(
+                    `Failed to create storekeeper: ${friendlyMessage}`,
+                    {
+                        description: validationErrors.join(', '),
+                    }
+                );
+            } else {
+                toast.error(`Failed to create storekeeper: ${friendlyMessage}`);
+            }
         },
     });
 
     return {
         // Queries
         usersQuery,
-        
+
         // Mutations
         createStaffMutation,
         createStorekeeperMutation,

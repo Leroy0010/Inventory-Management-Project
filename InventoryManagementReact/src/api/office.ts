@@ -18,7 +18,7 @@ export const officeApi = {
             if (filters?.search) params.append('search', filters.search);
             
             const queryString = params.toString();
-            const url = queryString ? `/api/offices?${queryString}` : '/api/offices';
+            const url = queryString ? `/offices?${queryString}` : '/offices';
             
             return await api.get<Office[]>(url);
         } catch (error) {
@@ -29,7 +29,7 @@ export const officeApi = {
     // Get office by ID
     getOfficeById: async (id: number): Promise<Office> => {
         try {
-            return await api.get<Office>(`/api/offices/${id}`);
+            return await api.get<Office>(`/offices/${id}`);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -38,16 +38,16 @@ export const officeApi = {
     // Get office names only
     getOfficeNames: async (): Promise<string[]> => {
         try {
-            return await api.get<string[]>('/api/offices/names');
+            return await api.get<string[]>('/offices/names');
         } catch (error) {
             throw new Error(handleApiError(error));
         }
     },
 
     // Create new office
-    createOffice: async (office: CreateOfficeRequest): Promise<Office> => {
+    createOffice: async (office: CreateOfficeRequest): Promise<string> => {
         try {
-            return await api.post<Office>('/api/offices', office);
+            return await api.post<string>('/offices', office);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -56,7 +56,7 @@ export const officeApi = {
     // Update office
     updateOffice: async (id: number, office: UpdateOfficeRequest): Promise<Office> => {
         try {
-            return await api.put<Office>(`/api/offices/${id}`, office);
+            return await api.put<Office>(`/offices/${id}`, office);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -65,7 +65,7 @@ export const officeApi = {
     // Delete office
     deleteOffice: async (id: number): Promise<void> => {
         try {
-            await api.delete(`/api/offices/${id}`);
+            await api.delete(`/offices/${id}`);
         } catch (error) {
             throw new Error(handleApiError(error));
         }

@@ -2,33 +2,204 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/ico" href="./src/assets/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Primary Meta Tags -->
+        <title>Inventory Management System - Modern Business Solution</title>
+        <meta
+            name="title"
+            content="Inventory Management System - Modern Business Solution"
+        />
         <meta
             name="description"
-            content="Inventory Management System built with React and TypeScript"
+            content="A comprehensive inventory management system built with React, TypeScript, and modern web technologies. Streamline your business operations with real-time tracking, automated reports, and intuitive user interface."
         />
-        <meta name="keywords" content="Inventory, Management, System" />
-        <meta name="author" content="Dennis Leroy" />
+        <meta
+            name="keywords"
+            content="inventory management, business software, stock tracking, supply chain, warehouse management, React, TypeScript, modern web app"
+        />
+        <meta name="author" content="Inventory Management Team" />
+        <meta name="robots" content="index, follow" />
+        <meta name="language" content="English" />
+        <meta name="revisit-after" content="7 days" />
+
+        <!-- Favicon and Icons -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="/favicon-32x32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="/favicon-16x16.png"
+        />
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/apple-touch-icon.png"
+        />
+        <link rel="manifest" href="/site.webmanifest" />
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta
+            property="og:url"
+            content="https://inventory-management.example.com/"
+        />
         <meta
             property="og:title"
-            content="Vite + React + TS Inventory Management"
+            content="Inventory Management System - Modern Business Solution"
         />
         <meta
             property="og:description"
-            content="A modern inventory management system using React and TypeScript."
+            content="A comprehensive inventory management system built with React, TypeScript, and modern web technologies. Streamline your business operations with real-time tracking, automated reports, and intuitive user interface."
         />
-        <meta property="og:type" content="website" />
+        <meta property="og:image" content="/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="Inventory Management System" />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
         <meta
-            property="og:image"
-            content="./src/assets/inventoryfxico 55x55.bmp"
+            property="twitter:url"
+            content="https://inventory-management.example.com/"
         />
-        <meta property="og:url" content="http://localhost:5173/" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <title>Inventory Management System</title>
+        <meta
+            property="twitter:title"
+            content="Inventory Management System - Modern Business Solution"
+        />
+        <meta
+            property="twitter:description"
+            content="A comprehensive inventory management system built with React, TypeScript, and modern web technologies. Streamline your business operations with real-time tracking, automated reports, and intuitive user interface."
+        />
+        <meta property="twitter:image" content="/twitter-image.png" />
+
+        <!-- Additional SEO Meta Tags -->
+        <meta name="theme-color" content="#1f2937" />
+        <meta name="msapplication-TileColor" content="#1f2937" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+
+        <!-- Preconnect to external domains for performance -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+        <!-- Preload critical resources -->
+        <link rel="preload" href="/src/main.tsx" as="script" />
+        <link rel="preload" href="/src/index.css" as="style" />
+
+        <!-- Structured Data for SEO -->
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                "name": "Inventory Management System",
+                "description": "A comprehensive inventory management system built with React, TypeScript, and modern web technologies.",
+                "url": "https://inventory-management.example.com/",
+                "applicationCategory": "BusinessApplication",
+                "operatingSystem": "Web Browser",
+                "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD"
+                },
+                "author": {
+                    "@type": "Organization",
+                    "name": "Inventory Management Team"
+                },
+                "featureList": [
+                    "Real-time inventory tracking",
+                    "Automated reporting",
+                    "User role management",
+                    "Request management",
+                    "Dashboard analytics",
+                    "Mobile responsive design"
+                ]
+            }
+        </script>
+
+        <!-- Performance and Security Headers -->
+        <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+        <meta http-equiv="X-Frame-Options" content="DENY" />
+        <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+
+        <!-- DNS Prefetch for better performance -->
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
     </head>
     <body>
-        <div id="root"></div>
+        <noscript>
+            <div
+                style="
+                    text-align: center;
+                    padding: 2rem;
+                    font-family: Arial, sans-serif;
+                "
+            >
+                <h1>JavaScript Required</h1>
+                <p>
+                    This application requires JavaScript to function properly.
+                    Please enable JavaScript in your browser and refresh the
+                    page.
+                </p>
+            </div>
+        </noscript>
+        <div id="root">
+            <!-- Loading fallback for better UX -->
+            <div
+                id="loading-fallback"
+                style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    font-family:
+                        system-ui,
+                        -apple-system,
+                        sans-serif;
+                    background: #f8fafc;
+                    color: #64748b;
+                "
+            >
+                <div style="text-align: center">
+                    <div
+                        style="
+                            width: 40px;
+                            height: 40px;
+                            border: 4px solid #e2e8f0;
+                            border-top: 4px solid #3b82f6;
+                            border-radius: 50%;
+                            animation: spin 1s linear infinite;
+                            margin: 0 auto 1rem;
+                        "
+                    ></div>
+                    <p>Loading Inventory Management System...</p>
+                </div>
+            </div>
+            <style>
+                @keyframes spin {
+                    0% {
+                        transform: rotate(0deg);
+                    }
+                    100% {
+                        transform: rotate(360deg);
+                    }
+                }
+            </style>
+        </div>
         <script type="module" src="/src/main.tsx"></script>
+        <script>
+            // Hide loading fallback when React app loads
+            window.addEventListener('load', function () {
+                const fallback = document.getElementById('loading-fallback');
+                if (fallback) {
+                    fallback.style.display = 'none';
+                }
+            });
+        </script>
     </body>
 </html>

@@ -9,19 +9,19 @@ import type {
 export const profileApi = {
   // Get current user profile
   getProfile: async (): Promise<UserProfile> => {
-    const response = await apiClient.get<UserProfile>('/api/users/get-profile');
+    const response = await apiClient.get<UserProfile>('/users/get-profile');
     return response.data;
   },
 
   // Update user profile
   updateProfile: async (data: UpdateProfileRequest): Promise<UserProfile> => {
-    const response = await apiClient.put<UserProfile>('/api/users/update-profile', data);
+    const response = await apiClient.put<UserProfile>('/users/update-profile', data);
     return response.data;
   },
 
   // Change user password
   changePassword: async (data: UpdatePasswordRequest): Promise<UpdatePasswordResponse> => {
-    const response = await apiClient.post<UpdatePasswordResponse>('/api/users/change-password', data);
+    const response = await apiClient.post<UpdatePasswordResponse>('/users/change-password', data);
     return response.data;
   },
 };

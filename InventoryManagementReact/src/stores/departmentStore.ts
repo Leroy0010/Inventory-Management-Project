@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { api, handleApiError } from '@/api/client';
-import type { Department } from '@/types/department';
+import type { Department, DepartmentResponseDto } from '@/types/department';
 
 export interface DepartmentState {
     departments: Department[];
@@ -11,10 +11,11 @@ export interface DepartmentState {
 
 export interface DepartmentActions {
     // Departments management
-    fetchDepartments: () => Promise<void>;
+    fetchDepartments: () => Promise<Department[]>;
     createDepartment: (name: string) => Promise<Department>;
     updateDepartment: (id: number, name: string) => Promise<Department>;
     deleteDepartment: (id: number) => Promise<void>;
+    fetchDepartmentsAdmin: () => Promise<DepartmentResponseDto[]>;
 
     // Error handling
     setError: (error: string | null) => void;
@@ -39,7 +40,22 @@ export const useDepartmentStore = create<DepartmentStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const departments = await api.get<Department[]>('/api/departments');
+                    const departments = await api.get<Department[]>('/departments');
+                    set({ departments: departments || [], isLoading: false });
+                } catch (error) {
+                    set({
+                        error: handleApiError(error),
+                        isLoading: false,
+                    });
+                }
+            },
+
+            // Fetch departments
+            fetchDepartmentsAdmin: async () => {
+                set({ isLoading: true, error: null });
+
+                try {
+                    const departments = await api.get<DepartmentResponseDto[]>('/departments/admin/get-all');
                     set({ departments: departments || [], isLoading: false });
                 } catch (error) {
                     set({
@@ -54,7 +70,7 @@ export const useDepartmentStore = create<DepartmentStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const newDepartment = await api.post<Department>('/api/departments', { name });
+                    const newDepartment = await api.post<Department>('/departments', { name });
 
                     set((state) => ({
                         departments: [...state.departments, newDepartment],
@@ -76,7 +92,7 @@ export const useDepartmentStore = create<DepartmentStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    const updatedDepartment = await api.put<Department>(`/api/departments/${id}`, { name });
+                    const updatedDepartment = await api.put<Department>(`/departments/${id}`, { name });
 
                     set((state) => ({
                         departments: state.departments.map((dept) =>
@@ -102,7 +118,7 @@ export const useDepartmentStore = create<DepartmentStore>()(
                 set({ isLoading: true, error: null });
 
                 try {
-                    await api.delete(`/api/departments/${id}`);
+                    await api.delete(`/departments/${id}`);
 
                     set((state) => ({
                         departments: state.departments.filter(

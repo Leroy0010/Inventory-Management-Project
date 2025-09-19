@@ -1,6 +1,3 @@
-import type { OfficeResponseDto } from './office';
-import type { Department } from './department';
-
 export interface LoginRequest {
     email: string;
     password: string;
@@ -14,26 +11,28 @@ export interface User {
     id: number;
     email: string;
     firstName: string;
-    lastName: string;
-    fullName: string;
+    lastName?: string;
+    fullName?: string;
     role: Role;
-    office?: OfficeResponseDto;
-    department?: Department;
+    office?: string;
+    department?: string;
     active?: boolean;
 }
 
-export interface Role {
-    id: number;
-    name: 'ADMIN' | 'STOREKEEPER' | 'STAFF';
-    description?: string;
-}
+export type Role = 'ADMIN' | 'STOREKEEPER' | 'STAFF';
 
 export interface LoginResponse {
-    user: User;
-    message: string;
+        id: number;
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: Role;
 }
 
 export interface RefreshResponse {
-    user: User;
-    message: string;
+        id: number;
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: Role;
 }

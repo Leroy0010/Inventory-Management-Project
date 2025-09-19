@@ -16,11 +16,26 @@ export function ProtectedRoute({
     requireAll = false,
     fallbackPath = '/login',
 }: ProtectedRouteProps) {
-    const { isAuthenticated, isLoading, hasAnyPermission, hasAllPermissions } =
-        useAuthStore();
+    const {
+        isAuthenticated,
+        isLoading,
+        isHydrated,     // ✅ added from store
+        hasAnyPermission,
+        hasAllPermissions,
+    } = useAuthStore();
     const location = useLocation();
 
-    // Show loading state while checking authentication
+
+    // ✅ NEW: wait for hydration before deciding anything
+    if (!isHydrated) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    // Show loading state while requests (login, logout, profile fetch) are in progress
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -43,30 +58,10 @@ export function ProtectedRoute({
             : hasAnyPermission(requiredPermissions);
 
         if (!hasRequiredPermissions) {
+            console.log('ProtectedRoute: Missing required permissions');
             return <Navigate to="/unauthorized" replace />;
         }
     }
 
     return <>{children}</>;
-}
-
-// Higher-order component for permission-based rendering
-export function withPermission<P extends object>(
-    Component: React.ComponentType<P>,
-    requiredPermissions: Permission[],
-    requireAll: boolean = false
-) {
-    return function PermissionWrappedComponent(props: P) {
-        const { hasAnyPermission, hasAllPermissions } = useAuthStore();
-
-        const hasRequiredPermissions = requireAll
-            ? hasAllPermissions(requiredPermissions)
-            : hasAnyPermission(requiredPermissions);
-
-        if (!hasRequiredPermissions) {
-            return null;
-        }
-
-        return <Component {...props} />;
-    };
 }

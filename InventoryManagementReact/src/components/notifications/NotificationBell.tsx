@@ -7,14 +7,12 @@ import { Separator } from '@/components/ui/separator';
 import { 
   Bell, 
   BellOff, 
-  CheckCircle2, 
   ExternalLink,
   Loader2
 } from 'lucide-react';
 import { useUnreadNotifications, useUnreadCount, useMarkAsRead } from '@/hooks/queries/useNotification';
 import { useWebSocketNotification } from '@/hooks/useWebSocketNotification';
 import { NotificationItem } from './NotificationItem';
-import { formatDistanceToNow } from 'date-fns';
 
 interface NotificationBellProps {
   className?: string;
@@ -22,27 +20,49 @@ interface NotificationBellProps {
 
 export function NotificationBell({ className = '' }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [animatePulse, setAnimatePulse] = useState(false);
+  const [animateShake, setAnimateShake] = useState(false);
   const { connectionState } = useWebSocketNotification();
   const { data: unreadNotifications = [], isLoading: isLoadingUnread } = useUnreadNotifications();
   const { data: unreadCount = 0, isLoading: isLoadingCount } = useUnreadCount();
   const markAsReadMutation = useMarkAsRead();
+  const prevCountRef = useRef(unreadCount);
 
-  // Show recent notifications (last 5)
-  const recentNotifications = unreadNotifications.slice(0, 5);
+  // Trigger animations on new notifications
+  useEffect(() => {
+    if (unreadCount > prevCountRef.current) {
+      const newCount = unreadCount - prevCountRef.current;
+      
+      // Always pulse
+      setAnimatePulse(true);
+      const pulseTimeout = setTimeout(() => setAnimatePulse(false), 800);
+
+      // Shake if multiple notifications
+      if (newCount > 1) {
+        setAnimateShake(true);
+        const shakeTimeout = setTimeout(() => setAnimateShake(false), 600);
+        return () => clearTimeout(shakeTimeout);
+      }
+
+      return () => clearTimeout(pulseTimeout);
+    }
+    prevCountRef.current = unreadCount;
+  }, [unreadCount]);
 
   const handleMarkAsRead = async (notificationId: number) => {
     try {
       await markAsReadMutation.mutateAsync(notificationId);
-    } catch (error) {
-      // Failed to mark notification as read
+    } catch {
+        // 
     }
   };
 
   const handleViewAll = () => {
     setIsOpen(false);
-    // Navigate to full notifications page
     window.location.href = '/notifications';
   };
+
+  const recentNotifications = unreadNotifications.slice(0, 5);
 
   return (
     <div className={className}>
@@ -54,22 +74,19 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
             className="relative h-9 w-9"
             disabled={isLoadingCount}
           >
-            {isLoadingCount ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Bell className="h-4 w-4" />
-            )}
-            
+            {isLoadingCount ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
+
             {/* Unread count badge */}
             {unreadCount > 0 && (
               <Badge 
                 variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                className={`absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs
+                  ${animatePulse ? 'animate-ping' : ''} ${animateShake ? 'animate-shake' : ''}`}
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </Badge>
             )}
-            
+
             {/* Connection status indicator */}
             <div 
               className={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full ${
@@ -91,36 +108,21 @@ export function NotificationBell({ className = '' }: NotificationBellProps) {
         </PopoverTrigger>
 
         <PopoverContent className="w-80 p-0" align="end">
-          <div className="p-4 border-b">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Notifications</h3>
-              <div className="flex items-center gap-2">
-                {unreadCount > 0 && (
-                  <span className="text-xs text-gray-500">
-                    {unreadCount} unread
-                  </span>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleViewAll}
-                  className="h-7 px-2 text-xs"
-                >
-                  View All
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </Button>
-              </div>
-            </div>
+          <div className="p-4 border-b flex items-center justify-between">
+            <h3 className="font-semibold text-sm">Notifications</h3>
+            {unreadCount > 0 && (
+              <span className="text-xs text-gray-500">{unreadCount} unread</span>
+            )}
           </div>
 
           <ScrollArea className="max-h-96">
             {isLoadingUnread ? (
-              <div className="p-4 space-y-3">
+              <div className="p-4 space-y-3 animate-pulse">
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div key={index} className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4" />
-                    <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2" />
+                    <div className="h-4 bg-gray-200 rounded" />
+                    <div className="h-3 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
                   </div>
                 ))}
               </div>

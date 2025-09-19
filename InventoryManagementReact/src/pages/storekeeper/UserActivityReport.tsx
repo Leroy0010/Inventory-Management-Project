@@ -1,15 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, memo } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-    Download,
-    RefreshCw,
-    AlertCircle,
-    FileText,
-    BarChart3,
-} from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import {
     useDepartmentUserActivityReport,
@@ -17,17 +8,17 @@ import {
     useRefreshUserActivityData,
 } from '@/hooks/queries/useUserActivityReport';
 import { UserActivityReportForm } from '@/components/user-activity-report/UserActivityReportForm';
-import { UserActivityReportTable } from '@/components/user-activity-report/UserActivityReportTable';
-import { UserActivitySummary } from '@/components/user-activity-report/UserActivitySummary';
+import { UserActivityReportHeader } from '@/components/user-activity-report/UserActivityReportHeader';
+import { UserActivityReportContent } from '@/components/user-activity-report/UserActivityReportContent';
+import { UserActivityReportMetadata } from '@/components/user-activity-report/UserActivityReportMetadata';
 import { exportToCSV } from '@/api/userActivityReport';
-import { cn } from '@/lib/utils';
 import type {
     UserActivityReportFilters,
     UserActivityReportResponseDto,
 } from '@/types/userActivityReport';
 
 
-export default function UserActivityReport() {
+const UserActivityReport = memo(function UserActivityReport() {
     const { user, hasPermission } = useAuthStore();
     const [filters, setFilters] = useState<UserActivityReportFilters>({
         timePeriod: {
@@ -170,43 +161,13 @@ export default function UserActivityReport() {
     return (
         <div className="container mx-auto p-6 space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        User Activity Report
-                    </h1>
-                    <p className="text-muted-foreground">
-                        Monitor user activity, performance metrics, and request
-                        patterns
-                    </p>
-                </div>
-                <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        onClick={handleRefresh}
-                        disabled={isLoading}
-                        className="flex items-center gap-2"
-                    >
-                        <RefreshCw
-                            className={cn(
-                                'h-4 w-4',
-                                isLoading && 'animate-spin'
-                            )}
-                        />
-                        Refresh
-                    </Button>
-                    {canExport && reportData && (
-                        <Button
-                            onClick={handleExport}
-                            disabled={isLoading}
-                            className="flex items-center gap-2"
-                        >
-                            <Download className="h-4 w-4" />
-                            Export CSV
-                        </Button>
-                    )}
-                </div>
-            </div>
+            <UserActivityReportHeader
+                onRefresh={handleRefresh}
+                onExport={canExport ? handleExport : undefined}
+                isLoading={isLoading}
+                canExport={canExport}
+                hasData={!!reportData}
+            />
 
             {/* Error Display */}
             {error && (
@@ -229,107 +190,26 @@ export default function UserActivityReport() {
                         onExport={canExport ? handleExport : undefined}
                         isLoading={isLoading}
                     />
-                                </div>
+                </div>
 
                 {/* Report Content */}
                 <div className="lg:col-span-2">
-                    {reportData ? (
-                        <Tabs
-                            value={activeTab}
-                            onValueChange={setActiveTab}
-                            className="w-full"
-                        >
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger
-                                    value="overview"
-                                    className="flex items-center gap-2"
-                                >
-                                    <BarChart3 className="h-4 w-4" />
-                                    Overview
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="details"
-                                    className="flex items-center gap-2"
-                                >
-                                    <FileText className="h-4 w-4" />
-                                    Details
-                                </TabsTrigger>
-                            </TabsList>
-
-                            <TabsContent value="overview" className="space-y-4">
-                                <UserActivitySummary
-                                    summary={reportData.summary}
-                                />
-                            </TabsContent>
-
-                            <TabsContent value="details" className="space-y-4">
-                                <UserActivityReportTable
-                                    data={reportData.userActivities}
-                                    isLoading={isLoading}
-                                />
-                            </TabsContent>
-                        </Tabs>
-                    ) : (
-                    <Card>
-                            <CardContent className="flex flex-col items-center justify-center py-12">
-                                <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                                <h3 className="text-lg font-semibold mb-2">
-                                    No Report Data
-                                </h3>
-                                <p className="text-muted-foreground text-center mb-4">
-                                    Configure your filters and generate a report
-                                    to view user activity data.
-                                </p>
-                                <Button
-                                    onClick={() =>
-                                        handleGenerateReport(filters)
-                                    }
-                                    disabled={isLoading}
-                                >
-                                    {isLoading
-                                        ? 'Generating...'
-                                        : 'Generate Report'}
-                                </Button>
-                        </CardContent>
-                    </Card>
-                    )}
+                    <UserActivityReportContent
+                        reportData={reportData}
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
+                        onGenerateReport={() => handleGenerateReport(filters)}
+                        isLoading={isLoading}
+                    />
                 </div>
             </div>
 
             {/* Report Metadata */}
             {reportData && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-sm">
-                            Report Information
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm text-muted-foreground">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div>
-                                <span className="font-medium">Generated:</span>{' '}
-                                {new Date(
-                                    reportData.generatedAt
-                                ).toLocaleString()}
-                                        </div>
-                                        <div>
-                                <span className="font-medium">
-                                    Generated By:
-                                </span>{' '}
-                                {reportData.generatedBy}
-                                        </div>
-                            <div>
-                                <span className="font-medium">Department:</span>{' '}
-                                {reportData.departmentName}
-                                    </div>
-                            <div>
-                                <span className="font-medium">Period:</span>{' '}
-                                {reportData.timePeriod}
-                                </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <UserActivityReportMetadata reportData={reportData} />
             )}
         </div>
     );
-}
+});
+
+export default UserActivityReport;

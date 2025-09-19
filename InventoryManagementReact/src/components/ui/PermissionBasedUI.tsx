@@ -1,20 +1,15 @@
-import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePermissionCheck } from '@/hooks/usePermissionCheck';
 import { useAuthStore } from '@/stores/authStore';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { 
-    Lock, 
-    Eye, 
-    EyeOff, 
-    Shield, 
-    User, 
-    Settings, 
-    AlertTriangle,
-    Info
-} from 'lucide-react';
 import type { Permission } from '@/types/permissions';
+import {
+    AlertTriangle,
+    Info,
+    Lock,
+    Shield
+} from 'lucide-react';
+import React from 'react';
 
 interface PermissionBasedUIProps {
     children: React.ReactNode;
@@ -31,7 +26,7 @@ export function PermissionBasedUI({
     requireAll = false,
     fallbackComponent,
     showPermissionHint = true,
-    className
+    className,
 }: PermissionBasedUIProps) {
     const { canAccess } = usePermissionCheck();
     const { user } = useAuthStore();
@@ -52,8 +47,8 @@ export function PermissionBasedUI({
 
     const getPermissionLevel = () => {
         if (!user?.role) return 'unknown';
-        
-        switch (user.role.name) {
+
+        switch (user.role) {
             case 'ADMIN':
                 return 'admin';
             case 'STOREKEEPER':
@@ -68,15 +63,16 @@ export function PermissionBasedUI({
     const getPermissionMessage = () => {
         const level = getPermissionLevel();
         const permissionNames = permissions.join(', ');
-        
+
         return {
             title: 'Access Restricted',
-            message: `This feature requires ${permissionNames} permission(s). Your current role (${user?.role?.name}) doesn't have access to this content.`,
-            suggestion: level === 'staff' 
-                ? 'Contact your storekeeper for access to this feature.'
-                : level === 'storekeeper'
-                ? 'Contact your administrator for additional permissions.'
-                : 'Please contact your system administrator.'
+            message: `This feature requires ${permissionNames} permission(s). Your current role (${user?.role}) doesn't have access to this content.`,
+            suggestion:
+                level === 'staff'
+                    ? 'Contact your storekeeper for access to this feature.'
+                    : level === 'storekeeper'
+                      ? 'Contact your administrator for additional permissions.'
+                      : 'Please contact your system administrator.',
         };
     };
 
@@ -89,7 +85,7 @@ export function PermissionBasedUI({
                     <Lock className="h-5 w-5 text-muted-foreground" />
                     {title}
                     <Badge variant="outline" className="ml-auto">
-                        {user?.role?.name || 'Unknown'}
+                        {user?.role || 'Unknown'}
                     </Badge>
                 </CardTitle>
             </CardHeader>
@@ -97,14 +93,16 @@ export function PermissionBasedUI({
                 <div className="flex items-start gap-3">
                     <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
                     <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">{message}</p>
+                        <p className="text-sm text-muted-foreground">
+                            {message}
+                        </p>
                         <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
                             <Info className="h-3 w-3 inline mr-1" />
                             {suggestion}
                         </p>
                     </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2 pt-2 border-t">
                     <Shield className="h-4 w-4 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground">
@@ -122,7 +120,7 @@ export function ConditionalUI({
     fallback,
     permissions,
     requireAll = false,
-    showWhenNoAccess = false
+    showWhenNoAccess = false,
 }: {
     children: React.ReactNode;
     fallback?: React.ReactNode;
@@ -144,17 +142,5 @@ export function ConditionalUI({
     return null;
 }
 
-// Hook for permission-based conditional rendering
-export function usePermissionUI(permissions: Permission[], requireAll: boolean = false) {
-    const { canAccess } = usePermissionCheck();
-    const { user } = useAuthStore();
 
-    return {
-        hasAccess: canAccess(permissions, requireAll),
-        userRole: user?.role?.name,
-        canShow: canAccess(permissions, requireAll),
-        isAdmin: user?.role?.name === 'ADMIN',
-        isStorekeeper: user?.role?.name === 'STOREKEEPER',
-        isStaff: user?.role?.name === 'STAFF'
-    };
-}
+

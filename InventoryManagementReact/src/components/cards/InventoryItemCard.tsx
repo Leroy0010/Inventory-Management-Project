@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,11 @@ import {
 import { cn } from '@/lib/utils';
 import type { InventoryItemResponseDto } from '@/types/inventoryItem';
 import { useCartQueries } from '@/hooks/queries/useCart';
-import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
+import {
+    formatApiError,
+    getFriendlyErrorMessage,
+    formatValidationErrors,
+} from '@/lib/error-utils';
 import { toast } from 'sonner';
 
 interface InventoryItemCardProps {
@@ -27,7 +31,7 @@ interface InventoryItemCardProps {
     className?: string;
 }
 
-export default function InventoryItemCard({
+const InventoryItemCard = memo(function InventoryItemCard({
     item,
     isStorekeeperView = false,
     onEdit,
@@ -51,8 +55,24 @@ export default function InventoryItemCard({
                 {
                     onError: (error: unknown) => {
                         const apiError = formatApiError(error);
-                        const friendlyMessage = getFriendlyErrorMessage(apiError);
-                        toast.error(`Failed to add ${item.name} to cart: ${friendlyMessage}`);
+                        const friendlyMessage =
+                            getFriendlyErrorMessage(apiError);
+                        const validationErrors = formatValidationErrors(
+                            apiError.details || null
+                        );
+
+                        if (validationErrors.length > 0) {
+                            toast.error(
+                                `Failed to add ${item.name} to cart: ${friendlyMessage}`,
+                                {
+                                    description: validationErrors.join(', '),
+                                }
+                            );
+                        } else {
+                            toast.error(
+                                `Failed to add ${item.name} to cart: ${friendlyMessage}`
+                            );
+                        }
                     },
                 }
             );
@@ -226,4 +246,6 @@ export default function InventoryItemCard({
             )}
         </Card>
     );
-}
+});
+
+export default InventoryItemCard;

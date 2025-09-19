@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useNavigate } from 'react-router-dom';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
-import { useAuthStore } from '@/stores/authStore';
 import { useAuthQueries } from '@/hooks/queries/useAuth';
+import { useAuthStore } from '@/stores/authStore';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { FormErrorAlert } from '@/components/ui/FormErrorAlert';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 import { GoogleSignInButton } from './GoogleSignInButton';
 
 // Validation schema
@@ -36,7 +37,8 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
     const navigate = useNavigate();
 
     const { error, clearError } = useAuthStore();
-    const { loginMutation, googleLoginMutation } = useAuthQueries();
+    const { loginMutation } = useAuthQueries();
+    const { login } = useAuthStore();
 
     const {
         register,
@@ -49,24 +51,28 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
     const onSubmit = async (data: LoginFormData) => {
         try {
             clearError();
-            await loginMutation.mutateAsync({
+            console.log('Starting login process...');
+
+            const user = await loginMutation.mutateAsync({
                 email: data.email,
                 password: data.password,
             });
-            onSuccess?.();
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-            // Error is handled by the mutation
-        }
-    };
 
-    const handleGoogleLogin = async (googleToken: string) => {
-        try {
-            clearError();
-            await googleLoginMutation.mutateAsync(googleToken);
-            onSuccess?.();
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            login(user);
+
+            console.log('Login successful, result:', user);
+
+            // Add a small delay to ensure all backend operations complete
+            // This prevents race conditions with token cleanup
+            await new Promise((resolve) => setTimeout(resolve, 200));
+
+            console.log('Calling onSuccess callback...');
+            // Call onSuccess after successful login
+            if (onSuccess) {
+                onSuccess();
+            }
         } catch (error) {
+            console.error('Login error:', error);
             // Error is handled by the mutation
         }
     };
@@ -75,9 +81,14 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
         <Card className={className}>
             <CardContent className="space-y-4">
                 {/* Error Alert */}
-                {error && (
+                {(error || loginMutation.error) && (
                     <Alert variant="destructive">
-                        <AlertDescription>{error}</AlertDescription>
+                        <AlertDescription>
+                            <FormErrorAlert
+                                error={loginMutation.error || error}
+                                defaultMessage="Login failed. Please try again."
+                            />
+                        </AlertDescription>
                     </Alert>
                 )}
 
@@ -162,8 +173,8 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
 
                 {/* Forgot Password Link */}
                 <div className="text-center">
-                    <Button 
-                        variant="link" 
+                    <Button
+                        variant="link"
                         className="text-sm"
                         onClick={() => navigate('/forgot-password')}
                     >
@@ -185,8 +196,7 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
 
                 {/* Google Sign In */}
                 <GoogleSignInButton
-                    onSuccess={handleGoogleLogin}
-                    isLoading={googleLoginMutation.isPending}
+                    isLoading={false}
                     disabled={isSubmitting || loginMutation.isPending}
                 />
             </CardContent>

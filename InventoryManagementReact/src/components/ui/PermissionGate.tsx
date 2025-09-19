@@ -68,33 +68,3 @@ export function PermissionGate({
     );
 }
 
-// Higher-order component for permission-based rendering
-export function withPermission<P extends object>(
-    Component: React.ComponentType<P>,
-    permissions: Permission[],
-    requireAll: boolean = false,
-    fallback?: React.ReactNode
-) {
-    return function PermissionWrappedComponent(props: P) {
-        return (
-            <PermissionGate
-                permissions={permissions}
-                requireAll={requireAll}
-                fallback={fallback}
-            >
-                <Component {...props} />
-            </PermissionGate>
-        );
-    };
-}
-
-// Hook for conditional rendering based on permissions
-export function usePermissionUI(permissions: Permission[], requireAll: boolean = false) {
-    const { canAccess } = usePermissionCheck();
-    
-    return {
-        hasAccess: canAccess(permissions, requireAll),
-        showContent: canAccess(permissions, requireAll),
-        showFallback: !canAccess(permissions, requireAll)
-    };
-}

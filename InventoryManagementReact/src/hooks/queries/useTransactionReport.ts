@@ -1,7 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { transactionReportApi } from '@/api/transactionReport';
 import { toast } from 'sonner';
-import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
+import {
+    formatApiError,
+    getFriendlyErrorMessage,
+    formatValidationErrors,
+} from '@/lib/error-utils';
 import type { TransactionReportRequest } from '@/types/transactionReports';
 
 // Query keys for transaction report operations
@@ -26,9 +30,22 @@ export const useTransactionReportQueries = () => {
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(
-                `Failed to generate transaction report: ${friendlyMessage}`
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
             );
+
+            if (validationErrors.length > 0) {
+                toast.error(
+                    `Failed to generate transaction report: ${friendlyMessage}`,
+                    {
+                        description: validationErrors.join(', '),
+                    }
+                );
+            } else {
+                toast.error(
+                    `Failed to generate transaction report: ${friendlyMessage}`
+                );
+            }
         },
     });
 

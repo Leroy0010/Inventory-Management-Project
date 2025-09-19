@@ -1,19 +1,22 @@
 import { api, handleApiError } from './client';
-import type { Department } from '@/types/department';
+import type { Department, DepartmentResponseDto } from '@/types/department';
 
 export const departmentApi = {
     // Departments
     getDepartments: async (): Promise<Department[]> => {
         try {
-            return await api.get<Department[]>('/api/departments');
+            return await api.get<Department[]>('/departments');
         } catch (error) {
             throw new Error(handleApiError(error));
         }
     },
 
-    createDepartment: async (name: string): Promise<Department> => {
+    createDepartment: async (data: {
+        name: string;
+        description?: string;
+    }): Promise<Department> => {
         try {
-            return await api.post<Department>('/api/departments', { name });
+            return await api.post<Department>('/departments', data);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -21,7 +24,7 @@ export const departmentApi = {
 
     updateDepartment: async (id: number, name: string): Promise<Department> => {
         try {
-            return await api.put<Department>(`/api/departments/${id}`, {
+            return await api.put<Department>(`/departments/${id}`, {
                 name,
             });
         } catch (error) {
@@ -31,7 +34,15 @@ export const departmentApi = {
 
     deleteDepartment: async (id: number): Promise<void> => {
         try {
-            await api.delete(`/api/departments/${id}`);
+            await api.delete(`/departments/${id}`);
+        } catch (error) {
+            throw new Error(handleApiError(error));
+        }
+    },
+
+    fetchDepartmentsAdmin: async (): Promise<DepartmentResponseDto[]> => {
+        try {
+            return await api.get(`/departments/admin/get-all`);
         } catch (error) {
             throw new Error(handleApiError(error));
         }

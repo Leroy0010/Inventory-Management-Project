@@ -23,4 +23,5 @@ export interface UserResponseDto {
     officeName?: string;
     departmentName?: string;
     active: boolean;
+    createdAt?: string;
 }

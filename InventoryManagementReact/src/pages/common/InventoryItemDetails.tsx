@@ -1,4 +1,4 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,7 @@ export default function InventoryItemDetails() {
     const itemQuery = useItemQuery(Number(id));
 
     // Determine if user is storekeeper
-    const isStorekeeper = user?.role.name === 'STOREKEEPER';
+    const isStorekeeper = user?.role === 'STOREKEEPER';
 
     // Calculate current quantity and reorder status
     const currentQuantity = itemQuery.data?.quantity || 0;
@@ -336,7 +336,6 @@ export default function InventoryItemDetails() {
                     </Card>
                 </div>
             </div>
-
         </div>
     );
 }

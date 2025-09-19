@@ -33,7 +33,7 @@ export const useUpdateProfile = () => {
       setError(null);
     },
     onError: (err) => {
-      setError(getErrorMessage(err));
+      setError({ "type": "API", "message": getErrorMessage(err)});
     },
   });
 };
@@ -51,7 +51,7 @@ export const useChangePassword = () => {
       setError(null);
     },
     onError: (err) => {
-      setError(getErrorMessage(err));
+      setError({ "type": "API", "message": getErrorMessage(err)});
     },
   });
 };

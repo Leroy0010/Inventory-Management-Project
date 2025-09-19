@@ -12,7 +12,7 @@ export const inventoryApi = {
     getItems: async (): Promise<InventoryItemResponseDto[]> => {
         try {
             return await api.get<InventoryItemResponseDto[]>(
-                '/api/inventory-items/get-all-department'
+                '/inventory-items/get-all-department'
             );
         } catch (error) {
             throw new Error(handleApiError(error));
@@ -21,7 +21,7 @@ export const inventoryApi = {
 
     getItemById: async (id: number): Promise<InventoryItem> => {
         try {
-            return await api.get<InventoryItem>(`/api/inventory-items/${id}`);
+            return await api.get<InventoryItem>(`/inventory-items/${id}`);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -42,7 +42,7 @@ export const inventoryApi = {
                 formData.append('image', imageFile);
 
                 return await api.post<InventoryItem>(
-                    '/api/inventory-items/with-image',
+                    '/inventory-items/with-image',
                     formData,
                     {
                         headers: {
@@ -53,7 +53,7 @@ export const inventoryApi = {
             } else {
                 // Regular JSON request for items without images
                 return await api.post<InventoryItem>(
-                    '/api/inventory-items',
+                    '/inventory-items',
                     item
                 );
             }
@@ -66,7 +66,7 @@ export const inventoryApi = {
         item: UpdateInventoryItemDto
     ): Promise<InventoryItem> => {
         try {
-            return await api.put<InventoryItem>('/api/inventory-items', item);
+            return await api.put<InventoryItem>(`/inventory-items/${item.id}`, item);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -74,7 +74,7 @@ export const inventoryApi = {
 
     deleteItem: async (id: number): Promise<void> => {
         try {
-            await api.delete('/api/inventory-items', { data: { id } });
+            await api.delete(`/inventory-items/${id}`,);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -83,7 +83,7 @@ export const inventoryApi = {
     // Inventory Balance
     getInventoryBalance: async (): Promise<any> => {
         try {
-            return await api.get<any>('/api/inventory/balance');
+            return await api.get<any>('/inventory/balance');
         } catch (error) {
             throw new Error(handleApiError(error));
         }

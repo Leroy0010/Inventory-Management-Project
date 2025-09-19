@@ -1,17 +1,19 @@
-import React, {
-    createContext,
-    useContext,
-    useReducer,
-    useEffect,
-    useCallback,
-} from 'react';
-import type { 
-    Notification, 
-    NotificationType, 
+import { useWebSocketNotification } from '@/hooks/useWebSocketNotification';
+import type {
     ContextNotificationAction,
     ContextNotificationState,
-    NotificationContextType
+    Notification,
+    NotificationContextType,
+    NotificationType,
 } from '@/types/notification';
+import { useQueryClient } from '@tanstack/react-query';
+import React, {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useReducer,
+} from 'react';
 
 // Initial State
 const initialState: ContextNotificationState = {
@@ -51,7 +53,9 @@ function notificationReducer(
             return {
                 ...state,
                 notifications: state.notifications.map((n) =>
-                    n.id.toString() === action.payload ? { ...n, isRead: true } : n
+                    n.id.toString() === action.payload
+                        ? { ...n, isRead: true }
+                        : n
                 ),
                 unreadCount: Math.max(0, state.unreadCount - 1),
             };
@@ -92,28 +96,21 @@ export function NotificationProvider({
     children: React.ReactNode;
 }) {
     const [state, dispatch] = useReducer(notificationReducer, initialState);
-    const [stompClient, setStompClient] = React.useState<any>(null);
+    const { connectionState, } = useWebSocketNotification();
+    const queryClient = useQueryClient();
 
-    // STOMP WebSocket connection
-    const connect = useCallback(() => {
-        // TODO: Implement actual STOMP connection
-        // For now, we'll simulate the connection
-        setStompClient({ connected: true });
-        dispatch({ type: 'SET_NOTIFICATIONS', payload: [] });
-    }, []);
-
-    const disconnect = useCallback(() => {
-        if (stompClient) {
-            // TODO: Implement actual STOMP disconnection
-            setStompClient(null);
-        }
-    }, [stompClient]);
+    // Update connection state in context
+    useEffect(() => {
+        dispatch({
+            type: 'SET_NOTIFICATIONS',
+            payload: state.notifications,
+        });
+    }, [connectionState.connected]);
 
     // Connect on mount
     useEffect(() => {
-        connect();
-        return () => disconnect();
-    }, [connect, disconnect]);
+        
+    }, []);
 
     const addNotification = useCallback(
         (notification: Omit<Notification, 'id' | 'createdAt'>) => {
@@ -145,13 +142,12 @@ export function NotificationProvider({
 
     const value: NotificationContextType = {
         ...state,
+        isConnected: connectionState.connected,
         addNotification,
         removeNotification,
         markAsRead,
         markAllAsRead,
         clearAll,
-        connect,
-        disconnect,
     };
 
     return (

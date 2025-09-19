@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '@/api/cart';
 import { toast } from 'sonner';
-import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
+import {
+    formatApiError,
+    getFriendlyErrorMessage,
+    formatValidationErrors,
+} from '@/lib/error-utils';
 
 // Query keys
 export const cartKeys = {
@@ -23,8 +27,13 @@ export const useCartQueries = () => {
 
     // Add item to cart mutation
     const addItemMutation = useMutation({
-        mutationFn: ({ itemId, quantity }: { itemId: number; quantity: number }) =>
-            cartApi.addItem(itemId, quantity),
+        mutationFn: ({
+            itemId,
+            quantity,
+        }: {
+            itemId: number;
+            quantity: number;
+        }) => cartApi.addItem(itemId, quantity),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: cartKeys.items() });
             toast.success('Item added to cart');
@@ -32,14 +41,29 @@ export const useCartQueries = () => {
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to add item: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(`Failed to add item: ${friendlyMessage}`, {
+                    description: validationErrors.join(', '),
+                });
+            } else {
+                toast.error(`Failed to add item: ${friendlyMessage}`);
+            }
         },
     });
 
     // Remove item from cart mutation
     const removeItemMutation = useMutation({
-        mutationFn: ({ itemId, quantity }: { itemId: number; quantity: number }) =>
-            cartApi.removeItem(itemId, quantity),
+        mutationFn: ({
+            itemId,
+            quantity,
+        }: {
+            itemId: number;
+            quantity: number;
+        }) => cartApi.removeItem(itemId, quantity),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: cartKeys.items() });
             toast.success('Item removed from cart');
@@ -47,14 +71,29 @@ export const useCartQueries = () => {
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to remove item: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(`Failed to remove item: ${friendlyMessage}`, {
+                    description: validationErrors.join(', '),
+                });
+            } else {
+                toast.error(`Failed to remove item: ${friendlyMessage}`);
+            }
         },
     });
 
     // Update item quantity mutation
     const updateItemMutation = useMutation({
-        mutationFn: ({ itemId, quantity }: { itemId: number; quantity: number }) =>
-            cartApi.updateItem(itemId, quantity),
+        mutationFn: ({
+            itemId,
+            quantity,
+        }: {
+            itemId: number;
+            quantity: number;
+        }) => cartApi.updateItem(itemId, quantity),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: cartKeys.items() });
             toast.success('Cart updated');
@@ -62,7 +101,17 @@ export const useCartQueries = () => {
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to update cart: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(`Failed to update cart: ${friendlyMessage}`, {
+                    description: validationErrors.join(', '),
+                });
+            } else {
+                toast.error(`Failed to update cart: ${friendlyMessage}`);
+            }
         },
     });
 
@@ -76,7 +125,17 @@ export const useCartQueries = () => {
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to clear cart: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(`Failed to clear cart: ${friendlyMessage}`, {
+                    description: validationErrors.join(', '),
+                });
+            } else {
+                toast.error(`Failed to clear cart: ${friendlyMessage}`);
+            }
         },
     });
 
@@ -86,19 +145,31 @@ export const useCartQueries = () => {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: cartKeys.items() });
             queryClient.invalidateQueries({ queryKey: ['requests'] });
-            toast.success(`Request submitted successfully! Request ID: ${data.id}`);
+            toast.success(
+                `Request submitted successfully! Request ID: ${data.id}`
+            );
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to submit request: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(`Failed to submit request: ${friendlyMessage}`, {
+                    description: validationErrors.join(', '),
+                });
+            } else {
+                toast.error(`Failed to submit request: ${friendlyMessage}`);
+            }
         },
     });
 
     return {
         // Queries
         cartItemsQuery,
-        
+
         // Mutations
         addItemMutation,
         removeItemMutation,

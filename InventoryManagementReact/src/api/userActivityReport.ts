@@ -11,7 +11,7 @@ import type {
  * Handles all API calls related to user activity reports
  */
 export class UserActivityReportApi {
-  private static readonly BASE_URL = '/api/reports/user-activity';
+  private static readonly BASE_URL = '/reports/user-activity';
 
   /**
    * Generate user activity report for current user's department

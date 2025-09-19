@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 export interface ApiError {
     message: string;
     statusCode?: number;
-    details?: any;
+    details?: Record<string, string[]> | null;
 }
 
 /**
@@ -18,7 +18,7 @@ export function formatApiError(error: unknown): ApiError {
         // Try to extract error message from response
         if (error.response?.data) {
             const data = error.response.data;
-            
+
             // Check for common error message fields
             if (typeof data === 'string') {
                 message = data;
@@ -31,6 +31,18 @@ export function formatApiError(error: unknown): ApiError {
             } else if (data.details) {
                 message = data.details;
             }
+
+            // Extract validation details if present
+            let details = null;
+            if (data.details && typeof data.details === 'object') {
+                details = data.details;
+            }
+
+            return {
+                message,
+                statusCode,
+                details,
+            };
         } else if (error.message) {
             message = error.message;
         }
@@ -57,7 +69,7 @@ export function formatApiError(error: unknown): ApiError {
     // Handle unknown error types
     return {
         message: 'An unexpected error occurred',
-        details: error,
+        details: null,
     };
 }
 
@@ -101,17 +113,35 @@ export function getFriendlyErrorMessage(error: ApiError): string {
 }
 
 /**
+ * Formats validation error details into a readable format
+ */
+export function formatValidationErrors(
+    details: Record<string, string[]> | null
+): string[] {
+    if (!details) return [];
+
+    const errors: string[] = [];
+    Object.entries(details).forEach(([field, fieldErrors]) => {
+        fieldErrors.forEach((error) => {
+            errors.push(`${field}: ${error}`);
+        });
+    });
+
+    return errors;
+}
+
+/**
  * Gets a user-friendly error message from any error
  */
 export function getErrorMessage(error: unknown): string {
     if (error instanceof Error) {
         return error.message;
     }
-    
+
     if (typeof error === 'string') {
         return error;
     }
-    
+
     const apiError = formatApiError(error);
     return apiError.message;
 }

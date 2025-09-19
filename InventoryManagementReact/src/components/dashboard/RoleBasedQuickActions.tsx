@@ -21,6 +21,7 @@ import {
     Eye,
     Edit
 } from 'lucide-react';
+import type { Permission } from '@/types/permissions';
 
 interface QuickAction {
     id: string;
@@ -177,9 +178,9 @@ export function RoleBasedQuickActions() {
         return null;
     }
 
-    const roleActions = quickActionsByRole[user.role.name] || [];
+    const roleActions = quickActionsByRole[user.role] || [];
     const availableActions = roleActions.filter(action => 
-        canAccess(action.permissions as any[])
+        canAccess(action.permissions as Permission[])
     );
 
     if (availableActions.length === 0) {
@@ -197,7 +198,7 @@ export function RoleBasedQuickActions() {
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     Quick Actions
                     <Badge variant="secondary" className="ml-auto">
-                        {user.role.name}
+                        {user.role}
                     </Badge>
                 </CardTitle>
             </CardHeader>

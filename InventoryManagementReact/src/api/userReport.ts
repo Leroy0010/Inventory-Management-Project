@@ -6,7 +6,7 @@ export const userReportApi = {
     // Get user report for a specific user and year (existing Spring Boot implementation)
     getUserReport: async (request: UserReportRequest): Promise<UserReportItemDto[]> => {
         try {
-            return await api.post<UserReportItemDto[]>('/api/reports/user', request);
+            return await api.post<UserReportItemDto[]>('/reports/user', request);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -22,7 +22,7 @@ export const userReportApi = {
             if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
             
             const queryString = params.toString();
-            const url = queryString ? `/api/reports/user/all?${queryString}` : '/api/reports/user/all';
+            const url = queryString ? `/reports/user/all?${queryString}` : '/reports/user/all';
             return await api.get<UserReportResponse>(url);
         } catch (error) {
             throw new Error(handleApiError(error));
@@ -40,8 +40,8 @@ export const userReportApi = {
             
             const queryString = params.toString();
             const url = queryString 
-                ? `/api/reports/user/department/${departmentId}?${queryString}` 
-                : `/api/reports/user/department/${departmentId}`;
+                ? `/reports/user/department/${departmentId}?${queryString}` 
+                : `/reports/user/department/${departmentId}`;
             return await api.get<UserReportResponse>(url);
         } catch (error) {
             throw new Error(handleApiError(error));

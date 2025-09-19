@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/auth';
-import type { LoginRequest } from '@/types/auth';
+import type { LoginRequest, User } from '@/types/auth';
 import { useAuthStore } from '@/stores/authStore';
+import {
+    formatApiError,
+    getFriendlyErrorMessage,
+    formatValidationErrors,
+} from '@/lib/error-utils';
 
 // Query Keys
 export const authKeys = {
@@ -13,13 +18,19 @@ export const authKeys = {
 // Custom hook for authentication queries and mutations
 export function useAuthQueries() {
     const queryClient = useQueryClient();
-    const { setUser, clearTokens, setError, clearError } = useAuthStore();
+    const {
+        setUser,
+        setUserFromProfile,
+        clearUser,
+        setError,
+        clearError,
+    } = useAuthStore();
 
     // Get current user profile
     const profileQuery = useQuery({
         queryKey: authKeys.profile(),
         queryFn: authApi.getProfile,
-        enabled: true,
+        enabled: false, // Don't auto-fetch on mount
         retry: false,
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
@@ -28,50 +39,54 @@ export function useAuthQueries() {
     const loginMutation = useMutation({
         mutationFn: (credentials: LoginRequest) => authApi.login(credentials),
         onSuccess: (data) => {
-            setUser(data.user);
-            // Note: Tokens are handled by HTTP-only cookies in this implementation
-            // If you need to store tokens in state, uncomment the following:
-            // setTokens(data.token, data.refreshToken);
+            const user: User = {
+                id: data.id,
+                email: data.email,
+                firstName: data.firstName,
+                lastName: data.fullName,
+                fullName: data.firstName,
+                role: data.role,
+            };
+            setUser(user);
             clearError();
-            // Invalidate and refetch profile
             queryClient.invalidateQueries({ queryKey: authKeys.profile() });
         },
         onError: (error) => {
-            setError(error instanceof Error ? error.message : 'Login failed');
+            console.error('Login mutation onError called:', error);
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            let errorMessage = friendlyMessage;
+            if (validationErrors.length > 0) {
+                errorMessage += ': ' + validationErrors.join(', ');
+            }
+
+            setError({ type: 'LOGIN', message: errorMessage });
         },
     });
 
-    // Google login mutation
-    const googleLoginMutation = useMutation({
-        mutationFn: (token: string) => authApi.loginWithGoogle(token),
-        onSuccess: (data) => {
-            setUser(data.user);
-            // Note: Tokens are handled by HTTP-only cookies in this implementation
-            // If you need to store tokens in state, uncomment the following:
-            // setTokens(data.token, data.refreshToken);
-            clearError();
-            queryClient.invalidateQueries({ queryKey: authKeys.profile() });
-        },
-        onError: (error) => {
-            setError(
-                error instanceof Error ? error.message : 'Google login failed'
-            );
-        },
-    });
 
     // Refresh token mutation
     const refreshMutation = useMutation({
         mutationFn: authApi.refresh,
         onSuccess: (data) => {
-            setUser(data.user);
-            // Note: Tokens are handled by HTTP-only cookies in this implementation
-            // If you need to store tokens in state, uncomment the following:
-            // setTokens(data.token, data.refreshToken);
+            if (data) {
+                setUser({
+                    id: data.id,
+                    email: data.email,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    fullName: data.fullName,
+                    role: data.role,
+                });
+            }
             clearError();
         },
         onError: () => {
-            clearTokens();
-            setUser(null);
+            clearUser();
         },
     });
 
@@ -79,14 +94,13 @@ export function useAuthQueries() {
     const logoutMutation = useMutation({
         mutationFn: authApi.logout,
         onSuccess: () => {
-            clearTokens();
-            setUser(null);
+            clearUser()
             queryClient.clear();
         },
         onError: () => {
             // Even if logout fails on server, clear local state
-            clearTokens();
-            setUser(null);
+            
+            clearUser()
             queryClient.clear();
         },
     });
@@ -95,13 +109,22 @@ export function useAuthQueries() {
     const updateProfileMutation = useMutation({
         mutationFn: authApi.updateProfile,
         onSuccess: (data) => {
-            setUser(data);
+            setUserFromProfile(data);
             queryClient.invalidateQueries({ queryKey: authKeys.profile() });
         },
         onError: (error) => {
-            setError(
-                error instanceof Error ? error.message : 'Profile update failed'
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
             );
+
+            let errorMessage = friendlyMessage;
+            if (validationErrors.length > 0) {
+                errorMessage += ': ' + validationErrors.join(', ');
+            }
+
+            setError({ type: 'API', message: errorMessage });
         },
     });
 
@@ -118,11 +141,18 @@ export function useAuthQueries() {
             clearError();
         },
         onError: (error) => {
-            setError(
-                error instanceof Error
-                    ? error.message
-                    : 'Password change failed'
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
             );
+
+            let errorMessage = friendlyMessage;
+            if (validationErrors.length > 0) {
+                errorMessage += ': ' + validationErrors.join(', ');
+            }
+
+            setError({ type: 'API', message: errorMessage });
         },
     });
 
@@ -133,11 +163,18 @@ export function useAuthQueries() {
             clearError();
         },
         onError: (error) => {
-            setError(
-                error instanceof Error
-                    ? error.message
-                    : 'Password reset request failed'
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
             );
+
+            let errorMessage = friendlyMessage;
+            if (validationErrors.length > 0) {
+                errorMessage += ': ' + validationErrors.join(', ');
+            }
+
+            setError({ type: 'LOGIN', message: errorMessage });
         },
     });
 
@@ -154,9 +191,18 @@ export function useAuthQueries() {
             clearError();
         },
         onError: (error) => {
-            setError(
-                error instanceof Error ? error.message : 'Password reset failed'
+            const apiError = formatApiError(error);
+            const friendlyMessage = getFriendlyErrorMessage(apiError);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
             );
+
+            let errorMessage = friendlyMessage;
+            if (validationErrors.length > 0) {
+                errorMessage += ': ' + validationErrors.join(', ');
+            }
+
+            setError({ type: 'API', message: errorMessage });
         },
     });
 
@@ -166,7 +212,6 @@ export function useAuthQueries() {
 
         // Mutations
         loginMutation,
-        googleLoginMutation,
         refreshMutation,
         logoutMutation,
         updateProfileMutation,

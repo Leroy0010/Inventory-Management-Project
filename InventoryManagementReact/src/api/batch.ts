@@ -6,7 +6,7 @@ export const batchApi = {
     // Get all batches
     getBatches: async (): Promise<InventoryBatch[]> => {
         try {
-            return await api.get<InventoryBatch[]>('/api/batches');
+            return await api.get<InventoryBatch[]>('/batches');
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -15,7 +15,7 @@ export const batchApi = {
     // Create new inventory batch
     createBatch: async (batch: CreateBatchDto): Promise<InventoryBatch> => {
         try {
-            return await api.post<InventoryBatch>('/api/batch', batch);
+            return await api.post<InventoryBatch>('/batch', batch);
         } catch (error) {
             throw new Error(handleApiError(error));
         }

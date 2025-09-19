@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { batchApi } from '@/api/batch';
 import { toast } from 'sonner';
-import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
+import {
+    formatApiError,
+    getFriendlyErrorMessage,
+    formatValidationErrors,
+} from '@/lib/error-utils';
 
 // Query keys for batch operations
 export const batchKeys = {
@@ -36,14 +40,24 @@ export const useBatchQueries = () => {
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to create batch: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(`Failed to create batch: ${friendlyMessage}`, {
+                    description: validationErrors.join(', '),
+                });
+            } else {
+                toast.error(`Failed to create batch: ${friendlyMessage}`);
+            }
         },
     });
 
     return {
         // Queries
         batchesQuery,
-        
+
         // Mutations
         createBatchMutation,
     };

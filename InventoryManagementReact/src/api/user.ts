@@ -6,7 +6,7 @@ export const userApi = {
     // Get all users
     getUsers: async (): Promise<UserResponseDto[]> => {
         try {
-            return await api.get<UserResponseDto[]>('/api/users');
+            return await api.get<UserResponseDto[]>('/users/admin/get');
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -15,7 +15,7 @@ export const userApi = {
     // Create new staff member
     createStaff: async (staff: CreateStaffDto): Promise<UserResponseDto> => {
         try {
-            return await api.post<UserResponseDto>('/api/users/register-staff', staff);
+            return await api.post<UserResponseDto>('/users/storekeeper/register-staff', staff);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -24,7 +24,7 @@ export const userApi = {
     // Create new storekeeper
     createStorekeeper: async (storekeeper: CreateStorekeeperDto): Promise<UserResponseDto> => {
         try {
-            return await api.post<UserResponseDto>('/api/users/register-storekeeper', storekeeper);
+            return await api.post<UserResponseDto>('/users/admin/register-user', storekeeper);
         } catch (error) {
             throw new Error(handleApiError(error));
         }

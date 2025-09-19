@@ -192,6 +192,4 @@ export interface NotificationContextType extends ContextNotificationState {
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   clearAll: () => void;
-  connect: () => void;
-  disconnect: () => void;
 }

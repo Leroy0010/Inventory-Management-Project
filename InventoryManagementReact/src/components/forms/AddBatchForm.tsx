@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
 import { useBatchQueries } from '@/hooks/queries/useBatch';
 import { toast } from 'sonner';
+import { FormErrorAlert } from '@/components/ui/FormErrorAlert';
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
@@ -51,10 +52,11 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
     const { createBatchMutation } = useBatchQueries();
 
     // Convert items to combobox options
-    const itemOptions: ComboboxOption[] = itemsQuery.data?.map((item) => ({
-        value: item.name,
-        label: item.name,
-    })) || [];
+    const itemOptions: ComboboxOption[] =
+        itemsQuery.data?.map((item) => ({
+            value: item.name,
+            label: item.name,
+        })) || [];
 
     const {
         register,
@@ -87,17 +89,20 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
             setValue('');
             toast.success('Batch created successfully!');
         } catch (error) {
-            // Error creating batch
+            // Error is handled by the mutation's onError callback
+            console.error('Failed to create batch:', error);
         }
     };
 
     return (
         <Card className={className}>
             <CardContent>
-                <form
-                    className="space-y-4"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
+                <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+                    <FormErrorAlert
+                        error={createBatchMutation.error}
+                        defaultMessage="Failed to create batch. Please try again."
+                    />
+
                     <div>
                         <Label htmlFor="itemName" className="mb-1">
                             Item Name

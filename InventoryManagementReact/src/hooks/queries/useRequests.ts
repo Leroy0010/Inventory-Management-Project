@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { requestApi } from '@/api/requests';
 import { toast } from 'sonner';
-import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
+import {
+    formatApiError,
+    getFriendlyErrorMessage,
+    formatValidationErrors,
+} from '@/lib/error-utils';
 
 // Query keys
 export const requestKeys = {
@@ -25,12 +29,13 @@ export const useRequestQueries = () => {
     });
 
     // Get request by ID
-    const getRequestByIdQuery = (id: number) => useQuery({
-        queryKey: requestKeys.detail(id),
-        queryFn: () => requestApi.getRequestById(id),
-        enabled: !!id,
-        staleTime: 30000,
-    });
+    const getRequestByIdQuery = (id: number) =>
+        useQuery({
+            queryKey: requestKeys.detail(id),
+            queryFn: () => requestApi.getRequestById(id),
+            enabled: !!id,
+            staleTime: 30000,
+        });
 
     // Submit cart as request mutation
     const submitCartAsRequestMutation = useMutation({
@@ -38,12 +43,24 @@ export const useRequestQueries = () => {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: requestKeys.lists() });
             queryClient.invalidateQueries({ queryKey: ['cart'] });
-            toast.success(`Request submitted successfully! Request ID: ${data.id}`);
+            toast.success(
+                `Request submitted successfully! Request ID: ${data.id}`
+            );
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to submit request: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(`Failed to submit request: ${friendlyMessage}`, {
+                    description: validationErrors.join(', '),
+                });
+            } else {
+                toast.error(`Failed to submit request: ${friendlyMessage}`);
+            }
         },
     });
 
@@ -52,12 +69,24 @@ export const useRequestQueries = () => {
         mutationFn: requestApi.createRequest,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: requestKeys.lists() });
-            toast.success(`Request created successfully! Request ID: ${data.id}`);
+            toast.success(
+                `Request created successfully! Request ID: ${data.id}`
+            );
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to create request: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(`Failed to create request: ${friendlyMessage}`, {
+                    description: validationErrors.join(', '),
+                });
+            } else {
+                toast.error(`Failed to create request: ${friendlyMessage}`);
+            }
         },
     });
 
@@ -66,14 +95,26 @@ export const useRequestQueries = () => {
         mutationFn: requestApi.approveOrRejectRequest,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: requestKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: requestKeys.detail(data.id) });
+            queryClient.invalidateQueries({
+                queryKey: requestKeys.detail(data.id),
+            });
             const action = data.status === 'APPROVED' ? 'approved' : 'rejected';
             toast.success(`Request ${action} successfully!`);
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to process request: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(`Failed to process request: ${friendlyMessage}`, {
+                    description: validationErrors.join(', '),
+                });
+            } else {
+                toast.error(`Failed to process request: ${friendlyMessage}`);
+            }
         },
     });
 
@@ -82,13 +123,25 @@ export const useRequestQueries = () => {
         mutationFn: requestApi.fulfillRequest,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: requestKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: requestKeys.detail(data.id) });
+            queryClient.invalidateQueries({
+                queryKey: requestKeys.detail(data.id),
+            });
             toast.success('Request fulfilled successfully!');
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to fulfill request: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(`Failed to fulfill request: ${friendlyMessage}`, {
+                    description: validationErrors.join(', '),
+                });
+            } else {
+                toast.error(`Failed to fulfill request: ${friendlyMessage}`);
+            }
         },
     });
 
@@ -96,7 +149,7 @@ export const useRequestQueries = () => {
         // Queries
         userRequestsQuery,
         getRequestByIdQuery,
-        
+
         // Mutations
         submitCartAsRequestMutation,
         createRequestMutation,

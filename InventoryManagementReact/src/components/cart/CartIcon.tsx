@@ -4,10 +4,17 @@ import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores/cartStore';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useAuthStore } from '@/stores/authStore';
 
 export function CartIcon() {
     const { totalItems, fetchCart } = useCartStore();
+    const { hasPermission } = useAuthStore();
     const navigate = useNavigate();
+
+    // Only show cart icon for STAFF users
+    if (!hasPermission('VIEW_CART')) {
+        return null;
+    }
 
     // Fetch cart data on component mount
     useEffect(() => {
@@ -28,8 +35,8 @@ export function CartIcon() {
         >
             <ShoppingCart className="w-5 h-5" />
             {totalItems > 0 && (
-                <Badge 
-                    variant="destructive" 
+                <Badge
+                    variant="destructive"
                     className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                 >
                     {totalItems}

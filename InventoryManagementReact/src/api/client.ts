@@ -7,7 +7,7 @@ import axios, {
 
 // API Configuration
 const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -21,8 +21,8 @@ const apiClient: AxiosInstance = axios.create({
 
 // Request interceptor
 apiClient.interceptors.request.use(
-    (config) => {
-        // Add any request modifications here
+    async (config) => {
+        // No CSRF token handling needed - using JWT tokens for authentication
         return config;
     },
     (error) => {
@@ -40,20 +40,36 @@ apiClient.interceptors.response.use(
             _retry?: boolean;
         };
 
-        // Handle 401 errors (unauthorized)
+        // Handle 401 errors (unauthorized) - but only for authenticated requests
         if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
+            // Skip refresh for auth-related endpoints to avoid infinite loops
+            const authEndpoints = [
+                '/auth/login',
+                '/auth/google',
+                '/auth/refresh',
+                '/auth/logout',
+                '/csrf-token',
+            ];
+            const isAuthEndpoint = authEndpoints.some((endpoint) =>
+                originalRequest.url?.includes(endpoint)
+            );
 
-            try {
-                // Attempt to refresh token
-                await apiClient.post('/api/auth/refresh');
+            if (!isAuthEndpoint) {
+                originalRequest._retry = true;
 
-                // Retry original request
-                return apiClient(originalRequest);
-            } catch (refreshError) {
-                // Refresh failed, redirect to login
-                window.location.href = '/login';
-                return Promise.reject(refreshError);
+                try {
+                    // Attempt to refresh token
+                    await apiClient.post('/auth/refresh');
+
+                    // Retry original request
+                    return apiClient(originalRequest);
+                } catch (refreshError) {
+                    // Refresh failed, redirect to login only if not already on login page
+                    if (window.location.pathname !== '/login') {
+                        window.location.href = '/login';
+                    }
+                    return Promise.reject(refreshError);
+                }
             }
         }
 
@@ -64,9 +80,9 @@ apiClient.interceptors.response.use(
 // API Error class
 export class ApiError extends Error {
     public status: number;
-    public data: any;
+    public data: unknown;
 
-    constructor(message: string, status: number, data?: any) {
+    constructor(message: string, status: number, data?: unknown) {
         super(message);
         this.name = 'ApiError';
         this.status = status;
@@ -88,21 +104,21 @@ export const api = {
 
     post: <T>(
         url: string,
-        data?: any,
+        data?: unknown,
         config?: AxiosRequestConfig
     ): Promise<T> =>
         apiClient.post(url, data, config).then((response) => response.data),
 
     put: <T>(
         url: string,
-        data?: any,
+        data?: unknown,
         config?: AxiosRequestConfig
     ): Promise<T> =>
         apiClient.put(url, data, config).then((response) => response.data),
 
     patch: <T>(
         url: string,
-        data?: any,
+        data?: unknown,
         config?: AxiosRequestConfig
     ): Promise<T> =>
         apiClient.patch(url, data, config).then((response) => response.data),
@@ -112,7 +128,7 @@ export const api = {
 };
 
 // Error handler utility
-export const handleApiError = (error: any): string => {
+export const handleApiError = (error: unknown): string => {
     if (error instanceof ApiError) {
         return error.message;
     }
@@ -125,15 +141,18 @@ export const handleApiError = (error: any): string => {
             case 400:
                 return `Bad Request: ${message}`;
             case 401:
-                return 'Unauthorized. Please log in again.';
+                return message || 'Unauthorized. Please log in again.';
             case 403:
-                return 'Access denied. You do not have permission to perform this action.';
+                return (
+                    message ||
+                    `Access denied. You do not have permission to perform this action: ${message}`
+                );
             case 404:
-                return 'Resource not found.';
+                return message ||  'Resource not found.';
             case 422:
-                return `Validation Error: ${message}`;
+                return message || `Validation Error: ${message}`;
             case 500:
-                return 'Internal server error. Please try again later.';
+                return message || 'Internal server error. Please try again later.';
             default:
                 return message || 'An unexpected error occurred.';
         }

@@ -15,9 +15,7 @@ export const RequestDetails = React.lazy(
 
 export const SendMessage = React.lazy(() => import('@/pages/SendMessage'));
 export const Settings = React.lazy(() => import('@/pages/Settings'));
-export const Notifications = React.lazy(
-    () => import('@/pages/common/Notifications')
-);
+export const Notifications = React.lazy(() => import('@/pages/Notifications'));
 export const Dashboard = React.lazy(() => import('@/pages/common/Dashboard'));
 
 // Admin pages
@@ -81,4 +79,9 @@ export const UserActivityReport = React.lazy(
 );
 export const InventorySummaryReport = React.lazy(
     () => import('@/pages/storekeeper/InventorySummaryReport')
+);
+
+// Heavy UI components
+export const ImageUpload = React.lazy(
+    () => import('@/components/ui/image-upload')
 );

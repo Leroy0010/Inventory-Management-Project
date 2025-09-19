@@ -9,7 +9,7 @@ import type {
  * Handles all API calls related to inventory summary reports
  */
 export class InventorySummaryReportApi {
-  private static readonly BASE_URL = '/api/reports/inventory-summary';
+  private static readonly BASE_URL = '/reports/inventory-summary';
 
   /**
    * Generate inventory summary report

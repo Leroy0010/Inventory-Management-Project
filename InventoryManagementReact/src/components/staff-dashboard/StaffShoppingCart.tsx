@@ -1,17 +1,33 @@
 import { ShoppingCart } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '../ui/card';
 import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/authStore';
 import type { CartItem } from '@/types/dashboard';
-
 
 interface StaffShoppingCartProps {
     cartItems: CartItem[];
     cartTotal: number;
 }
 
-export default function StaffShoppingCart({cartItems, cartTotal}: StaffShoppingCartProps) {
-    const navigate = useNavigate()
+export default function StaffShoppingCart({
+    cartItems,
+    cartTotal,
+}: StaffShoppingCartProps) {
+    const { hasPermission } = useAuthStore();
+    const navigate = useNavigate();
+
+    // Only show cart component for STAFF users
+    if (!hasPermission('VIEW_CART')) {
+        return null;
+    }
+
     return (
         <Card>
             <CardHeader>

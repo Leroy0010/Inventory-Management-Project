@@ -18,7 +18,7 @@ export const staffApi = {
       if (filters?.officeName) params.append('officeName', filters.officeName);
       
       const queryString = params.toString();
-      const url = queryString ? `/api/storekeeper/get-users?${queryString}` : '/api/storekeeper/get-users';
+      const url = queryString ? `/users/storekeeper/get-users?${queryString}` : '/users/storekeeper/get-users';
       
       return await api.get<Staff[]>(url);
     } catch (error) {
@@ -29,7 +29,7 @@ export const staffApi = {
   // Get staff by ID
   getStaffById: async (id: number): Promise<Staff> => {
     try {
-      return await api.get<Staff>(`/api/staff/${id}`);
+      return await api.get<Staff>(`/staff/${id}`);
     } catch (error) {
       throw new Error(handleApiError(error));
     }
@@ -38,7 +38,7 @@ export const staffApi = {
   // Create new staff member
   createStaff: async (staff: CreateStaffRequest): Promise<Staff> => {
     try {
-      return await api.post<Staff>('/api/storekeeper/register-staff', staff);
+      return await api.post<Staff>('/storekeeper/register-staff', staff);
     } catch (error) {
       throw new Error(handleApiError(error));
     }
@@ -47,7 +47,7 @@ export const staffApi = {
   // Update staff member
   updateStaff: async (id: number, staff: UpdateStaffRequest): Promise<Staff> => {
     try {
-      return await api.put<Staff>(`/api/staff/${id}`, staff);
+      return await api.put<Staff>(`/staff/${id}`, staff);
     } catch (error) {
       throw new Error(handleApiError(error));
     }
@@ -56,7 +56,7 @@ export const staffApi = {
   // Toggle staff active status
   toggleStaffStatus: async (request: ToggleStaffStatusRequest): Promise<Staff> => {
     try {
-      return await api.put<Staff>('/api/user/update-status', request);
+      return await api.put<Staff>('/user/update-status', request);
     } catch (error) {
       throw new Error(handleApiError(error));
     }
@@ -74,7 +74,7 @@ export const staffApi = {
   // Get staff emails and IDs for notifications
   getStaffEmailsAndIds: async (): Promise<Array<{ id: number; email: string }>> => {
     try {
-      return await api.get<Array<{ id: number; email: string }>>('/api/users/get-all-emails-and-ids');
+      return await api.get<Array<{ id: number; email: string }>>('/users/get-all-emails-and-ids');
     } catch (error) {
       throw new Error(handleApiError(error));
     }

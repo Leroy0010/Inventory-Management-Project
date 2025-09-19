@@ -23,7 +23,7 @@ interface RequestTableProps {
     onReject?: (request: RequestResponseDto) => void;
     onFulfill?: (request: RequestResponseDto) => void;
     isUpdating: boolean;
-    userRole: Role["name"];
+    userRole: Role;
 }
 
 const getStatusIcon = (status: RequestStatus) => {

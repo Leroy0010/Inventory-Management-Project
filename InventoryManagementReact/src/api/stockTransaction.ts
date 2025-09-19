@@ -4,7 +4,7 @@ export const stockTransactionApi = {
     // Stock Transactions
     getStockTransactions: async (): Promise<any[]> => {
         try {
-            return await api.get<any[]>('/api/stock-transactions');
+            return await api.get<any[]>('/stock-transactions');
         } catch (error) {
             throw new Error(handleApiError(error));
         }

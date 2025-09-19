@@ -12,7 +12,7 @@ export const transactionReportApi = {
     ): Promise<TransactionReport> => {
         try {
             return await api.post<TransactionReport>(
-                '/api/reports/transactions',
+                '/reports/transactions',
                 request
             );
         } catch (error) {

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 interface GoogleSignInButtonProps {
-    onSuccess: (token: string) => void;
+    onSuccess?: () => void;
     isLoading?: boolean;
     disabled?: boolean;
     className?: string;
@@ -14,15 +14,10 @@ export function GoogleSignInButton({
     disabled = false,
     className,
 }: GoogleSignInButtonProps) {
-    const handleGoogleSignIn = async () => {
-        try {
-            // In a real implementation, you would use the Google OAuth library
-            // For now, we'll simulate the Google sign-in process
-            const mockGoogleToken = 'mock-google-token-' + Date.now();
-            onSuccess(mockGoogleToken);
-        } catch (error) {
-            // Google sign-in error
-        }
+    const handleGoogleSignIn = () => {
+        // Redirect to Spring Security OAuth2 endpoint
+        window.location.href =
+            'http://localhost:8080/oauth2/authorization/google';
     };
 
     return (

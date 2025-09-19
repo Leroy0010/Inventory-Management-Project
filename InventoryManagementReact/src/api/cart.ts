@@ -6,7 +6,7 @@ export const cartApi = {
     // Get current user's cart
     getCart: async (): Promise<CartItem[]> => {
         try {
-            const response = await api.get<{ items: CartItem[] }>('/api/cart/get');
+            const response = await api.get<{ items: CartItem[] }>('/cart/get');
             return response.items || [];
         } catch (error) {
             throw new Error(handleApiError(error));
@@ -20,7 +20,7 @@ export const cartApi = {
                 id: itemId,
                 quantity: quantity
             };
-            await api.post('/api/cart/add-item', request);
+            await api.post('/cart/add-item', request);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -33,7 +33,7 @@ export const cartApi = {
                 id: itemId,
                 quantity: quantity
             };
-            await api.post('/api/cart/remove-item', request);
+            await api.post('/cart/remove-item', request);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -46,7 +46,7 @@ export const cartApi = {
                 id: itemId,
                 quantity: quantity
             };
-            await api.put('/api/cart/update-item', request);
+            await api.put('/cart/update-item', request);
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -55,7 +55,7 @@ export const cartApi = {
     // Clear entire cart
     clearCart: async (): Promise<void> => {
         try {
-            await api.delete('/api/cart/clear');
+            await api.delete('/cart/clear');
         } catch (error) {
             throw new Error(handleApiError(error));
         }
@@ -64,7 +64,7 @@ export const cartApi = {
     // Submit cart as request (based on JavaFX RequestService.submitCartAsRequest)
     submitCartAsRequest: async (): Promise<{ id: number; message: string }> => {
         try {
-            return await api.post<{ id: number; message: string }>('/api/requests');
+            return await api.post<{ id: number; message: string }>('/requests');
         } catch (error) {
             throw new Error(handleApiError(error));
         }

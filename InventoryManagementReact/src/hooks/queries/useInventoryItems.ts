@@ -1,16 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { inventoryApi } from '@/api/inventoryItem';
 import { toast } from 'sonner';
-import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
-import type {
-    CreateInventoryItemDto,
-} from '@/types/inventoryItem';
+import {
+    formatApiError,
+    getFriendlyErrorMessage,
+    formatValidationErrors,
+} from '@/lib/error-utils';
+import type { CreateInventoryItemDto } from '@/types/inventoryItem';
 
 // Query keys for inventory items
 export const inventoryItemKeys = {
     all: ['inventory-items'] as const,
     lists: () => [...inventoryItemKeys.all, 'list'] as const,
-    list: (filters: string) => [...inventoryItemKeys.lists(), { filters }] as const,
+    list: (filters: string) =>
+        [...inventoryItemKeys.lists(), { filters }] as const,
     details: () => [...inventoryItemKeys.all, 'detail'] as const,
     detail: (id: number) => [...inventoryItemKeys.details(), id] as const,
 };
@@ -44,14 +47,33 @@ export const useInventoryItemQueries = () => {
             imageFile?: File;
         }) => inventoryApi.createItem(item, imageFile),
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: inventoryItemKeys.lists() });
+            queryClient.invalidateQueries({
+                queryKey: inventoryItemKeys.lists(),
+            });
             queryClient.invalidateQueries({ queryKey: ['inventory-balance'] });
-            toast.success(`Inventory item "${data.name}" created successfully!`);
+            toast.success(
+                `Inventory item "${data.name}" created successfully!`
+            );
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to create inventory item: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(
+                    `Failed to create inventory item: ${friendlyMessage}`,
+                    {
+                        description: validationErrors.join(', '),
+                    }
+                );
+            } else {
+                toast.error(
+                    `Failed to create inventory item: ${friendlyMessage}`
+                );
+            }
         },
     });
 
@@ -59,15 +81,36 @@ export const useInventoryItemQueries = () => {
     const updateItemMutation = useMutation({
         mutationFn: inventoryApi.updateItem,
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: inventoryItemKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: inventoryItemKeys.detail(data.id) });
+            queryClient.invalidateQueries({
+                queryKey: inventoryItemKeys.lists(),
+            });
+            queryClient.invalidateQueries({
+                queryKey: inventoryItemKeys.detail(data.id),
+            });
             queryClient.invalidateQueries({ queryKey: ['inventory-balance'] });
-            toast.success(`Inventory item "${data.name}" updated successfully!`);
+            toast.success(
+                `Inventory item "${data.name}" updated successfully!`
+            );
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to update inventory item: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(
+                    `Failed to update inventory item: ${friendlyMessage}`,
+                    {
+                        description: validationErrors.join(', '),
+                    }
+                );
+            } else {
+                toast.error(
+                    `Failed to update inventory item: ${friendlyMessage}`
+                );
+            }
         },
     });
 
@@ -75,14 +118,31 @@ export const useInventoryItemQueries = () => {
     const deleteItemMutation = useMutation({
         mutationFn: inventoryApi.deleteItem,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: inventoryItemKeys.lists() });
+            queryClient.invalidateQueries({
+                queryKey: inventoryItemKeys.lists(),
+            });
             queryClient.invalidateQueries({ queryKey: ['inventory-balance'] });
             toast.success('Inventory item deleted successfully!');
         },
         onError: (error: unknown) => {
             const apiError = formatApiError(error);
             const friendlyMessage = getFriendlyErrorMessage(apiError);
-            toast.error(`Failed to delete inventory item: ${friendlyMessage}`);
+            const validationErrors = formatValidationErrors(
+                apiError.details || null
+            );
+
+            if (validationErrors.length > 0) {
+                toast.error(
+                    `Failed to delete inventory item: ${friendlyMessage}`,
+                    {
+                        description: validationErrors.join(', '),
+                    }
+                );
+            } else {
+                toast.error(
+                    `Failed to delete inventory item: ${friendlyMessage}`
+                );
+            }
         },
     });
 
@@ -90,7 +150,7 @@ export const useInventoryItemQueries = () => {
         // Queries
         itemsQuery,
         useItemQuery,
-        
+
         // Mutations
         createItemMutation,
         updateItemMutation,

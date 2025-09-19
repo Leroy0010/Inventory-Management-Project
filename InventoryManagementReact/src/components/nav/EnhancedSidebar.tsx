@@ -22,7 +22,7 @@ import {
     X,
     Shield,
     Eye,
-    Lock
+    Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +31,12 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface NavItem {
     to: string;
@@ -55,62 +60,64 @@ const navGroups: NavGroup[] = [
         label: 'Dashboard',
         icon: LayoutDashboard,
         description: 'Overview and quick access',
-        items: [{ 
-            to: '/', 
-            label: 'Dashboard', 
-            icon: LayoutDashboard, 
-            permissions: ['VIEW_DASHBOARD'],
-            description: 'Main dashboard view'
-        }],
+        items: [
+            {
+                to: '/',
+                label: 'Dashboard',
+                icon: LayoutDashboard,
+                permissions: ['VIEW_DASHBOARD'],
+                description: 'Main dashboard view',
+            },
+        ],
     },
     {
         label: 'Management',
         icon: Users,
         description: 'Create and manage resources',
         items: [
-            { 
-                to: '/staff/add', 
-                label: 'Add Staff', 
-                icon: Users, 
+            {
+                to: '/staff/add',
+                label: 'Add Staff',
+                icon: Users,
                 permissions: ['ADD_STAFF'],
-                description: 'Add new staff member'
+                description: 'Add new staff member',
             },
-            { 
-                to: '/inventory/add', 
-                label: 'Add Inventory', 
-                icon: Package, 
+            {
+                to: '/inventory/add',
+                label: 'Add Inventory',
+                icon: Package,
                 permissions: ['ADD_INVENTORY'],
-                description: 'Add new inventory item'
+                description: 'Add new inventory item',
             },
-            { 
-                to: '/office/add', 
-                label: 'Add Office', 
-                icon: Building, 
+            {
+                to: '/office/add',
+                label: 'Add Office',
+                icon: Building,
                 permissions: ['ADD_OFFICE'],
-                description: 'Add new office location'
+                description: 'Add new office location',
             },
-            { 
-                to: '/batch/add', 
-                label: 'Add Batch', 
-                icon: Layers, 
+            {
+                to: '/batch/add',
+                label: 'Add Batch',
+                icon: Layers,
                 permissions: ['ADD_BATCH'],
-                description: 'Add new inventory batch'
+                description: 'Add new inventory batch',
             },
-            { 
-                to: "/storekeeper/add", 
-                label: "Add Storekeeper", 
-                icon: Users, 
+            {
+                to: '/storekeeper/add',
+                label: 'Add Storekeeper',
+                icon: Users,
                 permissions: ['ADD_STOREKEEPER'],
                 description: 'Add new storekeeper account',
-                badge: 'Admin'
+                badge: 'Admin',
             },
-            { 
-                to: '/departments/add', 
-                label: 'Add Department', 
-                icon: Building, 
+            {
+                to: '/departments/add',
+                label: 'Add Department',
+                icon: Building,
                 permissions: ['ADD_DEPARTMENT'],
                 description: 'Add new department',
-                badge: 'Admin'
+                badge: 'Admin',
             },
         ],
     },
@@ -119,19 +126,19 @@ const navGroups: NavGroup[] = [
         icon: Package2,
         description: 'Manage inventory items and batches',
         items: [
-            { 
-                to: '/inventory-items', 
-                label: 'Inventory Items', 
-                icon: Package2, 
+            {
+                to: '/inventory-items',
+                label: 'Inventory Items',
+                icon: Package2,
                 permissions: ['VIEW_INVENTORY'],
-                description: 'View and manage inventory'
+                description: 'View and manage inventory',
             },
-            { 
-                to: '/batch', 
-                label: 'Batches', 
-                icon: Layers, 
+            {
+                to: '/batch',
+                label: 'Batches',
+                icon: Layers,
                 permissions: ['VIEW_BATCH'],
-                description: 'View and manage batches'
+                description: 'View and manage batches',
             },
         ],
     },
@@ -140,19 +147,19 @@ const navGroups: NavGroup[] = [
         icon: Users,
         description: 'Manage staff and office locations',
         items: [
-            { 
-                to: '/staff', 
-                label: 'Staff', 
-                icon: Users, 
+            {
+                to: '/staff',
+                label: 'Staff',
+                icon: Users,
                 permissions: ['VIEW_STAFF'],
-                description: 'View and manage staff'
+                description: 'View and manage staff',
             },
-            { 
-                to: '/office', 
-                label: 'Offices', 
-                icon: Building, 
+            {
+                to: '/office',
+                label: 'Offices',
+                icon: Building,
                 permissions: ['VIEW_OFFICE'],
-                description: 'View and manage offices'
+                description: 'View and manage offices',
             },
         ],
     },
@@ -161,13 +168,13 @@ const navGroups: NavGroup[] = [
         icon: Building,
         description: 'Manage organizational departments',
         items: [
-            { 
-                to: '/departments', 
-                label: 'Departments', 
-                icon: Building, 
+            {
+                to: '/departments',
+                label: 'Departments',
+                icon: Building,
                 permissions: ['VIEW_DEPARTMENTS'],
                 description: 'View and manage departments',
-                badge: 'Admin'
+                badge: 'Admin',
             },
         ],
     },
@@ -176,19 +183,19 @@ const navGroups: NavGroup[] = [
         icon: FileText,
         description: 'Handle and track requests',
         items: [
-            { 
-                to: '/requests', 
-                label: 'Manage Requests', 
-                icon: FileText, 
+            {
+                to: '/requests',
+                label: 'Manage Requests',
+                icon: FileText,
                 permissions: ['MANAGE_REQUESTS'],
-                description: 'Review and approve requests'
+                description: 'Review and approve requests',
             },
-            { 
-                to: '/staff-requests', 
-                label: 'My Requests', 
-                icon: FileText, 
+            {
+                to: '/staff-requests',
+                label: 'My Requests',
+                icon: FileText,
                 permissions: [Permission.VIEW_REQUESTS],
-                description: 'View your requests'
+                description: 'View your requests',
             },
         ],
     },
@@ -197,13 +204,13 @@ const navGroups: NavGroup[] = [
         icon: Package2,
         description: 'Shopping cart functionality',
         items: [
-            { 
-                to: '/cart', 
-                label: 'Shopping Cart', 
-                icon: Package2, 
+            {
+                to: '/cart',
+                label: 'Shopping Cart',
+                icon: Package2,
                 permissions: ['VIEW_CART'],
                 description: 'Manage your cart items',
-                badge: 'Staff'
+                badge: 'Staff',
             },
         ],
     },
@@ -212,19 +219,19 @@ const navGroups: NavGroup[] = [
         icon: Bell,
         description: 'Notifications and messaging',
         items: [
-            { 
-                to: '/notifications', 
-                label: 'Notifications', 
-                icon: Bell, 
+            {
+                to: '/notifications',
+                label: 'Notifications',
+                icon: Bell,
                 permissions: ['VIEW_NOTIFICATIONS'],
-                description: 'View system notifications'
+                description: 'View system notifications',
             },
-            { 
-                to: '/send-message', 
-                label: 'Send Message', 
-                icon: MessageSquare, 
+            {
+                to: '/send-message',
+                label: 'Send Message',
+                icon: MessageSquare,
                 permissions: ['SEND_MESSAGES'],
-                description: 'Send messages to users'
+                description: 'Send messages to users',
             },
         ],
     },
@@ -233,19 +240,19 @@ const navGroups: NavGroup[] = [
         icon: Settings,
         description: 'User settings and profile',
         items: [
-            { 
-                to: '/profile', 
-                label: 'Profile', 
-                icon: Users, 
+            {
+                to: '/profile',
+                label: 'Profile',
+                icon: Users,
                 permissions: ['VIEW_PROFILE'],
-                description: 'Manage your profile'
+                description: 'Manage your profile',
             },
-            { 
-                to: '/settings', 
-                label: 'Settings', 
-                icon: Settings, 
+            {
+                to: '/settings',
+                label: 'Settings',
+                icon: Settings,
                 permissions: ['VIEW_SETTINGS'],
-                description: 'System settings'
+                description: 'System settings',
             },
         ],
     },
@@ -256,33 +263,33 @@ const reportsGroup: NavGroup = {
     icon: FileText,
     description: 'Analytics and reporting',
     items: [
-        { 
-            to: '/reports/transaction', 
-            label: 'Transaction Report', 
-            icon: FileText, 
+        {
+            to: '/reports/transaction',
+            label: 'Transaction Report',
+            icon: FileText,
             permissions: ['VIEW_TRANSACTION_REPORTS'],
-            description: 'View transaction reports'
+            description: 'View transaction reports',
         },
-        { 
-            to: '/reports/inventory-summary', 
-            label: 'Inventory Summary', 
-            icon: FileText, 
+        {
+            to: '/reports/inventory-summary',
+            label: 'Inventory Summary',
+            icon: FileText,
             permissions: ['VIEW_INVENTORY_SUMMARY_REPORTS'],
-            description: 'View inventory summary'
+            description: 'View inventory summary',
         },
-        { 
-            to: '/reports/user', 
-            label: 'User Report', 
-            icon: FileText, 
+        {
+            to: '/reports/user',
+            label: 'User Report',
+            icon: FileText,
             permissions: ['VIEW_USER_REPORTS'],
-            description: 'View user activity reports'
+            description: 'View user activity reports',
         },
-        { 
-            to: '/reports/user-activity', 
-            label: 'User Activity', 
-            icon: Activity, 
+        {
+            to: '/reports/user-activity',
+            label: 'User Activity',
+            icon: Activity,
             permissions: ['VIEW_USER_REPORTS'],
-            description: 'View detailed user activity'
+            description: 'View detailed user activity',
         },
     ],
     permissions: ['VIEW_REPORTS'],
@@ -342,8 +349,9 @@ export function EnhancedSidebar({
                                 let isActiveState = isActive;
 
                                 if (location.pathname === '/notifications') {
-                                    const hasSendTab = location.search.includes('tab=send');
-                                    
+                                    const hasSendTab =
+                                        location.search.includes('tab=send');
+
                                     if (item.to === '/notifications') {
                                         isActiveState = !hasSendTab;
                                     } else if (item.to === '/send-message') {
@@ -377,8 +385,8 @@ export function EnhancedSidebar({
                                 {item.label}
                             </span>
                             {item.badge && (
-                                <Badge 
-                                    variant="outline" 
+                                <Badge
+                                    variant="outline"
                                     className="ml-auto text-xs px-1.5 py-0.5"
                                 >
                                     {item.badge}
@@ -397,7 +405,9 @@ export function EnhancedSidebar({
                             {item.permissions && (
                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                     <Shield className="h-3 w-3" />
-                                    <span>Requires: {item.permissions.join(', ')}</span>
+                                    <span>
+                                        Requires: {item.permissions.join(', ')}
+                                    </span>
                                 </div>
                             )}
                         </div>
@@ -546,14 +556,16 @@ export function EnhancedSidebar({
                                 {user?.firstName} {user?.lastName}
                             </p>
                             <div className="flex items-center gap-2">
-                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                    user?.role.name === 'ADMIN' 
-                                        ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                                        : user?.role.name === 'STOREKEEPER'
-                                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                                        : 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                }`}>
-                                    {user?.role.name}
+                                <span
+                                    className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                        user?.role === 'ADMIN'
+                                            ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                            : user?.role === 'STOREKEEPER'
+                                              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                              : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                    }`}
+                                >
+                                    {user?.role}
                                 </span>
                             </div>
                         </div>
