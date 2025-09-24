@@ -1,44 +1,23 @@
-import { useState } from 'react';
-import { Card, CardContent } from '../ui/card';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
+import { useState, useEffect } from 'react';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from '../ui/card';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
 import { useBatchQueries } from '@/hooks/queries/useBatch';
 import { toast } from 'sonner';
 import { FormErrorAlert } from '@/components/ui/FormErrorAlert';
-import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
-import { Button } from '../ui/button';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-
-const addBatchSchema = z.object({
-    itemName: z.string().min(1, 'Select an item!'),
-    quantity: z.number().min(1, "Quantity can't be less than 1!"),
-    totalPrice: z.number().refine(
-        (value) => {
-            // Check if the number is finite (not Infinity or NaN)
-            if (!Number.isFinite(value)) {
-                return false;
-            }
-
-            // Convert the number to a string and check the decimal places
-            const parts = value.toString().split('.');
-            if (parts.length === 1) {
-                return true; // No decimal part, considered valid
-            }
-            // Check if the decimal part has 2 or fewer digits
-            return parts[1].length <= 2;
-        },
-        {
-            message: 'Amount must have at most 2 decimal places',
-        }
-    ),
-    supplierName: z.string().optional(),
-    invoiceId: z.string().optional(),
-});
-
-type AddBatchFormData = z.infer<typeof addBatchSchema>;
+import { type ComboboxOption } from '@/components/ui/combobox';
+import { addBatchSchema, type AddBatchFormData } from './BatchFormValidation';
+import { BatchFormFields } from './BatchFormFields';
+import { BatchFormActions } from './BatchFormActions';
+import { BatchFormSuccessAlert } from './BatchFormSuccessAlert';
+import { Package2 } from 'lucide-react';
 
 interface AddBatchFormProps {
     className?: string;
@@ -46,6 +25,7 @@ interface AddBatchFormProps {
 
 export default function AddBatchForm({ className }: AddBatchFormProps) {
     const [value, setValue] = useState('');
+    const [showSuccess, setShowSuccess] = useState<boolean>(false);
 
     // Queries
     const { itemsQuery } = useInventoryItemQueries();
@@ -58,14 +38,9 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
             label: item.name,
         })) || [];
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isSubmitting },
-        setValue: setFormValue,
-        reset,
-    } = useForm<AddBatchFormData>({
+    const methods = useForm<AddBatchFormData>({
         resolver: zodResolver(addBatchSchema),
+        mode: 'onChange',
         defaultValues: {
             itemName: '',
             quantity: 1,
@@ -74,6 +49,26 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
             invoiceId: '',
         },
     });
+
+    const {
+        handleSubmit,
+        formState: { isSubmitting, isValid, isDirty },
+        setValue: setFormValue,
+        reset,
+        watch,
+    } = methods;
+
+    const watchedValues = watch();
+
+    // Auto-hide success message after 3 seconds
+    useEffect(() => {
+        if (showSuccess) {
+            const timer = setTimeout(() => {
+                setShowSuccess(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccess]);
 
     // Handle form submission
     const onSubmit = async (data: AddBatchFormData) => {
@@ -85,122 +80,75 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
                 supplierName: data.supplierName || undefined,
                 invoiceId: data.invoiceId || undefined,
             });
-            reset();
-            setValue('');
-            toast.success('Batch created successfully!');
+
+            // Show success state
+            setShowSuccess(true);
+
+            // Reset form after a brief delay
+            setTimeout(() => {
+                reset();
+                setValue('');
+            }, 1000);
         } catch (error) {
             // Error is handled by the mutation's onError callback
             console.error('Failed to create batch:', error);
         }
     };
 
+    const handleReset = () => {
+        reset();
+        setValue('');
+        setShowSuccess(false);
+    };
+
+    const isFormValid = isValid && isDirty;
+    const isLoading = isSubmitting || createBatchMutation.isPending;
+
     return (
         <Card className={className}>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Package2 className="h-5 w-5" />
+                    Add New Batch
+                </CardTitle>
+                <CardDescription>
+                    Create a new inventory batch. All fields marked with * are
+                    required.
+                </CardDescription>
+            </CardHeader>
             <CardContent>
-                <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-                    <FormErrorAlert
-                        error={createBatchMutation.error}
-                        defaultMessage="Failed to create batch. Please try again."
-                    />
+                <FormProvider {...methods}>
+                    <form
+                        className="space-y-6"
+                        onSubmit={handleSubmit(onSubmit)}
+                    >
+                        {/* Success Alert */}
+                        <BatchFormSuccessAlert show={showSuccess} />
 
-                    <div>
-                        <Label htmlFor="itemName" className="mb-1">
-                            Item Name
-                        </Label>
-                        <Combobox
-                            options={itemOptions}
+                        {/* Error Alert */}
+                        <FormErrorAlert
+                            error={createBatchMutation.error}
+                            defaultMessage="Failed to create batch. Please try again."
+                        />
+
+                        {/* Form Fields */}
+                        <BatchFormFields
+                            itemOptions={itemOptions}
                             value={value}
-                            onValueChange={(selectedValue) => {
-                                setValue(selectedValue);
-                                setFormValue('itemName', selectedValue);
-                            }}
-                            placeholder="Select item name..."
-                            searchPlaceholder="Search item name..."
-                            emptyText="No item found"
-                            width="w-full"
+                            setValue={setValue}
+                            setFormValue={setFormValue}
+                            watchedValues={watchedValues}
+                            isLoading={isLoading}
                         />
-                        {errors.itemName && (
-                            <p className="text-sm text-red-600 mt-1">
-                                {errors.itemName.message}
-                            </p>
-                        )}
-                    </div>
 
-                    <div>
-                        <Label htmlFor="quantity">Quantity</Label>
-                        <Input
-                            id="quantity"
-                            type="number"
-                            min={1}
-                            placeholder="Enter quantity"
-                            {...register('quantity')}
-                            className="mt-1"
+                        {/* Form Actions */}
+                        <BatchFormActions
+                            isLoading={isLoading}
+                            isFormValid={isFormValid}
+                            onReset={handleReset}
                         />
-                        {errors.quantity && (
-                            <p className="text-sm text-red-600 mt-1">
-                                {errors.quantity.message}
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
-                        <Label htmlFor="totalPrice">Total Price</Label>
-                        <Input
-                            id="totalPrice"
-                            type="text"
-                            placeholder="Enter total price"
-                            {...register('totalPrice')}
-                            className="mt-1"
-                        />
-                        {errors.totalPrice && (
-                            <p className="text-sm text-red-600 mt-1">
-                                {errors.totalPrice.message}
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
-                        <Label htmlFor="supplierName">Supplier Name</Label>
-                        <Input
-                            id="supplierName"
-                            type="text"
-                            placeholder="Enter supplier's name"
-                            {...register('supplierName')}
-                            className="mt-1"
-                        />
-                        {errors.supplierName && (
-                            <p className="text-sm text-red-600 mt-1">
-                                {errors.supplierName.message}
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
-                        <Label htmlFor="invoiceId">Invoice ID</Label>
-                        <Input
-                            id="invoiceId"
-                            type="text"
-                            placeholder="Enter Invoice ID"
-                            {...register('invoiceId')}
-                            className="mt-1"
-                        />
-                        {errors.invoiceId && (
-                            <p className="text-sm text-red-600 mt-1">
-                                {errors.invoiceId.message}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="pt-4">
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="w-full cursor-pointer"
-                        >
-                            {isSubmitting ? 'Adding...' : 'Add Batch'}
-                        </Button>
-                    </div>
-                </form>
+                    </form>
+                </FormProvider>
             </CardContent>
         </Card>
     );

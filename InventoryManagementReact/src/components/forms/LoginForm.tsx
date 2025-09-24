@@ -51,7 +51,7 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
     const onSubmit = async (data: LoginFormData) => {
         try {
             clearError();
-            console.log('Starting login process...');
+            // console.log('Starting login process...');
 
             const user = await loginMutation.mutateAsync({
                 email: data.email,
@@ -60,19 +60,19 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
 
             login(user);
 
-            console.log('Login successful, result:', user);
+            // console.log('Login successful, result:', user);
 
             // Add a small delay to ensure all backend operations complete
             // This prevents race conditions with token cleanup
             await new Promise((resolve) => setTimeout(resolve, 200));
 
-            console.log('Calling onSuccess callback...');
+            // console.log('Calling onSuccess callback...');
             // Call onSuccess after successful login
             if (onSuccess) {
                 onSuccess();
             }
         } catch (error) {
-            console.error('Login error:', error);
+            // console.error('Login error:', error);
             // Error is handled by the mutation
         }
     };

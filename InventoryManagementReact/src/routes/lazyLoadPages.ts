@@ -6,6 +6,14 @@ export const ForgotPassword = React.lazy(
     () => import('@/pages/auth/ForgotPassword')
 );
 
+export const ResetPasswordForm = React.lazy(
+    () => import('@/components/forms/ResetPasswordForm')
+)
+
+export const ForgotPasswordForm = React.lazy(
+    () => import('@/components/forms/ForgotPasswordForm')
+)
+
 export const Unauthorized = React.lazy(() => import('@/pages/Unauthorized'));
 export const NotFound = React.lazy(() => import('@/pages/NotFound'));
 export const Profile = React.lazy(() => import('@/pages/common/Profile'));

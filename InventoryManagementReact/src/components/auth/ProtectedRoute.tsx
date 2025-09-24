@@ -19,7 +19,7 @@ export function ProtectedRoute({
     const {
         isAuthenticated,
         isLoading,
-        isHydrated,     // ✅ added from store
+        isHydrated,    
         hasAnyPermission,
         hasAllPermissions,
     } = useAuthStore();
@@ -58,7 +58,6 @@ export function ProtectedRoute({
             : hasAnyPermission(requiredPermissions);
 
         if (!hasRequiredPermissions) {
-            console.log('ProtectedRoute: Missing required permissions');
             return <Navigate to="/unauthorized" replace />;
         }
     }

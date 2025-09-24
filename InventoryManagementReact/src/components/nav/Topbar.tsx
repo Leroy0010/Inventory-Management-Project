@@ -15,6 +15,8 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/stores/authStore';
 import { LogOut, Menu, Moon, Settings, Sun, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import {useAuthQueries} from "@/hooks/queries/useAuth";
+
 
 interface TopbarProps {
     onMenuToggle?: () => void;
@@ -22,12 +24,18 @@ interface TopbarProps {
 }
 
 export function Topbar({ onMenuToggle, isSidebarCollapsed = false }: TopbarProps) {
-    const { user, logout } = useAuthStore();
+    const { user} = useAuthStore();
+    const {logoutMutation} = useAuthQueries();
     const { theme, setTheme } = useTheme();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        try {
+            await logoutMutation.mutateAsync();
+        } catch (error) {
+            // 
+        }
+        
     };
 
     return (

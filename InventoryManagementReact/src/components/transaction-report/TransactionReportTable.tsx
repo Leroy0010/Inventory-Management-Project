@@ -11,11 +11,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
     ChevronDown,
     ChevronRight,
     FileText,
     TrendingUp,
     TrendingDown,
+    Download,
+    FileSpreadsheet,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type {
@@ -24,6 +32,8 @@ import type {
     StockTransactionType,
 } from '@/types/transactionReports';
 import { format } from 'date-fns';
+import { transactionReportApi } from '@/api/transactionReport';
+import { toast } from 'sonner';
 
 // Date formatting functions using date-fns
 const formatDate = (dateString: string) => {
@@ -48,7 +58,7 @@ interface TransactionReportTableProps {
 
 const getTransactionTypeBadge = (type: StockTransactionType) => {
     switch (type) {
-        case 'RECEIVED':
+        case 'IN':
             return (
                 <Badge
                     variant="default"
@@ -58,7 +68,7 @@ const getTransactionTypeBadge = (type: StockTransactionType) => {
                     Received
                 </Badge>
             );
-        case 'ISSUED':
+        case 'OUT':
             return (
                 <Badge
                     variant="destructive"
@@ -101,10 +111,10 @@ const TransactionRow = ({ transaction }: { transaction: TransactionDto }) => {
                 <TableCell>
                     {getTransactionTypeBadge(transaction.transactionType)}
                 </TableCell>
-                <TableCell className="text-right font-mono">
+                <TableCell className="text-right font-mono ">
                     {transaction.quantity.toLocaleString()}
                 </TableCell>
-                <TableCell className="text-right font-mono">
+                <TableCell className="text-right font-mono ">
                     {transaction.balance.toLocaleString()}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
@@ -187,6 +197,50 @@ export default function TransactionReportTable({
     report,
     isLoading,
 }: TransactionReportTableProps) {
+    const handleExportCSV = () => {
+        if (!report) {
+            toast.error('No data to export');
+            return;
+        }
+
+        try {
+            transactionReportApi.exportToCSV(report);
+            toast.success('Transaction report exported successfully');
+        } catch (error) {
+            toast.error('Failed to export report');
+            console.error('Export error:', error);
+        }
+    };
+
+    const handleExportDetailedCSV = () => {
+        if (!report) {
+            toast.error('No data to export');
+            return;
+        }
+
+        try {
+            transactionReportApi.exportDetailedToCSV(report);
+            toast.success('Detailed transaction report exported successfully');
+        } catch (error) {
+            toast.error('Failed to export detailed report');
+            console.error('Export error:', error);
+        }
+    };
+
+    const handleExportJSON = () => {
+        if (!report) {
+            toast.error('No data to export');
+            return;
+        }
+
+        try {
+            transactionReportApi.exportToJSON(report);
+            toast.success('Transaction report exported as JSON successfully');
+        } catch (error) {
+            toast.error('Failed to export JSON report');
+            console.error('Export error:', error);
+        }
+    };
     if (isLoading) {
         return (
             <Card>
@@ -232,12 +286,47 @@ export default function TransactionReportTable({
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Transaction Report - {report.itemName}
-                </CardTitle>
-                <div className="text-sm text-muted-foreground">
-                    Unit: {report.unitOfMeasurement} | Item ID: {report.itemId}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <CardTitle className="flex items-center gap-2">
+                            <FileText className="h-5 w-5" />
+                            Transaction Report - {report.itemName}
+                        </CardTitle>
+                        <div className="text-sm text-muted-foreground">
+                            Unit: {report.unitOfMeasurement} | Item ID:{' '}
+                            {report.itemId}
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex items-center gap-2"
+                                >
+                                    <Download className="h-4 w-4" />
+                                    Export
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={handleExportCSV}>
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    Export CSV (Simple)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={handleExportDetailedCSV}
+                                >
+                                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                                    Export CSV (Detailed)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleExportJSON}>
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    Export JSON
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
             </CardHeader>
             <CardContent>

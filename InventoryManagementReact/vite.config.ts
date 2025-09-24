@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { createHtmlPlugin } from 'vite-plugin-html';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -12,6 +13,17 @@ export default defineConfig({
             jsxRuntime: 'automatic',
         }),
         tailwindcss(),
+        // HTML optimization plugin
+        createHtmlPlugin({
+            minify: process.env.NODE_ENV === 'production',
+            inject: {
+                data: {
+                    title: 'Inventory Management System - Modern Business Solution',
+                    description:
+                        'A comprehensive inventory management system built with React, TypeScript, and modern web technologies.',
+                },
+            },
+        }),
         // Only show visualizer in development
         process.env.NODE_ENV === 'development' &&
             visualizer({
@@ -63,6 +75,8 @@ export default defineConfig({
             },
         },
         chunkSizeWarningLimit: 1000,
+        cssCodeSplit: true,
+        cssMinify: 'lightningcss',
         rollupOptions: {
             output: {
                 manualChunks: {

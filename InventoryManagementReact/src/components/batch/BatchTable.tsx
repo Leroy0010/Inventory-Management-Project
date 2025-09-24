@@ -29,7 +29,7 @@ const formatDate = (date: Date) => {
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'GHS',
     }).format(amount);
 };
 
@@ -46,7 +46,10 @@ export default function BatchTable({ batches, isLoading }: BatchTableProps) {
                 <CardContent>
                     <div className="space-y-4">
                         {Array.from({ length: 5 }).map((_, i) => (
-                            <div key={i} className="flex items-center space-x-4">
+                            <div
+                                key={i}
+                                className="flex items-center space-x-4"
+                            >
                                 <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
                                 <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
                                 <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
@@ -86,9 +89,7 @@ export default function BatchTable({ batches, isLoading }: BatchTableProps) {
                         {batches.map((batch) => (
                             <TableRow key={batch.id}>
                                 <TableCell>
-                                    <Badge variant="outline">
-                                        #{batch.id}
-                                    </Badge>
+                                    <Badge variant="outline">#{batch.id}</Badge>
                                 </TableCell>
                                 <TableCell className="font-medium">
                                     {batch.inventoryItemName}
@@ -100,8 +101,12 @@ export default function BatchTable({ batches, isLoading }: BatchTableProps) {
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge 
-                                        variant={batch.remainingQuantity > 0 ? "default" : "secondary"}
+                                    <Badge
+                                        variant={
+                                            batch.remainingQuantity > 0
+                                                ? 'default'
+                                                : 'secondary'
+                                        }
                                     >
                                         {batch.remainingQuantity}
                                     </Badge>
@@ -109,36 +114,52 @@ export default function BatchTable({ batches, isLoading }: BatchTableProps) {
                                 <TableCell>
                                     <div className="flex items-center space-x-1">
                                         <DollarSign className="h-3 w-3 text-muted-foreground" />
-                                        <span>{formatCurrency(batch.totalPrice / batch.quantity)}</span>
+                                        <span>
+                                            {formatCurrency(batch.unitPrice)}
+                                        </span>
                                     </div>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center space-x-1">
                                         <DollarSign className="h-3 w-3 text-muted-foreground" />
-                                        <span className="font-medium">{formatCurrency(batch.totalPrice)}</span>
+                                        <span className="font-medium">
+                                            {formatCurrency(
+                                                batch.unitPrice * batch.quantity
+                                            )}
+                                        </span>
                                     </div>
                                 </TableCell>
                                 <TableCell>
                                     {batch.supplierName ? (
-                                        <span className="text-sm">{batch.supplierName}</span>
+                                        <span className="text-sm">
+                                            {batch.supplierName}
+                                        </span>
                                     ) : (
-                                        <span className="text-muted-foreground text-sm">N/A</span>
+                                        <span className="text-muted-foreground text-sm">
+                                            N/A
+                                        </span>
                                     )}
                                 </TableCell>
                                 <TableCell>
                                     {batch.invoiceId ? (
                                         <div className="flex items-center space-x-1">
                                             <Hash className="h-3 w-3 text-muted-foreground" />
-                                            <span className="text-sm font-mono">{batch.invoiceId}</span>
+                                            <span className="text-sm font-mono">
+                                                {batch.invoiceId}
+                                            </span>
                                         </div>
                                     ) : (
-                                        <span className="text-muted-foreground text-sm">N/A</span>
+                                        <span className="text-muted-foreground text-sm">
+                                            N/A
+                                        </span>
                                     )}
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center space-x-1">
                                         <Calendar className="h-3 w-3 text-muted-foreground" />
-                                        <span className="text-sm">{formatDate(batch.batchDate)}</span>
+                                        <span className="text-sm">
+                                            {formatDate(batch.batchDate)}
+                                        </span>
                                     </div>
                                 </TableCell>
                             </TableRow>

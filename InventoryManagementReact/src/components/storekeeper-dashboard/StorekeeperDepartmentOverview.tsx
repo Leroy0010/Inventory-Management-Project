@@ -45,7 +45,7 @@ export default function StorekeeperDepartmentOverview({
                             </span>
                         </div>
                         <span className="text-lg font-bold text-green-600">
-                            {departmentOverview?.totalItems || 0}
+                            {departmentOverview?.inventoryItems || 0}
                         </span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">

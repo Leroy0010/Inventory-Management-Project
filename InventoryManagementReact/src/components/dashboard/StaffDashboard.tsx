@@ -1,22 +1,31 @@
-import { useAuthStore } from '@/stores/authStore';
-import { useGetProfile } from '@/hooks/queries/useProfile';
-import { useUnreadCount } from '@/hooks/queries/useNotification';
 import { useStaffDashboard } from '@/hooks/queries/useDashboard';
-import StaffWelcome from '../staff-dashboard/StaffWelcome';
-import StaffStatsGrid from '../staff-dashboard/StaffStatsGrid';
+import { useUnreadCount } from '@/hooks/queries/useNotification';
+import { useGetProfile } from '@/hooks/queries/useProfile';
+import { useAuthStore } from '@/stores/authStore';
+import {
+    AlertTriangle,
+    CheckCircle,
+    Clock,
+    Package,
+    XCircle,
+} from 'lucide-react';
 import StaffNotificationSummary from '../staff-dashboard/StaffNotificationSummary';
-import StaffQuickSearchAndBrowse from '../staff-dashboard/StaffQuickSearchAndBrowse';
-import StaffShoppingCart from '../staff-dashboard/StaffShoppingCart';
-import StaffRecentRequests from '../staff-dashboard/StaffRecentRequests';
 import StaffQuickActions from '../staff-dashboard/StaffQuickActions';
-import { RoleBasedQuickActions } from './RoleBasedQuickActions';
-import { AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react';
+import StaffQuickSearchAndBrowse from '../staff-dashboard/StaffQuickSearchAndBrowse';
+import StaffRecentRequests from '../staff-dashboard/StaffRecentRequests';
+import StaffShoppingCart from '../staff-dashboard/StaffShoppingCart';
+import StaffStatsGrid from '../staff-dashboard/StaffStatsGrid';
+import StaffWelcome from '../staff-dashboard/StaffWelcome';
+import { useNavigate } from 'react-router-dom';
+import type { RequestStatus } from '@/types/request';
 
 export function StaffDashboard() {
     const { user } = useAuthStore();
     const { data: profile } = useGetProfile();
     const { data: unreadCount = 0 } = useUnreadCount();
     const { data: dashboardData, isLoading, error } = useStaffDashboard();
+
+    const navigate = useNavigate();
 
     if (isLoading) {
         return (
@@ -45,7 +54,11 @@ export function StaffDashboard() {
     }
 
     // Use real data from backend
-    const quickActions = dashboardData?.quickActions || [];
+    const quickActions =
+        dashboardData?.quickActions.map((act) => ({
+            ...act,
+            action: () => act?.href && navigate(act?.href),
+        })) || [];
     const stats = dashboardData?.stats || [];
     const cartItems = dashboardData?.cartItems || [];
     const cartTotal = dashboardData?.cartTotal || 0;
@@ -53,25 +66,31 @@ export function StaffDashboard() {
 
     // Cart items are now fetched from backend data
 
-    const getStatusIcon = (status: string) => {
+    const getStatusIcon = (status: RequestStatus) => {
         switch (status) {
-            case 'approved':
+            case 'APPROVED':
                 return <CheckCircle className="h-4 w-4 text-green-500" />;
-            case 'rejected':
+            case 'REJECTED':
                 return <XCircle className="h-4 w-4 text-red-500" />;
+            case 'FULFILLED':
+                return <Package className="h-4 w-4 text-blue-500" />;
             default:
                 return <Clock className="h-4 w-4 text-orange-500" />;
         }
     };
 
-    const getStatusColor = (status: string) => {
+    const getStatusColor = (status: RequestStatus) => {
         switch (status) {
-            case 'approved':
-                return 'text-green-600 bg-green-50';
-            case 'rejected':
-                return 'text-red-600 bg-red-50';
+            case 'PENDING':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'APPROVED':
+                return 'bg-green-100 text-green-800';
+            case 'FULFILLED':
+                return 'bg-blue-100 text-blue-800';
+            case 'REJECTED':
+                return 'bg-red-100 text-red-800';
             default:
-                return 'text-orange-600 bg-orange-50';
+                return 'bg-gray-100 text-gray-800';
         }
     };
 
@@ -86,7 +105,7 @@ export function StaffDashboard() {
             {stats.length > 0 && <StaffStatsGrid stats={stats} />}
 
             {/* Quick Actions */}
-            <RoleBasedQuickActions />
+
             {quickActions.length > 0 && (
                 <StaffQuickActions quickActions={quickActions} />
             )}
@@ -100,10 +119,7 @@ export function StaffDashboard() {
                     recentRequests={recentRequests}
                 />
                 {/* Shopping Cart */}
-                <StaffShoppingCart
-                    cartItems={cartItems}
-                    cartTotal={cartTotal}
-                />
+                <StaffShoppingCart />
             </div>
 
             {/* Quick Search and Browse */}

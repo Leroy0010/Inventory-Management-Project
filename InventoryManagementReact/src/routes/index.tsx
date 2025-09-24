@@ -62,7 +62,7 @@ const router = createBrowserRouter([
             </Suspense>
         ),
     },
-    
+
     {
         path: '/unauthorized',
         element: (
@@ -297,7 +297,7 @@ const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
-                            requiredPermissions={[Permission.VIEW_REQUESTS]}
+                            requiredPermissions={[Permission.MANAGE_REQUESTS]}
                         >
                             <StorekeeperRequests />
                         </ProtectedRoute>

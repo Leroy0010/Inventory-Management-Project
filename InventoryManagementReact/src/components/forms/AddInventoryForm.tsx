@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
 import { Package, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
 import { FormErrorAlert } from '@/components/ui/FormErrorAlert';
 import { InventoryFormFields } from './InventoryFormFields';
 import { InventoryFormActions } from './InventoryFormActions';
@@ -51,24 +50,12 @@ export default function AddInventoryForm({ className }: AddInventoryFormProps) {
     // Handle form submission
     const onSubmit = async (data: AddInventoryFormData) => {
         if (!isValid) {
-            toast.error('Please fix the form errors before submitting');
             return;
         }
 
         setIsSubmitting(true);
 
         try {
-            // Prepare form data for API
-            const formData = new FormData();
-            formData.append('name', data.name);
-            formData.append('description', data.description || '');
-            formData.append('unit', data.unit);
-            formData.append('reorderLevel', data.reorderLevel.toString());
-
-            if (selectedImage) {
-                formData.append('image', selectedImage);
-            }
-
             // Create inventory item
             await createItemMutation.mutateAsync({
                 item: {
@@ -80,14 +67,13 @@ export default function AddInventoryForm({ className }: AddInventoryFormProps) {
                 imageFile: selectedImage || undefined,
             });
 
-            toast.success('Inventory item created successfully!');
             reset();
             setSelectedImage(null);
 
             // Navigate to inventory list
             // navigate('/inventory-items');
         } catch (error) {
-            // Error is handled by the mutation's onError callback
+            // Error is handled by the mutation's onError callback with toast notifications
             console.error('Failed to create inventory item:', error);
         } finally {
             setIsSubmitting(false);
@@ -102,7 +88,7 @@ export default function AddInventoryForm({ className }: AddInventoryFormProps) {
 
     // Handle image error
     const handleImageError = (error: string) => {
-        toast.error(error);
+        console.error('Image upload error:', error);
     };
 
     const handleReset = () => {

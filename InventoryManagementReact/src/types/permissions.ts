@@ -75,7 +75,7 @@ export type Permission = (typeof Permission)[keyof typeof Permission];
 
 // Role-based permissions mapping
 export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
-    'ADMIN': [
+    ADMIN: [
         // Dashboard
         Permission.VIEW_DASHBOARD,
 
@@ -95,7 +95,7 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
         Permission.ADD_STOREKEEPER,
         Permission.SEND_GENERAL_NOTIFICATION,
     ],
-    'STAFF': [
+    STAFF: [
         // Dashboard
         Permission.VIEW_DASHBOARD,
 
@@ -115,9 +115,8 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
         Permission.CHECKOUT_CART,
         Permission.VIEW_REQUESTS,
         Permission.VIEW_REQUEST_DETAILS,
-        Permission.MANAGE_REQUESTS
     ],
-    'STOREKEEPER': [
+    STOREKEEPER: [
         // Dashboard
         Permission.VIEW_DASHBOARD,
 
@@ -150,10 +149,10 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
         Permission.DELETE_BATCH,
 
         // Request management
-        Permission.VIEW_REQUESTS,
         Permission.APPROVE_REQUESTS,
         Permission.REJECT_REQUESTS,
         Permission.MANAGE_REQUESTS,
+        Permission.FULFIL_REQUESTS,
         Permission.VIEW_REQUEST_DETAILS,
 
         // Reports

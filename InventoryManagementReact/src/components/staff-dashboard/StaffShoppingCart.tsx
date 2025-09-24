@@ -9,24 +9,24 @@ import {
 import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
-import type { CartItem } from '@/types/dashboard';
+import { useCart } from '@/hooks/queries/useCart';
+import type { CartItem } from '@/types/cart';
 
-interface StaffShoppingCartProps {
-    cartItems: CartItem[];
-    cartTotal: number;
-}
-
-export default function StaffShoppingCart({
-    cartItems,
-    cartTotal,
-}: StaffShoppingCartProps) {
+export default function StaffShoppingCart() {
     const { hasPermission } = useAuthStore();
     const navigate = useNavigate();
+    const canViewCart = hasPermission('VIEW_CART');
+    const { data: cartItems = [], isLoading } = useCart(canViewCart);
 
     // Only show cart component for STAFF users
-    if (!hasPermission('VIEW_CART')) {
+    if (!canViewCart) {
         return null;
     }
+
+    const cartTotal = (cartItems as CartItem[]).reduce(
+        (sum: number, item: CartItem) => sum + item.quantity,
+        0
+    );
 
     return (
         <Card>
@@ -52,16 +52,16 @@ export default function StaffShoppingCart({
             </CardHeader>
             <CardContent>
                 <div className="space-y-3">
-                    {cartItems.length > 0 ? (
+                    {(cartItems as CartItem[]).length > 0 ? (
                         <>
-                            {cartItems.map((item) => (
+                            {(cartItems as CartItem[]).map((item: CartItem) => (
                                 <div
                                     key={item.id}
                                     className="flex items-center justify-between p-2 border rounded"
                                 >
                                     <div>
                                         <p className="font-medium text-sm">
-                                            {item.name}
+                                            {item.itemName}
                                         </p>
                                         <p className="text-xs text-gray-500">
                                             Qty: {item.quantity}

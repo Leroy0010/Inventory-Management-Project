@@ -22,6 +22,7 @@ import { InventoryListView } from '@/components/inventory/InventoryListView';
 import { InventoryEmptyState } from '@/components/inventory/InventoryEmptyState';
 import { InventoryLoadingState } from '@/components/inventory/InventoryLoadingState';
 import { InventoryErrorState } from '@/components/inventory/InventoryErrorState';
+import { useCartQueries } from '@/hooks/queries/useCart';
 
 type ViewMode = 'grid' | 'list';
 
@@ -35,6 +36,7 @@ const InventoryItems = memo(function InventoryItems() {
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
     const { itemsQuery, deleteItemMutation } = useInventoryItemQueries();
+    const { addItemMutation } = useCartQueries(user?.role === 'STAFF');
 
     // Determine if user is storekeeper
     const isStorekeeper = user?.role === 'STOREKEEPER';
@@ -91,10 +93,20 @@ const InventoryItems = memo(function InventoryItems() {
         [navigate]
     );
 
-    const handleAddToCart = useCallback((item: InventoryItemResponseDto) => {
-        // Add to cart logic
-        toast.success(`${item.name} added to cart`);
-    }, []);
+    const handleToggleCart = useCallback(
+        async (item: InventoryItemResponseDto) => {
+            try {
+                await addItemMutation.mutateAsync({
+                    itemId: item.id,
+                    quantity: 1,
+                });
+                toast.success(`${item.name} added to cart`);
+            } catch (error) {
+                toast.error('Failed to add item');
+            }
+        },
+        [addItemMutation]
+    );
 
     const handleViewDetails = useCallback((item: InventoryItemResponseDto) => {
         setSelectedItem(item);
@@ -126,7 +138,7 @@ const InventoryItems = memo(function InventoryItems() {
                 onAddClick={() => navigate('/storekeeper/add-inventory')}
             />
 
-            <InventoryStatistics stats={stats} />
+            {isStorekeeper && <InventoryStatistics stats={stats} />}
 
             <InventorySearch
                 searchTerm={searchTerm}
@@ -171,7 +183,7 @@ const InventoryItems = memo(function InventoryItems() {
                             isStorekeeper={isStorekeeper}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
-                            onAddToCart={handleAddToCart}
+                            onAddToCart={handleToggleCart}
                             onViewDetails={handleViewDetails}
                         />
                     ) : (
@@ -180,7 +192,7 @@ const InventoryItems = memo(function InventoryItems() {
                             isStorekeeper={isStorekeeper}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
-                            onAddToCart={handleAddToCart}
+                            onAddToCart={handleToggleCart}
                             onViewDetails={handleViewDetails}
                         />
                     )}
@@ -194,7 +206,7 @@ const InventoryItems = memo(function InventoryItems() {
                 isStorekeeperView={isStorekeeper}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onAddToCart={handleAddToCart}
+                onAddToCart={handleToggleCart}
             />
         </div>
     );

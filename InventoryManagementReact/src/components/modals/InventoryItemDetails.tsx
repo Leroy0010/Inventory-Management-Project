@@ -7,21 +7,27 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-// import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import {
-    Edit,
-    Trash2,
-    ShoppingCart,
     X,
     Package,
-    CheckCircle2,
     AlertTriangle,
     ExternalLink,
+    Edit,
+    Trash2,
+    CheckCircle2,
+    ShoppingCart,
+    Minus,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import type { InventoryItemResponseDto } from '@/types/inventoryItem';
-import { Badge } from '../ui/badge';
+import { useCartQueries, useIsItemInCart } from '@/hooks/queries/useCart';
+import { useAuthStore } from '@/stores/authStore';
+import { InventoryItemDetailsHeader } from './InventoryItemDetailsHeader';
+import { InventoryItemDetailsImage } from './InventoryItemDetailsImage';
+import { InventoryItemDetailsInfo } from './InventoryItemDetailsInfo';
+import { InventoryItemDetailsActions } from './InventoryItemDetailsActions';
 
 interface InventoryItemDetailsProps {
     item: InventoryItemResponseDto | null;
@@ -42,18 +48,36 @@ export default function InventoryItemDetails({
     onDelete,
     onAddToCart,
 }: InventoryItemDetailsProps) {
-    const [isInCart, setIsInCart] = useState(false);
     const navigate = useNavigate();
+    const { user } = useAuthStore();
+    const { addItemMutation, removeItemMutation } = useCartQueries(
+        user?.role === 'STAFF'
+    );
+    const {
+        isInCart,
+        cartItem,
+        isLoading: isCartLoading,
+    } = useIsItemInCart(item?.id || 0, user?.role === 'STAFF');
 
     if (!item) return null;
 
     // Calculate reorder status
     const needsReorder = item.quantity <= item.reorderLevel;
 
-    const handleAddToCart = () => {
+    const handleToggleCart = () => {
         if (onAddToCart) {
             onAddToCart(item);
-            setIsInCart(true);
+        } else {
+            if (isInCart) {
+                // Remove from cart
+                removeItemMutation.mutate({
+                    itemId: item.id,
+                    quantity: cartItem?.quantity || 1,
+                });
+            } else {
+                // Add to cart
+                addItemMutation.mutate({ itemId: item.id, quantity: 1 });
+            }
         }
     };
 
@@ -80,198 +104,32 @@ export default function InventoryItemDetails({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <div className="flex items-center justify-between">
-                        <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                            Item Details
-                        </DialogTitle>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={onClose}
-                            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                        >
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </div>
+                    <InventoryItemDetailsHeader onClose={onClose} />
                 </DialogHeader>
 
                 <div className="space-y-6">
-                    {/* Image Section */}
-                    <div className="flex justify-center">
-                        <div className="relative w-64 h-48 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
-                            {item.imagePath ? (
-                                <img
-                                    src={item.imagePath}
-                                    alt={item.name}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                    <Package className="h-16 w-16 text-gray-400" />
-                                </div>
-                            )}
-
-                            {/* Reorder Warning Overlay */}
-                            {needsReorder && (
-                                <div className="absolute top-2 right-2">
-                                    <Badge
-                                        variant="destructive"
-                                        className="text-xs"
-                                    >
-                                        <AlertTriangle className="h-3 w-3 mr-1" />
-                                        Low Stock
-                                    </Badge>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Details Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* ID */}
-                        <div className="space-y-1">
-                            <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                                ID:
-                            </label>
-                            <div className="text-sm text-gray-900 dark:text-gray-100">
-                                {item.id}
-                            </div>
-                        </div>
-
-                        {/* Name */}
-                        <div className="space-y-1">
-                            <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                                Name:
-                            </label>
-                            <div className="text-sm text-gray-900 dark:text-gray-100 font-medium">
-                                {item.name}
-                            </div>
-                        </div>
-
-                        {/* Unit */}
-                        <div className="space-y-1">
-                            <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                                Unit:
-                            </label>
-                            <div className="text-sm text-gray-900 dark:text-gray-100">
-                                {item.unit}
-                            </div>
-                        </div>
-
-                        {/* Current Quantity */}
-                        <div className="space-y-1">
-                            <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                                Current Quantity:
-                            </label>
-                            <div className="flex items-center space-x-2">
-                                <span
-                                    className={cn(
-                                        'text-sm font-bold',
-                                        needsReorder
-                                            ? 'text-red-600 dark:text-red-400'
-                                            : 'text-gray-900 dark:text-gray-100'
-                                    )}
-                                >
-                                    {item.quantity}
-                                </span>
-                                {needsReorder && (
-                                    <Badge
-                                        variant="destructive"
-                                        className="text-xs"
-                                    >
-                                        <AlertTriangle className="h-3 w-3 mr-1" />
-                                        Low Stock
-                                    </Badge>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Reorder Level */}
-                        <div className="space-y-1">
-                            <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                                Reorder Level:
-                            </label>
-                            <div className="text-sm text-gray-900 dark:text-gray-100">
-                                {item.reorderLevel}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Description */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                            Description:
-                        </label>
-                        <Textarea
-                            value={
-                                item.description || 'No description available'
-                            }
-                            readOnly
-                            className="min-h-[100px] bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 resize-none"
-                        />
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                        {/* Full Screen Button - Always visible */}
-                        <Button
-                            variant="outline"
-                            onClick={handleViewFullScreen}
-                            className="flex items-center space-x-2 text-blue-600 border-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-700 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-blue-950 dark:hover:text-blue-300"
-                        >
-                            <ExternalLink className="h-4 w-4" />
-                            <span>View Full Screen</span>
-                        </Button>
-
-                        {/* Role-specific Action Buttons */}
-                        <div className="flex items-center space-x-3">
-                            {isStorekeeperView ? (
-                                // Storekeeper Action Buttons
-                                <>
-                                    <Button
-                                        variant="outline"
-                                        onClick={handleEdit}
-                                        className="flex items-center space-x-2"
-                                    >
-                                        <Edit className="h-4 w-4" />
-                                        <span>Edit</span>
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        onClick={handleDelete}
-                                        className="flex items-center space-x-2"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                        <span>Delete</span>
-                                    </Button>
-                                </>
-                            ) : (
-                                // Staff Add to Cart Button
-                                <Button
-                                    onClick={handleAddToCart}
-                                    disabled={isInCart}
-                                    className={cn(
-                                        'flex items-center space-x-2',
-                                        isInCart
-                                            ? 'bg-green-600 hover:bg-green-600 cursor-not-allowed'
-                                            : 'bg-green-500 hover:bg-green-600'
-                                    )}
-                                >
-                                    {isInCart ? (
-                                        <>
-                                            <CheckCircle2 className="h-4 w-4" />
-                                            <span>In Cart</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <ShoppingCart className="h-4 w-4" />
-                                            <span>Add to Cart</span>
-                                        </>
-                                    )}
-                                </Button>
-                            )}
-                        </div>
-                    </div>
+                    <InventoryItemDetailsImage
+                        item={item}
+                        needsReorder={needsReorder}
+                    />
+                    <InventoryItemDetailsInfo
+                        item={item}
+                        needsReorder={needsReorder}
+                    />
+                    <InventoryItemDetailsActions
+                        item={item}
+                        isStorekeeperView={isStorekeeperView}
+                        isInCart={isInCart}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onAddToCart={handleToggleCart}
+                        onViewFullScreen={handleViewFullScreen}
+                        isLoading={
+                            addItemMutation.isPending ||
+                            removeItemMutation.isPending ||
+                            isCartLoading
+                        }
+                    />
                 </div>
             </DialogContent>
         </Dialog>

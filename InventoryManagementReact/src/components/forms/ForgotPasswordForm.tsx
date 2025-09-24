@@ -21,9 +21,8 @@ import { FormErrorAlert } from '@/components/ui/FormErrorAlert';
 // Validation schema
 const forgotPasswordSchema = z.object({
     email: z
-        .string()
-        .min(1, 'Email is required')
-        .email('Please enter a valid email address'),
+        .email('Please enter a valid email address')
+        .min(1, 'Email is required'),
 });
 
 interface ForgotPasswordFormProps {
@@ -32,7 +31,7 @@ interface ForgotPasswordFormProps {
     className?: string;
 }
 
-export function ForgotPasswordForm({
+export default function ForgotPasswordForm({
     onSuccess,
     onBack,
     className,
@@ -68,6 +67,17 @@ export function ForgotPasswordForm({
             } catch (error) {
                 // Error is handled by the mutation
             }
+        }
+    };
+
+
+     const handleBack = () => {
+        if (isSubmitted) {
+            // If user already submitted, just reset to show the form again
+            setIsSubmitted(false);
+        } else {
+            // Otherwise, actually go back to login
+            onBack?.();
         }
     };
 
@@ -111,10 +121,7 @@ export function ForgotPasswordForm({
                         </Button>
 
                         <Button
-                            onClick={() => {
-                                setIsSubmitted(false);
-                                onBack?.();
-                            }}
+                            onClick={handleBack}
                             variant="ghost"
                             className="w-full"
                         >

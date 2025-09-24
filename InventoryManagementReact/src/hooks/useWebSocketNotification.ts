@@ -4,162 +4,277 @@ import { useQueryClient } from '@tanstack/react-query';
 import { notificationKeys } from './queries/useNotification';
 import { getStompClient } from '@/lib/stompClient';
 import { toast } from '@/hooks/useToast';
-import type { WebSocketNotification, WebSocketConnectionState } from '@/types/notification';
-import type {Frame} from "@stomp/stompjs";
+import type {
+    WebSocketNotification,
+    WebSocketConnectionState,
+} from '@/types/notification';
+import type { Frame } from '@stomp/stompjs';
 
 export function useWebSocketNotification(batchWindowMs = 1500) {
-  const { user } = useAuthStore();
-  const queryClient = useQueryClient();
-  const subscriptionIdRef = useRef<string | null>(null);
-  const reconnectAttemptsRef = useRef(0);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const { user } = useAuthStore();
+    const queryClient = useQueryClient();
+    const subscriptionIdRef = useRef<string | null>(null);
+    const reconnectAttemptsRef = useRef(0);
+    const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const notificationQueueRef = useRef<WebSocketNotification[]>([]);
-  const batchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const notificationQueueRef = useRef<WebSocketNotification[]>([]);
+    const batchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [connectionState, setConnectionState] = useState<WebSocketConnectionState>({
-    connected: false,
-    connecting: false,
-    error: null,
-  });
+    const [connectionState, setConnectionState] =
+        useState<WebSocketConnectionState>({
+            connected: false,
+            connecting: false,
+            error: null,
+        });
 
-  const [unreadCount, setUnreadCount] = useState<number>(0);
+    const [unreadCount, setUnreadCount] = useState<number>(0);
 
-  const enqueueNotification = useCallback((notification: WebSocketNotification) => {
-    notificationQueueRef.current.push(notification);
-    setUnreadCount((prev) => prev + 1);
+    const enqueueNotification = useCallback(
+        (notification: WebSocketNotification) => {
+            // Handle bulk mark as read updates
+            if (
+                notification.id === null &&
+                notification.title === 'All notifications marked as read'
+            ) {
+                // Invalidate all notification queries to refresh data
+                queryClient.invalidateQueries({
+                    queryKey: notificationKeys.all,
+                });
+                setUnreadCount(0);
+                return;
+            }
 
-    if (!batchTimeoutRef.current) {
-      batchTimeoutRef.current = setTimeout(() => {
-        flushNotificationBatch();
-      }, batchWindowMs);
-    }
-  }, [batchWindowMs]);
+            // Handle individual notification updates (mark as read)
+            if (notification.id && notification.read) {
+                // Update the specific notification in the cache
+                queryClient.setQueriesData(
+                    { queryKey: notificationKeys.all },
+                    (oldData: any) => {
+                        if (oldData?.notifications) {
+                            return {
+                                ...oldData,
+                                notifications: oldData.notifications.map(
+                                    (n: any) =>
+                                        n.id === notification.id
+                                            ? { ...n, isRead: true }
+                                            : n
+                                ),
+                            };
+                        }
+                        return oldData;
+                    }
+                );
 
-  const flushNotificationBatch = useCallback(() => {
-    const queued = [...notificationQueueRef.current];
-    notificationQueueRef.current = [];
-    if (batchTimeoutRef.current) {
-      clearTimeout(batchTimeoutRef.current);
-      batchTimeoutRef.current = null;
-    }
+                // Update unread count
+                setUnreadCount((prev) => Math.max(0, prev - 1));
+                return;
+            }
 
-    if (!queued.length) return;
+            // Handle new notifications
+            notificationQueueRef.current.push(notification);
+            setUnreadCount((prev) => prev + 1);
 
-    // Update query cache
-    queryClient.setQueriesData({ queryKey: notificationKeys.all }, (oldData: any) => {
-      if (oldData?.notifications) {
-        return { ...oldData, notifications: [...queued, ...oldData.notifications] };
-      }
-      return oldData;
-    });
+            if (!batchTimeoutRef.current) {
+                batchTimeoutRef.current = setTimeout(() => {
+                    flushNotificationBatch();
+                }, batchWindowMs);
+            }
+        },
+        [batchWindowMs, queryClient]
+    );
 
-    if (user?.id) {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.count(user.id) });
-    }
+    const flushNotificationBatch = useCallback(() => {
+        const queued = [...notificationQueueRef.current];
+        notificationQueueRef.current = [];
+        if (batchTimeoutRef.current) {
+            clearTimeout(batchTimeoutRef.current);
+            batchTimeoutRef.current = null;
+        }
 
-    // Show batched toasts
-    if (queued.length === 1) showSingleNotification(queued[0]);
-    else showBatchedNotification(queued);
+        if (!queued.length) return;
 
-    // Browser notifications individually
-    queued.forEach((n) => {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(n.title, { body: n.message, icon: '/favicon.ico' });
-      }
-    });
-  }, [queryClient, user?.id]);
+        // Update query cache
+        queryClient.setQueriesData(
+            { queryKey: notificationKeys.all },
+            (oldData: any) => {
+                if (oldData?.notifications) {
+                    return {
+                        ...oldData,
+                        notifications: [...queued, ...oldData.notifications],
+                    };
+                }
+                return oldData;
+            }
+        );
 
-  const showSingleNotification = (notification: WebSocketNotification) => {
-    toast({ title: notification.title, description: notification.message, variant: getToastVariant(notification.type), duration: 5000 });
-  };
+        if (user?.id) {
+            queryClient.invalidateQueries({
+                queryKey: notificationKeys.count(user.id),
+            });
+        }
 
-  const showBatchedNotification = (notifications: WebSocketNotification[]) => {
-    toast({
-      title: `You have ${notifications.length} new notifications`,
-      description: notifications.map((n) => `• ${n.title}`).join('\n'),
-      variant: 'info',
-      duration: 4000 + notifications.length * 1000,
-    });
-  };
+        // Show batched toasts
+        if (queued.length === 1) showSingleNotification(queued[0]);
+        else showBatchedNotification(queued);
 
-  const getToastVariant = (type: string) => {
-    switch (type) {
-      case 'REQUEST_APPROVED': return 'success';
-      case 'REQUEST_REJECTED': return 'destructive';
-      case 'LOW_STOCK': return 'warning';
-      case 'NEW_REQUEST': return 'info';
-      default: return 'default';
-    }
-  };
+        // Browser notifications individually
+        queued.forEach((n) => {
+            showSystemNotification(n.title, n.message);
+        });
+    }, [queryClient, user?.id]);
 
-  const connectAndSubscribe = useCallback(async () => {
-    if (!user?.id) return;
-    const stompClient = getStompClient();
-    setConnectionState({ connected: false, connecting: true, error: null });
-
-    try {
-      await stompClient.connect();
-      setConnectionState({ connected: true, connecting: false, error: null });
-      reconnectAttemptsRef.current = 0;
-
-      // Subscribe to user's notifications
-      const subscriptionId = stompClient.subscribeToUserNotifications(user.id, enqueueNotification);
-      subscriptionIdRef.current = subscriptionId;
-
-      flushNotificationBatch();
-
-      // Handle disconnect
-      const originalOnDisconnect = stompClient['client']?.onDisconnect;
-      stompClient['client']!.onDisconnect = (frame?: Frame) => {
-        setConnectionState({ connected: false, connecting: false, error: 'Disconnected' });
-        attemptReconnect();
-        originalOnDisconnect?.(frame as Frame);
-      };
-    } catch (error) {
-      console.error('WebSocket connection failed:', error);
-      setConnectionState({ connected: false, connecting: false, error: error instanceof Error ? error.message : 'Connection failed' });
-      attemptReconnect();
-    }
-  }, [user?.id, enqueueNotification, flushNotificationBatch]);
-
-  const attemptReconnect = useCallback(() => {
-    const maxAttempts = 5;
-    const baseDelay = 2000;
-
-    if (reconnectAttemptsRef.current >= maxAttempts) return;
-
-    reconnectAttemptsRef.current += 1;
-    const delay = baseDelay * reconnectAttemptsRef.current ** 2;
-    console.log(`Attempting reconnect in ${delay / 1000}s (attempt ${reconnectAttemptsRef.current})`);
-    reconnectTimeoutRef.current = setTimeout(connectAndSubscribe, delay);
-  }, [connectAndSubscribe]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    connectAndSubscribe();
-
-    return () => {
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (batchTimeoutRef.current) clearTimeout(batchTimeoutRef.current);
-
-      const stompClient = getStompClient();
-      if (subscriptionIdRef.current) {
-        stompClient.unsubscribe(subscriptionIdRef.current);
-        subscriptionIdRef.current = null;
-      }
-      stompClient.disconnect();
-      setConnectionState({ connected: false, connecting: false, error: null });
+    const showSystemNotification = (title: string, message: string) => {
+        if ('Notification' in window) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: message,
+                    icon: '../assets/favicon.ico',
+                    badge: '../assets/favicon.ico',
+                    tag: 'inventory-notification',
+                    requireInteraction: false,
+                });
+            } else if (Notification.permission === 'default') {
+                // Request permission
+                Notification.requestPermission().then((permission) => {
+                    if (permission === 'granted') {
+                        new Notification(title, {
+                            body: message,
+                            icon: '../assets/favicon.ico',
+                            badge: '../assets/favicon.ico',
+                            tag: 'inventory-notification',
+                            requireInteraction: false,
+                        });
+                    }
+                });
+            }
+        }
     };
-  }, [user?.id, connectAndSubscribe]);
 
-  // Reset unread count manually if needed
-  const resetUnreadCount = useCallback(() => setUnreadCount(0), []);
+    const showSingleNotification = (notification: WebSocketNotification) => {
+        toast({
+            title: notification.title,
+            description: notification.message,
+            variant: getToastVariant(notification.type),
+            duration: 5000,
+        });
+    };
 
-  return {
-    connectionState,
-    unreadCount,
-    resetUnreadCount,
-  };
+    const showBatchedNotification = (
+        notifications: WebSocketNotification[]
+    ) => {
+        toast({
+            title: `You have ${notifications.length} new notifications`,
+            description: notifications.map((n) => `• ${n.title}`).join('\n'),
+            variant: 'info',
+            duration: 4000 + notifications.length * 1000,
+        });
+    };
+
+    const getToastVariant = (type: string) => {
+        switch (type) {
+            case 'REQUEST_APPROVED':
+                return 'success';
+            case 'REQUEST_REJECTED':
+                return 'destructive';
+            case 'LOW_STOCK':
+                return 'warning';
+            case 'NEW_REQUEST':
+                return 'info';
+            default:
+                return 'default';
+        }
+    };
+
+    const connectAndSubscribe = useCallback(async () => {
+        if (!user?.id) return;
+        const stompClient = getStompClient();
+        setConnectionState({ connected: false, connecting: true, error: null });
+
+        try {
+            await stompClient.connect();
+            setConnectionState({
+                connected: true,
+                connecting: false,
+                error: null,
+            });
+            reconnectAttemptsRef.current = 0;
+
+            // Subscribe to user's notifications
+            const subscriptionId = stompClient.subscribeToUserNotifications(
+                user.id,
+                enqueueNotification
+            );
+            subscriptionIdRef.current = subscriptionId;
+
+            flushNotificationBatch();
+
+            // Handle disconnect
+            const originalOnDisconnect = stompClient['client']?.onDisconnect;
+            stompClient['client']!.onDisconnect = (frame?: Frame) => {
+                setConnectionState({
+                    connected: false,
+                    connecting: false,
+                    error: 'Disconnected',
+                });
+                attemptReconnect();
+                originalOnDisconnect?.(frame as Frame);
+            };
+        } catch (error) {
+            console.error('WebSocket connection failed:', error);
+            setConnectionState({
+                connected: false,
+                connecting: false,
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : 'Connection failed',
+            });
+            attemptReconnect();
+        }
+    }, [user?.id, enqueueNotification, flushNotificationBatch]);
+
+    const attemptReconnect = useCallback(() => {
+        const maxAttempts = 5;
+        const baseDelay = 2000;
+
+        if (reconnectAttemptsRef.current >= maxAttempts) return;
+
+        reconnectAttemptsRef.current += 1;
+        const delay = baseDelay * reconnectAttemptsRef.current ** 2;
+        // console.log(`Attempting reconnect in ${delay / 1000}s (attempt ${reconnectAttemptsRef.current})`);
+        reconnectTimeoutRef.current = setTimeout(connectAndSubscribe, delay);
+    }, [connectAndSubscribe]);
+
+    useEffect(() => {
+        if (!user?.id) return;
+
+        connectAndSubscribe();
+
+        return () => {
+            if (reconnectTimeoutRef.current)
+                clearTimeout(reconnectTimeoutRef.current);
+            if (batchTimeoutRef.current) clearTimeout(batchTimeoutRef.current);
+
+            const stompClient = getStompClient();
+            if (subscriptionIdRef.current) {
+                stompClient.unsubscribe(subscriptionIdRef.current);
+                subscriptionIdRef.current = null;
+            }
+            stompClient.disconnect();
+            setConnectionState({
+                connected: false,
+                connecting: false,
+                error: null,
+            });
+        };
+    }, [user?.id, connectAndSubscribe]);
+
+    // Reset unread count manually if needed
+    const resetUnreadCount = useCallback(() => setUnreadCount(0), []);
+
+    return {
+        connectionState,
+        unreadCount,
+        resetUnreadCount,
+    };
 }

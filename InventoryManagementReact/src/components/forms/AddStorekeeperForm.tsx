@@ -20,7 +20,6 @@ interface AddStorekeeperFormProps {
 export default function AddStorekeeperForm({
     className,
 }: AddStorekeeperFormProps) {
-    const [open, setOpen] = useState(false);
     const [value, setValue] = useState('');
 
     // Queries
@@ -81,8 +80,6 @@ export default function AddStorekeeperForm({
                         {/* Form Fields */}
                         <StorekeeperFormFields
                             departments={departments}
-                            open={open}
-                            setOpen={setOpen}
                             value={value}
                             setValue={setValue}
                         />

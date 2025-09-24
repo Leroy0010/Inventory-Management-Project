@@ -14,10 +14,6 @@ export const userReportKeys = {
     lists: () => [...userReportKeys.all, 'list'] as const,
     list: (filters: UserReportFilters) =>
         [...userReportKeys.lists(), { filters }] as const,
-    user: (userId: number, year?: number) =>
-        [...userReportKeys.all, 'user', userId, year] as const,
-    department: (departmentId: number, filters: UserReportFilters) =>
-        [...userReportKeys.all, 'department', departmentId, filters] as const,
 };
 
 // User Report queries and mutations
@@ -50,24 +46,15 @@ export const useUserReportQueries = () => {
         },
     });
 
-    // Get all users report with filters (new Spring Boot endpoint)
-    const getAllUsersReportQuery = (filters: UserReportFilters = {}) =>
+    // Get single user report with filters (updated Spring Boot implementation)
+    const getUserReportQuery = (filters: UserReportFilters | null) =>
         useQuery({
-            queryKey: userReportKeys.list(filters),
-            queryFn: () => userReportApi.getAllUsersReport(filters),
-            staleTime: 2 * 60 * 1000, // 2 minutes
-        });
-
-    // Get department user report with filters (new Spring Boot endpoint)
-    const getDepartmentUserReportQuery = (
-        departmentId: number,
-        filters: UserReportFilters = {}
-    ) =>
-        useQuery({
-            queryKey: userReportKeys.department(departmentId, filters),
-            queryFn: () =>
-                userReportApi.getDepartmentUserReport(departmentId, filters),
-            enabled: !!departmentId,
+            queryKey: userReportKeys.list(filters || {}),
+            queryFn: () => userReportApi.getUserReport(filters!),
+            enabled:
+                !!filters &&
+                !!filters.userId &&
+                (!!filters.year || (!!filters.startDate && !!filters.endDate)),
             staleTime: 2 * 60 * 1000, // 2 minutes
         });
 
@@ -76,7 +63,6 @@ export const useUserReportQueries = () => {
         getUserReportMutation,
 
         // Queries
-        getAllUsersReportQuery,
-        getDepartmentUserReportQuery,
+        getUserReportQuery,
     };
 };

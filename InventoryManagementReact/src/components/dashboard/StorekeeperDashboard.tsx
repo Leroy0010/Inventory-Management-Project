@@ -1,57 +1,38 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { useStorekeeperDashboard } from '@/hooks/queries/useDashboard';
+import { useUnreadCount } from '@/hooks/queries/useNotification';
+import { useGetProfile } from '@/hooks/queries/useProfile';
+import { useAuthStore } from '@/stores/authStore';
 import {
-    Package,
-    Users,
-    Building2,
-    TrendingUp,
+    Activity,
     AlertTriangle,
     BarChart3,
-    FileText,
     Bell,
-    Activity,
+    Building2,
     CheckCircle,
     Clock,
+    FileText,
+    Package,
+    TrendingUp,
+    Users,
     XCircle,
-    ShoppingCart,
 } from 'lucide-react';
+import StorekeeperNotificationSummary from '../storekeeper-dashboard/StorekeeperNotificationSummary';
+import StorekeeperQuickActions from '../storekeeper-dashboard/StorekeeperQuickActions';
+import StorekeeperRecentRequests from '../storekeeper-dashboard/StorekeeperRecentRequests';
+import StorekeeperReportSection from '../storekeeper-dashboard/StorekeeperReportSection';
+import StorekeeperStatsGrid from '../storekeeper-dashboard/StorekeeperStatsGrid';
+import StorekeeperWelcomeSection from '../storekeeper-dashboard/StorekeeperWelcomeSection';
+import { useNavigate } from 'react-router-dom';
+import type { RequestStatus } from '@/types/request';
 
 // Icon mapping for dynamic icons
-const iconMap = {
-    Package,
-    Users,
-    Building2,
-    TrendingUp,
-    AlertTriangle,
-    BarChart3,
-    FileText,
-    Bell,
-    Activity,
-    CheckCircle,
-    Clock,
-    XCircle,
-    ShoppingCart,
-} as const;
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/authStore';
-import { useGetProfile } from '@/hooks/queries/useProfile';
-import { useUnreadCount } from '@/hooks/queries/useNotification';
-import { useStorekeeperDashboard } from '@/hooks/queries/useDashboard';
-import StorekeeperNotificationSummary from '../storekeeper-dashboard/StorekeeperNotificationSummary';
-import StorekeeperReportSection from '../storekeeper-dashboard/StorekeeperReportSection';
-import StorekeeperDepartmentOverview from '../storekeeper-dashboard/StorekeeperDepartmentOverview';
-import StorekeeperWelcomeSection from '../storekeeper-dashboard/StorekeeperWelcomeSection';
-import StorekeeperRecentRequests from '../storekeeper-dashboard/StorekeeperRecentRequests';
-import StorekeeperQuickActions from '../storekeeper-dashboard/StorekeeperQuickActions';
-import StorekeeperStatsGrid from '../storekeeper-dashboard/StorekeeperStatsGrid';
-import { InventorySummary } from './InventorySummary';
-import { RoleBasedQuickActions } from './RoleBasedQuickActions';
 
 export function StorekeeperDashboard() {
-    const navigate = useNavigate();
     const { user } = useAuthStore();
     const { data: profile } = useGetProfile();
     const { data: unreadCount = 0 } = useUnreadCount();
     const { data: dashboardData, isLoading, error } = useStorekeeperDashboard();
+    const navigate = useNavigate();
 
     if (isLoading) {
         return (
@@ -80,30 +61,39 @@ export function StorekeeperDashboard() {
     }
 
     // Use real data from backend
-    const quickActions = dashboardData?.quickActions || [];
+    const quickActions =
+        dashboardData?.quickActions.map((act) => ({
+            ...act,
+            action: () => act?.href && navigate(act?.href),
+        })) || [];
     const stats = dashboardData?.stats || [];
-    const departmentOverview = dashboardData?.departmentOverview;
     const recentRequests = dashboardData?.recentRequests || [];
 
-    const getStatusIcon = (status: string) => {
+    const getStatusIcon = (status: RequestStatus) => {
         switch (status) {
-            case 'approved':
+            case 'APPROVED':
                 return <CheckCircle className="h-4 w-4 text-green-500" />;
-            case 'rejected':
+            case 'REJECTED':
                 return <XCircle className="h-4 w-4 text-red-500" />;
+            case 'FULFILLED':
+                return <Package className="h-4 w-4 text-blue-500" />;
             default:
                 return <Clock className="h-4 w-4 text-orange-500" />;
         }
     };
 
-    const getStatusColor = (status: string) => {
+    const getStatusColor = (status: RequestStatus) => {
         switch (status) {
-            case 'approved':
-                return 'text-green-600 bg-green-50';
-            case 'rejected':
-                return 'text-red-600 bg-red-50';
+            case 'PENDING':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'APPROVED':
+                return 'bg-green-100 text-green-800';
+            case 'FULFILLED':
+                return 'bg-blue-100 text-blue-800';
+            case 'REJECTED':
+                return 'bg-red-100 text-red-800';
             default:
-                return 'text-orange-600 bg-orange-50';
+                return 'bg-gray-100 text-gray-800';
         }
     };
 
@@ -115,13 +105,10 @@ export function StorekeeperDashboard() {
             {stats.length > 0 && <StorekeeperStatsGrid stats={stats} />}
 
             {/* Quick Actions */}
-            <RoleBasedQuickActions />
+
             {quickActions.length > 0 && (
                 <StorekeeperQuickActions quickActions={quickActions} />
             )}
-
-            {/* Inventory Summary */}
-            <InventorySummary />
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -131,19 +118,17 @@ export function StorekeeperDashboard() {
                     getStatusIcon={getStatusIcon}
                     recentRequests={recentRequests}
                 />
-                {/* Department Overview */}
-                <StorekeeperDepartmentOverview
-                    departmentOverview={departmentOverview}
-                />
+                {/* Reports Section */}
+                <StorekeeperReportSection />
             </div>
 
             {/* Notification Summary */}
-            <StorekeeperNotificationSummary
-                dashboardData={dashboardData}
-                unreadCount={unreadCount}
-            />
-            {/* Reports Section */}
-            <StorekeeperReportSection />
+            {unreadCount > 0 && (
+                <StorekeeperNotificationSummary
+                    dashboardData={dashboardData}
+                    unreadCount={unreadCount}
+                />
+            )}
         </div>
     );
 }

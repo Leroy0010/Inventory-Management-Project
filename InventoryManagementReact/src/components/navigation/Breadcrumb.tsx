@@ -49,7 +49,7 @@ const routeLabels: Record<string, string> = {
 function getBreadcrumbItems(pathname: string): BreadcrumbItem[] {
     const segments = pathname.split('/').filter(Boolean);
     const items: BreadcrumbItem[] = [
-        { label: 'Dashboard', href: '/', isActive: pathname === '/' }
+        { label: 'Dashboard', href: '/', isActive: pathname === '/' },
     ];
 
     if (segments.length === 0) {
@@ -60,19 +60,21 @@ function getBreadcrumbItems(pathname: string): BreadcrumbItem[] {
     segments.forEach((segment, index) => {
         currentPath += `/${segment}`;
         const isLast = index === segments.length - 1;
-        
+
         // Handle dynamic segments (like :id)
         let label = routeLabels[currentPath];
         if (!label) {
             // Check for dynamic routes
             const dynamicPath = currentPath.replace(/\/\d+$/, '/:id');
-            label = routeLabels[dynamicPath] || segment.charAt(0).toUpperCase() + segment.slice(1);
+            label =
+                routeLabels[dynamicPath] ||
+                segment.charAt(0).toUpperCase() + segment.slice(1);
         }
 
         items.push({
             label,
             href: isLast ? undefined : currentPath,
-            isActive: isLast
+            isActive: isLast,
         });
     });
 
@@ -88,14 +90,19 @@ export function Breadcrumb({ className, customItems }: BreadcrumbProps) {
     }
 
     return (
-        <nav className={cn('flex items-center space-x-1 text-sm text-muted-foreground', className)}>
+        <nav
+            className={cn(
+                'flex items-center space-x-1 text-sm text-muted-foreground',
+                className
+            )}
+        >
             <Link
                 to="/"
                 className="flex items-center hover:text-foreground transition-colors"
             >
                 <Home className="h-4 w-4" />
             </Link>
-            
+
             {items.slice(1).map((item, index) => (
                 <React.Fragment key={index}>
                     <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
@@ -107,10 +114,12 @@ export function Breadcrumb({ className, customItems }: BreadcrumbProps) {
                             {item.label}
                         </Link>
                     ) : (
-                        <span className={cn(
-                            'font-medium',
-                            item.isActive && 'text-foreground'
-                        )}>
+                        <span
+                            className={cn(
+                                'font-medium',
+                                item.isActive && 'text-foreground'
+                            )}
+                        >
                             {item.label}
                         </span>
                     )}

@@ -1,25 +1,20 @@
 import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartCount } from '@/hooks/queries/useCart';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 
 export function CartIcon() {
-    const { totalItems, fetchCart } = useCartStore();
     const { hasPermission } = useAuthStore();
     const navigate = useNavigate();
+    const canViewCart = hasPermission('VIEW_CART');
+    const { data: totalItems = 0, isLoading } = useCartCount(canViewCart);
 
     // Only show cart icon for STAFF users
-    if (!hasPermission('VIEW_CART')) {
+    if (!canViewCart) {
         return null;
     }
-
-    // Fetch cart data on component mount
-    useEffect(() => {
-        fetchCart();
-    }, [fetchCart]);
 
     const handleCartClick = () => {
         navigate('/cart');
@@ -32,6 +27,7 @@ export function CartIcon() {
             className="text-slate-300 hover:text-white hover:bg-slate-600 relative"
             onClick={handleCartClick}
             aria-label="Shopping cart"
+            disabled={isLoading}
         >
             <ShoppingCart className="w-5 h-5" />
             {totalItems > 0 && (

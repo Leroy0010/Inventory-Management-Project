@@ -97,7 +97,7 @@ const RequestDetailsModal = memo(function RequestDetailsModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-[58rem] max-h-[80vh] overflow-y-auto">
                 <RequestDetailsHeader request={request} />
 
                 <div className="space-y-6">

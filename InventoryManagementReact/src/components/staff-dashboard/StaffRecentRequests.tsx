@@ -11,11 +11,12 @@ import { Button } from '../ui/button';
 import type { RecentRequest } from '@/types/dashboard';
 import { useNavigate } from 'react-router-dom';
 import type { ReactElement } from 'react';
+import type { RequestStatus } from '@/types/request';
 
 interface StaffRecentRequestsProps {
     recentRequests: RecentRequest[];
-    getStatusIcon: (value: string) => ReactElement;
-    getStatusColor: (value: string) => string;
+    getStatusIcon: (value: RequestStatus) => ReactElement;
+    getStatusColor: (value: RequestStatus) => string;
 }
 
 export default function StaffRecentRequests({

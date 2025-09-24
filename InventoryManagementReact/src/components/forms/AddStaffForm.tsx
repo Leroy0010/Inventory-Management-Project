@@ -5,7 +5,6 @@ import { Button } from '../ui/button';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useOfficeNames } from '@/hooks/queries/useOffice';
 import { useUserQueries } from '@/hooks/queries/useUser';
-import { toast } from 'sonner';
 import { StaffFormErrorAlert } from './StaffFormErrorAlert';
 import { type ComboboxOption } from '@/components/ui/combobox';
 import { StaffFormFields } from './StaffFormFields';
@@ -58,9 +57,8 @@ const AddStaffForm = memo(function AddStaffForm({
             });
             reset();
             setValue('');
-            toast.success('Staff member created successfully!');
         } catch (error) {
-            // Error is handled by the mutation's onError callback
+            // Error is handled by the mutation's onError callback with toast notifications
             console.error('Failed to create staff member:', error);
         }
     };

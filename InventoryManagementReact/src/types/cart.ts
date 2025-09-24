@@ -10,6 +10,6 @@ export interface CartItem {
 
 
 export interface CartItemRequestDto {
-    id: number;
+    itemId: number;
     quantity: number;
 }

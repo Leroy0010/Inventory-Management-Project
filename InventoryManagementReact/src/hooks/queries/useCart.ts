@@ -1,32 +1,49 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '@/api/cart';
-import { toast } from 'sonner';
-import {
-    formatApiError,
-    getFriendlyErrorMessage,
-    formatValidationErrors,
-} from '@/lib/error-utils';
+import type { CartItem } from '@/types/cart';
+import { cartErrorHandler } from '@/lib/cartErrorHandler';
 
 // Query keys
 export const cartKeys = {
     all: ['cart'] as const,
-    items: () => [...cartKeys.all, 'items'] as const,
+    cart: () => [...cartKeys.all, 'items'] as const,
+    count: () => [...cartKeys.all, 'count'] as const,
 };
 
-// Cart queries
-export const useCartQueries = () => {
-    const queryClient = useQueryClient();
-
-    // Get cart items
-    const cartItemsQuery = useQuery({
-        queryKey: cartKeys.items(),
+// Hook for getting cart items
+export function useCart(enabled: boolean = true) {
+    const query = useQuery({
+        queryKey: cartKeys.cart(),
         queryFn: cartApi.getCart,
         staleTime: 30000, // 30 seconds
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: true,
+        enabled,
     });
 
-    // Add item to cart mutation
-    const addItemMutation = useMutation({
+    // Handle errors with toast notifications
+    if (query.error) {
+        cartErrorHandler.fetchCart(query.error);
+    }
+
+    return query;
+}
+
+// Hook for getting cart count
+export function useCartCount(enabled: boolean = true) {
+    const { data: cartItems = [], isLoading } = useCart(enabled);
+    const totalItems = cartItems.length;
+
+    return {
+        data: totalItems,
+        isLoading,
+    };
+}
+
+// Hook for adding item to cart
+export function useAddToCart() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
         mutationFn: ({
             itemId,
             quantity,
@@ -34,29 +51,33 @@ export const useCartQueries = () => {
             itemId: number;
             quantity: number;
         }) => cartApi.addItem(itemId, quantity),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: cartKeys.items() });
-            toast.success('Item added to cart');
-        },
-        onError: (error: unknown) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
+        onSuccess: (_, variables) => {
+            // Invalidate and refetch cart data
+            queryClient.invalidateQueries({ queryKey: cartKeys.all });
 
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to add item: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to add item: ${friendlyMessage}`);
-            }
+            // Show success toast
+            cartErrorHandler.success({
+                operation: 'add',
+                itemId: variables.itemId,
+                quantity: variables.quantity,
+            });
+        },
+        onError: (error, variables) => {
+            // Show error toast with context
+            cartErrorHandler.addItem(
+                error,
+                `Item ${variables.itemId}`,
+                variables.quantity
+            );
         },
     });
+}
 
-    // Remove item from cart mutation
-    const removeItemMutation = useMutation({
+// Hook for removing item from cart
+export function useRemoveFromCart() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
         mutationFn: ({
             itemId,
             quantity,
@@ -64,29 +85,33 @@ export const useCartQueries = () => {
             itemId: number;
             quantity: number;
         }) => cartApi.removeItem(itemId, quantity),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: cartKeys.items() });
-            toast.success('Item removed from cart');
-        },
-        onError: (error: unknown) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
+        onSuccess: (_, variables) => {
+            // Invalidate and refetch cart data
+            queryClient.invalidateQueries({ queryKey: cartKeys.all });
 
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to remove item: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to remove item: ${friendlyMessage}`);
-            }
+            // Show success toast
+            cartErrorHandler.success({
+                operation: 'remove',
+                itemId: variables.itemId,
+                quantity: variables.quantity,
+            });
+        },
+        onError: (error, variables) => {
+            // Show error toast with context
+            cartErrorHandler.removeItem(
+                error,
+                `Item ${variables.itemId}`,
+                variables.quantity
+            );
         },
     });
+}
 
-    // Update item quantity mutation
-    const updateItemMutation = useMutation({
+// Hook for updating item quantity in cart
+export function useUpdateCartItem() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
         mutationFn: ({
             itemId,
             quantity,
@@ -94,87 +119,112 @@ export const useCartQueries = () => {
             itemId: number;
             quantity: number;
         }) => cartApi.updateItem(itemId, quantity),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: cartKeys.items() });
-            toast.success('Cart updated');
-        },
-        onError: (error: unknown) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
+        onSuccess: (_, variables) => {
+            // Invalidate and refetch cart data
+            queryClient.invalidateQueries({ queryKey: cartKeys.all });
 
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to update cart: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to update cart: ${friendlyMessage}`);
-            }
+            // Show success toast
+            cartErrorHandler.success({
+                operation: 'update',
+                itemId: variables.itemId,
+                quantity: variables.quantity,
+            });
+        },
+        onError: (error, variables) => {
+            // Show error toast with context
+            cartErrorHandler.updateItem(
+                error,
+                `Item ${variables.itemId}`,
+                variables.quantity
+            );
         },
     });
+}
 
-    // Clear cart mutation
-    const clearCartMutation = useMutation({
+// Hook for clearing cart
+export function useClearCart() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
         mutationFn: cartApi.clearCart,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: cartKeys.items() });
-            toast.success('Cart cleared');
-        },
-        onError: (error: unknown) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
+            // Invalidate and refetch cart data
+            queryClient.invalidateQueries({ queryKey: cartKeys.all });
 
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to clear cart: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to clear cart: ${friendlyMessage}`);
-            }
+            // Show success toast
+            cartErrorHandler.success({
+                operation: 'clear',
+            });
+        },
+        onError: (error) => {
+            // Show error toast
+            cartErrorHandler.clearCart(error);
         },
     });
+}
 
-    // Submit cart as request mutation
-    const submitCartAsRequestMutation = useMutation({
+// Hook for submitting cart as request
+export function useSubmitCartAsRequest() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
         mutationFn: cartApi.submitCartAsRequest,
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: cartKeys.items() });
-            queryClient.invalidateQueries({ queryKey: ['requests'] });
-            toast.success(
-                `Request submitted successfully! Request ID: ${data.id}`
-            );
-        },
-        onError: (error: unknown) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
+            // Invalidate and refetch cart data
+            queryClient.invalidateQueries({ queryKey: cartKeys.all });
 
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to submit request: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to submit request: ${friendlyMessage}`);
-            }
+            // Show success toast with request ID
+            cartErrorHandler.success({
+                operation: 'submit',
+            });
+        },
+        onError: (error) => {
+            // Show error toast
+            cartErrorHandler.submitRequest(error);
         },
     });
+}
+
+// Hook to check if an item is in cart
+export function useIsItemInCart(itemId: number, enabled: boolean = true) {
+    const { data: cartItems = [], isLoading } = useCart(enabled);
+
+    const isInCart = cartItems.some(
+        (cartItem: CartItem) => cartItem.itemId === itemId
+    );
+    const cartItem = cartItems.find(
+        (cartItem: CartItem) => cartItem.itemId === itemId
+    );
 
     return {
-        // Queries
-        cartItemsQuery,
-
-        // Mutations
-        addItemMutation,
-        removeItemMutation,
-        updateItemMutation,
-        clearCartMutation,
-        submitCartAsRequestMutation,
+        isInCart,
+        cartItem,
+        isLoading,
     };
-};
+}
+
+// Combined hook for all cart operations
+export function useCartQueries(enabled: boolean = true) {
+    const cart = useCart(enabled);
+    const cartCount = useCartCount(enabled);
+    const addToCart = useAddToCart();
+    const removeFromCart = useRemoveFromCart();
+    const updateCartItem = useUpdateCartItem();
+    const clearCart = useClearCart();
+    const submitCartAsRequest = useSubmitCartAsRequest();
+
+    return {
+        cart,
+        cartCount,
+        cartItemsQuery: cart,
+        addItemMutation: addToCart,
+        removeItemMutation: removeFromCart,
+        updateItemMutation: updateCartItem,
+        clearCartMutation: clearCart,
+        submitCartAsRequestMutation: submitCartAsRequest,
+        addToCart,
+        removeFromCart,
+        updateCartItem,
+        clearCart,
+    };
+}

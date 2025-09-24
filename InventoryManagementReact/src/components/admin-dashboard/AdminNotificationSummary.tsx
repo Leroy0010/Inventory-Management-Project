@@ -36,7 +36,7 @@ export default function AdminNotificationSummary({
                     <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                         <div className="flex items-center gap-2">
                             <Bell className="h-4 w-4 text-blue-600" />
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-medium text-blue-600">
                                 Unread Notifications
                             </span>
                         </div>
@@ -49,6 +49,7 @@ export default function AdminNotificationSummary({
                             <Button
                                 variant="outline"
                                 size="sm"
+                                className='text-blue-600'
                                 onClick={() => navigate('/notifications')}
                             >
                                 View All

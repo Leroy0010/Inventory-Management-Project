@@ -27,4 +27,4 @@ export interface TransactionDto {
     balance: number;
 }
 
-export type StockTransactionType = "RECEIVED" | "ISSUED";
+export type StockTransactionType = "IN" | "OUT";

@@ -25,7 +25,7 @@ const filterSchema = z.object({
     itemId: z.number().optional(),
     year: z.number().min(2000).max(2100).optional(),
     month: z.number().min(1).max(12).optional(),
-    transactionType: z.enum(['RECEIVED', 'ISSUED']).optional(),
+    transactionType: z.enum(['IN', 'OUT']).optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
 });
@@ -54,8 +54,8 @@ const MONTHS = [
 ];
 
 const TRANSACTION_TYPES: { value: StockTransactionType; label: string }[] = [
-    { value: 'RECEIVED', label: 'Received' },
-    { value: 'ISSUED', label: 'Issued' },
+    { value: 'IN', label: 'Received' },
+    { value: 'OUT', label: 'Issued' },
 ];
 
 export default function TransactionReportFilters({

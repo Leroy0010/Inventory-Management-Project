@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface GoogleSignInButtonProps {
     onSuccess?: () => void;
@@ -14,10 +15,16 @@ export function GoogleSignInButton({
     disabled = false,
     className,
 }: GoogleSignInButtonProps) {
+    const [isRedirecting, setIsRedirecting] = useState(false);
+
     const handleGoogleSignIn = () => {
-        // Redirect to Spring Security OAuth2 endpoint
-        window.location.href =
-            'http://localhost:8080/oauth2/authorization/google';
+        setIsRedirecting(true);
+        // Add a small delay to show the loading state before redirect
+        setTimeout(() => {
+            // Redirect to Spring Security OAuth2 endpoint
+            window.location.href =
+                'http://localhost:8080/oauth2/authorization/google';
+        }, 100);
     };
 
     return (
@@ -26,12 +33,14 @@ export function GoogleSignInButton({
             variant="outline"
             className={`w-full ${className} cursor-pointer`}
             onClick={handleGoogleSignIn}
-            disabled={disabled || isLoading}
+            disabled={disabled || isLoading || isRedirecting}
         >
-            {isLoading ? (
+            {isLoading || isRedirecting ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in with Google...
+                    {isRedirecting
+                        ? 'Redirecting to Google...'
+                        : 'Signing in with Google...'}
                 </>
             ) : (
                 <>

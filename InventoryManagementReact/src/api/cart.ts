@@ -17,7 +17,7 @@ export const cartApi = {
     addItem: async (itemId: number, quantity: number): Promise<void> => {
         try {
             const request: CartItemRequestDto = {
-                id: itemId,
+                itemId: itemId,
                 quantity: quantity
             };
             await api.post('/cart/add-item', request);
@@ -30,7 +30,7 @@ export const cartApi = {
     removeItem: async (itemId: number, quantity: number): Promise<void> => {
         try {
             const request: CartItemRequestDto = {
-                id: itemId,
+                itemId: itemId,
                 quantity: quantity
             };
             await api.post('/cart/remove-item', request);
@@ -43,7 +43,7 @@ export const cartApi = {
     updateItem: async (itemId: number, quantity: number): Promise<void> => {
         try {
             const request: CartItemRequestDto = {
-                id: itemId,
+                itemId: itemId,
                 quantity: quantity
             };
             await api.put('/cart/update-item', request);

@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import {
     Select,
     SelectContent,
@@ -12,13 +12,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Search, Filter, X, SortAsc, SortDesc } from 'lucide-react';
+import { DateRangePicker } from '@/components/ui/date-picker';
+import { Filter, X, SortAsc, SortDesc } from 'lucide-react';
+import { useUserEmailsAndIds } from '@/hooks/queries/useUser';
+import { useToast } from '@/hooks/useToast';
 import type { UserReportFilters } from '@/types/userReport';
 
 const filterSchema = z.object({
-    search: z.string().optional(),
+    userId: z.number().optional(),
     year: z.number().min(2000).max(2100).optional(),
-    sortBy: z.enum(['userName', 'quantityReceived', 'inventoryCode']).optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    sortBy: z.enum(['itemId', 'itemName', 'quantityReceived']).optional(),
     sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
@@ -31,9 +36,9 @@ interface UserReportFiltersProps {
 }
 
 const SORT_OPTIONS = [
-    { value: 'userName', label: 'User Name' },
+    { value: 'itemId', label: 'Item ID' },
+    { value: 'itemName', label: 'Item Name' },
     { value: 'quantityReceived', label: 'Quantity Received' },
-    { value: 'inventoryCode', label: 'User ID' },
 ];
 
 const SORT_ORDER_OPTIONS = [
@@ -46,6 +51,8 @@ export default function UserReportFilters({
     onClearFilters,
     isLoading = false,
 }: UserReportFiltersProps) {
+    const { userEmailsAndIdsQuery } = useUserEmailsAndIds();
+    const { toast } = useToast();
 
     const {
         register,
@@ -57,23 +64,54 @@ export default function UserReportFilters({
     } = useForm<FilterFormData>({
         resolver: zodResolver(filterSchema),
         defaultValues: {
-            search: '',
+            userId: undefined,
             year: new Date().getFullYear(),
-            sortBy: 'userName',
+            startDate: undefined,
+            endDate: undefined,
+            sortBy: 'itemName',
             sortOrder: 'asc',
         },
     });
 
     const watchedValues = watch();
 
-    // Generate years (current year ± 5)
+    // Convert user emails and IDs to combobox options
+    const userOptions: ComboboxOption[] = [
+        ...(userEmailsAndIdsQuery.data?.map((user) => ({
+            value: user.id.toString(),
+            label: user.email,
+        })) || []),
+    ];
+
+    // Generate years (current year - 10)
     const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
+    const years = Array.from({ length: 11 }, (_, i) => currentYear - 10 + i);
 
     const handleApplyFilters = (data: FilterFormData) => {
+        // Validate that at least userId and either year or date range is provided
+        if (!data.userId) {
+            toast({
+                title: 'Validation Error',
+                description: 'Please select a user',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        if (!data.year && (!data.startDate || !data.endDate)) {
+            toast({
+                title: 'Validation Error',
+                description: 'Please select either a year or a date range',
+                variant: 'destructive',
+            });
+            return;
+        }
+
         const filters: UserReportFilters = {
-            search: data.search || undefined,
+            userId: data.userId || undefined,
             year: data.year,
+            startDate: data.startDate,
+            endDate: data.endDate,
             sortBy: data.sortBy,
             sortOrder: data.sortOrder,
         };
@@ -91,6 +129,14 @@ export default function UserReportFilters({
         onClearFilters();
     };
 
+    const handleDateRangeChange = (
+        startDate: Date | undefined,
+        endDate: Date | undefined
+    ) => {
+        setValue('startDate', startDate?.toISOString().split('T')[0]);
+        setValue('endDate', endDate?.toISOString().split('T')[0]);
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -100,22 +146,33 @@ export default function UserReportFilters({
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <form onSubmit={handleSubmit(handleApplyFilters)} className="space-y-4">
+                <form
+                    onSubmit={handleSubmit(handleApplyFilters)}
+                    className="space-y-4"
+                >
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* Search */}
+                        {/* User Selection */}
                         <div className="space-y-2">
-                            <Label htmlFor="search">Search Users</Label>
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    id="search"
-                                    placeholder="Search by name or email..."
-                                    className="pl-10"
-                                    {...register('search')}
-                                />
-                            </div>
-                            {errors.search && (
-                                <p className="text-sm text-red-600">{errors.search.message}</p>
+                            <Label htmlFor="userId">Select User</Label>
+                            <Combobox
+                                options={userOptions}
+                                value={watchedValues.userId?.toString() || ''}
+                                onValueChange={(value) =>
+                                    setValue(
+                                        'userId',
+                                        value ? parseInt(value) : undefined
+                                    )
+                                }
+                                placeholder="Select user..."
+                                searchPlaceholder="Search by email..."
+                                emptyText="No users found"
+                                width="w-full"
+                                disabled={userEmailsAndIdsQuery.isLoading}
+                            />
+                            {errors.userId && (
+                                <p className="text-sm text-red-600">
+                                    {errors.userId.message}
+                                </p>
                             )}
                         </div>
 
@@ -125,7 +182,10 @@ export default function UserReportFilters({
                             <Select
                                 value={watchedValues.year?.toString() || ''}
                                 onValueChange={(value) =>
-                                    setValue('year', value ? parseInt(value) : undefined)
+                                    setValue(
+                                        'year',
+                                        value ? parseInt(value) : undefined
+                                    )
                                 }
                             >
                                 <SelectTrigger>
@@ -133,17 +193,64 @@ export default function UserReportFilters({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {years.map((year) => (
-                                        <SelectItem key={year} value={year.toString()}>
+                                        <SelectItem
+                                            key={year}
+                                            value={year.toString()}
+                                        >
                                             {year}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.year && (
-                                <p className="text-sm text-red-600">{errors.year.message}</p>
+                                <p className="text-sm text-red-600">
+                                    {errors.year.message}
+                                </p>
                             )}
                         </div>
 
+                        {/* Date Range Selection */}
+                        <div className="space-y-2">
+                            <Label>Date Range (Alternative to Year)</Label>
+                            <DateRangePicker
+                                startDate={
+                                    watchedValues.startDate
+                                        ? new Date(watchedValues.startDate)
+                                        : undefined
+                                }
+                                endDate={
+                                    watchedValues.endDate
+                                        ? new Date(watchedValues.endDate)
+                                        : undefined
+                                }
+                                onStartDateChange={(date) =>
+                                    handleDateRangeChange(
+                                        date,
+                                        watchedValues.endDate
+                                            ? new Date(watchedValues.endDate)
+                                            : undefined
+                                    )
+                                }
+                                onEndDateChange={(date) =>
+                                    handleDateRangeChange(
+                                        watchedValues.startDate
+                                            ? new Date(watchedValues.startDate)
+                                            : undefined,
+                                        date
+                                    )
+                                }
+                            />
+                            {errors.startDate && (
+                                <p className="text-sm text-red-600">
+                                    {errors.startDate.message}
+                                </p>
+                            )}
+                            {errors.endDate && (
+                                <p className="text-sm text-red-600">
+                                    {errors.endDate.message}
+                                </p>
+                            )}
+                        </div>
 
                         {/* Sort By */}
                         <div className="space-y-2">
@@ -151,7 +258,13 @@ export default function UserReportFilters({
                             <Select
                                 value={watchedValues.sortBy || ''}
                                 onValueChange={(value) =>
-                                    setValue('sortBy', value as 'userName' | 'quantityReceived' | 'inventoryCode')
+                                    setValue(
+                                        'sortBy',
+                                        value as
+                                            | 'itemId'
+                                            | 'itemName'
+                                            | 'quantityReceived'
+                                    )
                                 }
                             >
                                 <SelectTrigger>
@@ -159,14 +272,19 @@ export default function UserReportFilters({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {SORT_OPTIONS.map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
+                                        <SelectItem
+                                            key={option.value}
+                                            value={option.value}
+                                        >
                                             {option.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.sortBy && (
-                                <p className="text-sm text-red-600">{errors.sortBy.message}</p>
+                                <p className="text-sm text-red-600">
+                                    {errors.sortBy.message}
+                                </p>
                             )}
                         </div>
 
@@ -176,7 +294,10 @@ export default function UserReportFilters({
                             <Select
                                 value={watchedValues.sortOrder || ''}
                                 onValueChange={(value) =>
-                                    setValue('sortOrder', value as 'asc' | 'desc')
+                                    setValue(
+                                        'sortOrder',
+                                        value as 'asc' | 'desc'
+                                    )
                                 }
                             >
                                 <SelectTrigger>
@@ -184,7 +305,10 @@ export default function UserReportFilters({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {SORT_ORDER_OPTIONS.map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
+                                        <SelectItem
+                                            key={option.value}
+                                            value={option.value}
+                                        >
                                             <div className="flex items-center gap-2">
                                                 {option.value === 'asc' ? (
                                                     <SortAsc className="h-4 w-4" />
@@ -198,7 +322,9 @@ export default function UserReportFilters({
                                 </SelectContent>
                             </Select>
                             {errors.sortOrder && (
-                                <p className="text-sm text-red-600">{errors.sortOrder.message}</p>
+                                <p className="text-sm text-red-600">
+                                    {errors.sortOrder.message}
+                                </p>
                             )}
                         </div>
                     </div>

@@ -1,11 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { inventoryApi } from '@/api/inventoryItem';
-import { toast } from 'sonner';
-import {
-    formatApiError,
-    getFriendlyErrorMessage,
-    formatValidationErrors,
-} from '@/lib/error-utils';
+import { formErrorHandler } from '@/lib/formErrorHandler';
 import type { CreateInventoryItemDto } from '@/types/inventoryItem';
 
 // Query keys for inventory items
@@ -51,29 +46,17 @@ export const useInventoryItemQueries = () => {
                 queryKey: inventoryItemKeys.lists(),
             });
             queryClient.invalidateQueries({ queryKey: ['inventory-balance'] });
-            toast.success(
-                `Inventory item "${data.name}" created successfully!`
-            );
-        },
-        onError: (error: unknown) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
 
-            if (validationErrors.length > 0) {
-                toast.error(
-                    `Failed to create inventory item: ${friendlyMessage}`,
-                    {
-                        description: validationErrors.join(', '),
-                    }
-                );
-            } else {
-                toast.error(
-                    `Failed to create inventory item: ${friendlyMessage}`
-                );
-            }
+            // Show success toast
+            formErrorHandler.success({
+                operation: 'create',
+                entity: 'inventory',
+                entityName: data.name,
+            });
+        },
+        onError: (error: unknown, variables) => {
+            // Show error toast with context
+            formErrorHandler.createInventory(error, variables.item.name);
         },
     });
 
@@ -88,29 +71,22 @@ export const useInventoryItemQueries = () => {
                 queryKey: inventoryItemKeys.detail(data.id),
             });
             queryClient.invalidateQueries({ queryKey: ['inventory-balance'] });
-            toast.success(
-                `Inventory item "${data.name}" updated successfully!`
-            );
-        },
-        onError: (error: unknown) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
 
-            if (validationErrors.length > 0) {
-                toast.error(
-                    `Failed to update inventory item: ${friendlyMessage}`,
-                    {
-                        description: validationErrors.join(', '),
-                    }
-                );
-            } else {
-                toast.error(
-                    `Failed to update inventory item: ${friendlyMessage}`
-                );
-            }
+            // Show success toast
+            formErrorHandler.success({
+                operation: 'update',
+                entity: 'inventory',
+                entityName: data.name,
+                entityId: data.id,
+            });
+        },
+        onError: (error: unknown, variables) => {
+            // Show error toast with context
+            formErrorHandler.updateInventory(
+                error,
+                variables.name,
+                variables.id
+            );
         },
     });
 
@@ -122,27 +98,16 @@ export const useInventoryItemQueries = () => {
                 queryKey: inventoryItemKeys.lists(),
             });
             queryClient.invalidateQueries({ queryKey: ['inventory-balance'] });
-            toast.success('Inventory item deleted successfully!');
+
+            // Show success toast
+            formErrorHandler.success({
+                operation: 'delete',
+                entity: 'inventory',
+            });
         },
         onError: (error: unknown) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
-
-            if (validationErrors.length > 0) {
-                toast.error(
-                    `Failed to delete inventory item: ${friendlyMessage}`,
-                    {
-                        description: validationErrors.join(', '),
-                    }
-                );
-            } else {
-                toast.error(
-                    `Failed to delete inventory item: ${friendlyMessage}`
-                );
-            }
+            // Show error toast
+            formErrorHandler.deleteInventory(error);
         },
     });
 

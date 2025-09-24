@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useCartQueries } from '@/hooks/queries/useCart';
 import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
+import type { CartItem } from '@/types/cart';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 import CartHeader from '@/components/cart/CartHeader';
 import CartTable from '@/components/cart/CartTable';
 import CartSummary from '@/components/cart/CartSummary';
@@ -8,7 +11,6 @@ import CartActions from '@/components/cart/CartActions';
 import CartNotes from '@/components/cart/CartNotes';
 import CartCheckoutDialog from '@/components/cart/CartCheckoutDialog';
 import CartEmpty from '@/components/cart/CartEmpty';
-import CartError from '@/components/cart/CartError';
 import CartSkeleton from '@/components/cart/CartSkeleton';
 
 export default function Cart() {
@@ -21,26 +23,24 @@ export default function Cart() {
         updateItemMutation,
         clearCartMutation,
         submitCartAsRequestMutation,
-    } = useCartQueries();
+    } = useCartQueries(true); // Always enabled for cart page
 
-    const cartItems = cartItemsQuery.data || [];
+    const cartItems = (cartItemsQuery.data || []) as CartItem[];
     const isLoading = cartItemsQuery.isLoading;
     const error = cartItemsQuery.error;
 
     // Calculate totals
-    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const totalItems = cartItems.reduce(
+        (sum: number, item: CartItem) => sum + item.quantity,
+        0
+    );
 
     const updateItemQuantity = (itemId: number, newQuantity: number) => {
-        // if (newQuantity <= 0) {
-        //     removeItem(itemId);  // Mixing business logic & UI ❌
-        //     return;
-        // }
-
         updateItemMutation.mutate({ itemId, quantity: newQuantity });
     };
 
     const removeItem = (itemId: number) => {
-        const item = cartItems.find(item => item.itemId === itemId);
+        const item = cartItems.find((item: CartItem) => item.itemId === itemId);
         if (item) {
             removeItemMutation.mutate({ itemId, quantity: item.quantity });
         }
@@ -71,12 +71,34 @@ export default function Cart() {
         return <CartSkeleton />;
     }
 
-    // Error state
+    // Error state - show inline error with retry option
     if (error) {
-        const apiError = formatApiError(error);
-        const friendlyMessage = getFriendlyErrorMessage(apiError);
-        
-        return <CartError friendlyMessage={friendlyMessage} handleRefreshCart={handleRefreshCart} />;
+        return (
+            <div className="space-y-6">
+                <div className="text-center py-12">
+                    <div className="text-red-500 text-6xl mb-4">⚠️</div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        Cart Loading Failed
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        Unable to load your cart. This might be a temporary
+                        issue.
+                    </p>
+                    <div className="flex gap-2 justify-center">
+                        <Button onClick={handleRefreshCart} variant="outline">
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Try Again
+                        </Button>
+                        <Button
+                            onClick={() => window.location.reload()}
+                            variant="default"
+                        >
+                            Refresh Page
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     // Empty cart state

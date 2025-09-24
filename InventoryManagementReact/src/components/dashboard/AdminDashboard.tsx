@@ -1,21 +1,22 @@
-import { AlertTriangle } from 'lucide-react';
-import { useAuthStore } from '@/stores/authStore';
-import { useGetProfile } from '@/hooks/queries/useProfile';
-import { useUnreadCount } from '@/hooks/queries/useNotification';
 import { useAdminDashboard } from '@/hooks/queries/useDashboard';
+import { useUnreadCount } from '@/hooks/queries/useNotification';
+import { useGetProfile } from '@/hooks/queries/useProfile';
+import { useAuthStore } from '@/stores/authStore';
+import { AlertTriangle } from 'lucide-react';
 import AdminNotificationSummary from '../admin-dashboard/AdminNotificationSummary';
+import AdminQuickActions from '../admin-dashboard/AdminQuickActions';
 import AdminRecentActivity from '../admin-dashboard/AdminRecentActivity';
+import AdminStatsGrid from '../admin-dashboard/AdminStatsGrid';
 import AdminSystemOverview from '../admin-dashboard/AdminSystemOverview';
 import AdminWelcomeSection from '../admin-dashboard/AdminWelcomeSection';
-import AdminStatsGrid from '../admin-dashboard/AdminStatsGrid';
-import AdminQuickActions from '../admin-dashboard/AdminQuickActions';
-import { RoleBasedQuickActions } from './RoleBasedQuickActions';
+import { useNavigate } from 'react-router-dom';
 
 export function AdminDashboard() {
     const { user } = useAuthStore();
     const { data: profile } = useGetProfile();
     const { data: unreadCount = 0 } = useUnreadCount();
     const { data: dashboardData, isLoading, error } = useAdminDashboard();
+    const navigate = useNavigate();
 
     if (isLoading) {
         return (
@@ -45,7 +46,11 @@ export function AdminDashboard() {
 
     // Use real data from backend
     const stats = dashboardData?.stats || [];
-    const quickActions = dashboardData?.quickActions || [];
+    const quickActions =
+        dashboardData?.quickActions.map((act) => ({
+            ...act,
+            action: () => act?.href && navigate(act?.href),
+        })) || [];
 
     return (
         <div className="space-y-6">
@@ -59,7 +64,6 @@ export function AdminDashboard() {
             {stats.length > 0 && <AdminStatsGrid stats={stats} />}
 
             {/* Quick Actions */}
-            <RoleBasedQuickActions />
             {quickActions.length > 0 && (
                 <AdminQuickActions quickActions={quickActions} />
             )}

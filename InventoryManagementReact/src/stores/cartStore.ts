@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { cartApi } from '@/api/cart';
 import type { CartItem } from '@/types/cart';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface CartState {
     cartItems: CartItem[];
@@ -21,12 +22,15 @@ export const useCartStore = create<CartState>()(
             cartItems: [],
             totalItems: 0,
             isLoading: false,
-            
+
             setCartItems: (items) => {
-                const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+                const totalItems = items.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0
+                );
                 set({ cartItems: items, totalItems });
             },
-            
+
             addItem: async (itemId, quantity) => {
                 set({ isLoading: true });
                 try {
@@ -38,7 +42,7 @@ export const useCartStore = create<CartState>()(
                     set({ isLoading: false });
                 }
             },
-            
+
             removeItem: async (itemId, quantity) => {
                 set({ isLoading: true });
                 try {
@@ -50,7 +54,7 @@ export const useCartStore = create<CartState>()(
                     set({ isLoading: false });
                 }
             },
-            
+
             updateQuantity: async (itemId, quantity) => {
                 set({ isLoading: true });
                 try {
@@ -66,7 +70,7 @@ export const useCartStore = create<CartState>()(
                     set({ isLoading: false });
                 }
             },
-            
+
             clearCart: async () => {
                 set({ isLoading: true });
                 try {
@@ -78,12 +82,15 @@ export const useCartStore = create<CartState>()(
                     set({ isLoading: false });
                 }
             },
-            
+
             fetchCart: async () => {
                 set({ isLoading: true });
                 try {
                     const items = await cartApi.getCart();
-                    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+                    const totalItems = items.reduce(
+                        (sum, item) => sum + item.quantity,
+                        0
+                    );
                     set({ cartItems: items, totalItems });
                 } catch (error) {
                     // Failed to fetch cart

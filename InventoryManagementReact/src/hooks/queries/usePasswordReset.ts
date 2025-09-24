@@ -6,36 +6,19 @@ import type {
     PasswordResetResponse,
     PasswordChangeResponse,
 } from '@/types/passwordReset';
-import {
-    formatApiError,
-    getFriendlyErrorMessage,
-    formatValidationErrors,
-} from '@/lib/error-utils';
-import { toast } from 'sonner';
+import { passwordErrorHandler } from '@/lib/passwordErrorHandler';
 
 // Hook for requesting password reset
 export function useRequestPasswordReset() {
     return useMutation<PasswordResetResponse, Error, PasswordResetRequest>({
         mutationFn: passwordResetApi.requestPasswordReset,
+        onSuccess: () => {
+            passwordErrorHandler.success({
+                operation: 'reset',
+            });
+        },
         onError: (error: any) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
-
-            if (validationErrors.length > 0) {
-                toast.error(
-                    `Failed to send password reset email: ${friendlyMessage}`,
-                    {
-                        description: validationErrors.join(', '),
-                    }
-                );
-            } else {
-                toast.error(
-                    `Failed to send password reset email: ${friendlyMessage}`
-                );
-            }
+            passwordErrorHandler.resetPassword(error);
         },
     });
 }
@@ -44,20 +27,13 @@ export function useRequestPasswordReset() {
 export function useResetPassword() {
     return useMutation<PasswordChangeResponse, Error, PasswordChangeRequest>({
         mutationFn: passwordResetApi.resetPassword,
+        onSuccess: () => {
+            passwordErrorHandler.success({
+                operation: 'reset',
+            });
+        },
         onError: (error: any) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
-
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to reset password: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to reset password: ${friendlyMessage}`);
-            }
+            passwordErrorHandler.resetPassword(error);
         },
     });
 }

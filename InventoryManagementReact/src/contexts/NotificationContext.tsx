@@ -44,7 +44,7 @@ function notificationReducer(
                     (n) => n.id.toString() !== action.payload
                 ),
                 unreadCount:
-                    notificationToRemove && !notificationToRemove.isRead
+                    notificationToRemove && !notificationToRemove.read
                         ? state.unreadCount - 1
                         : state.unreadCount,
             };
@@ -54,7 +54,7 @@ function notificationReducer(
                 ...state,
                 notifications: state.notifications.map((n) =>
                     n.id.toString() === action.payload
-                        ? { ...n, isRead: true }
+                        ? { ...n, read: true }
                         : n
                 ),
                 unreadCount: Math.max(0, state.unreadCount - 1),
@@ -78,7 +78,7 @@ function notificationReducer(
             return {
                 ...state,
                 notifications: action.payload,
-                unreadCount: action.payload.filter((n) => !n.isRead).length,
+                unreadCount: action.payload.filter((n) => !n.read).length,
             };
         default:
             return state;
@@ -96,7 +96,7 @@ export function NotificationProvider({
     children: React.ReactNode;
 }) {
     const [state, dispatch] = useReducer(notificationReducer, initialState);
-    const { connectionState, } = useWebSocketNotification();
+    const { connectionState } = useWebSocketNotification();
     const queryClient = useQueryClient();
 
     // Update connection state in context
@@ -108,9 +108,7 @@ export function NotificationProvider({
     }, [connectionState.connected]);
 
     // Connect on mount
-    useEffect(() => {
-        
-    }, []);
+    useEffect(() => {}, []);
 
     const addNotification = useCallback(
         (notification: Omit<Notification, 'id' | 'createdAt'>) => {
@@ -180,7 +178,7 @@ export function createNotification(
         type,
         title,
         message,
-        isRead: false,
+        read: false,
         requestId,
         itemId,
     };

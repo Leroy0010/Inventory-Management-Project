@@ -1,0 +1,46 @@
+module.exports = {
+    plugins: {
+        '@tailwindcss/postcss': {},
+        autoprefixer: {
+            flexbox: 'no-2009',
+            grid: 'autoplace',
+        },
+        ...(process.env.NODE_ENV === 'production' && {
+            cssnano: {
+                preset: [
+                    'default',
+                    {
+                        discardComments: { removeAll: true },
+                        normalizeWhitespace: true,
+                        colormin: true,
+                        minifyFontValues: true,
+                        minifySelectors: true,
+                        mergeLonghand: true,
+                        mergeRules: true,
+                        minifyGradients: true,
+                        normalizeUrl: true,
+                        orderedValues: true,
+                        reduceIdents: true,
+                        svgo: true,
+                        uniqueSelectors: true,
+                        zindex: false,
+                        reduceTransforms: true,
+                        convertValues: true,
+                        discardDuplicates: true,
+                        discardEmpty: true,
+                        discardOverridden: true,
+                        discardUnused: true,
+                        mergeIdents: true,
+                        normalizeDisplayValues: true,
+                        normalizePositions: true,
+                        normalizeRepeatStyle: true,
+                        normalizeString: true,
+                        normalizeTimingFunctions: true,
+                        normalizeUnicode: true,
+                        reduceInitial: true,
+                    },
+                ],
+            },
+        }),
+    },
+};

@@ -1,79 +1,81 @@
+import type { RequestStatus } from "./request";
+
 // Dashboard types for React app
 export interface DashboardStats {
-  title: string;
-  value: string;
-  change: string;
-  icon: string;
-  color: string;
+    title: string;
+    value: string;
+    change: string;
+    icon: string;
+    color: string;
 }
 
 export interface QuickAction {
-  title: string;
-  description: string;
-  icon: string;
-  color: string;
-  href?: string;
-  action?: () => void;
+    title: string;
+    description: string;
+    icon: string;
+    color: string;
+    href?: string;
+    action?: () => void;
 }
 
 export interface RecentRequest {
-  id: number;
-  staffName: string;
-  itemName: string;
-  status: string;
-  createdAt: string;
-  timeAgo: string;
-  quantity: number;
+    id: number;
+    staffName: string;
+    itemName: string;
+    status: RequestStatus;
+    createdAt: string; // ISO string from LocalDateTime
+    timeAgo: string;
+    quantity: number;
 }
 
 export interface CartItem {
-  id: number;
-  name: string;
-  quantity: number;
+    id: number;
+    name: string;
+    quantity: number;
 }
 
 export interface SystemHealth {
-  status: string;
-  database: string;
-  cache: string;
-  uptime: string;
+    status: string;
+    database: string;
+    cache: string;
+    uptime: string;
 }
 
 export interface DepartmentOverview {
-  totalStaff: number;
-  totalItems: number;
-  pendingRequests: number;
-  lowStockItems: number;
+    totalStaff: number;
+    inventoryItems: number;
+    pendingRequests: number;
+    lowStockItems: number;
 }
 
 export interface AdminDashboard {
-  welcomeMessage: string;
-  role: string;
-  stats: DashboardStats[];
-  quickActions: QuickAction[];
-  systemHealth: SystemHealth;
-  unreadNotifications: number;
+    welcomeMessage: string;
+    role: string;
+    stats: DashboardStats[];
+    quickActions: QuickAction[];
+    systemHealth: SystemHealth;
+    unreadNotifications: number;
 }
 
 export interface StorekeeperDashboard {
-  welcomeMessage: string;
-  role: string;
-  departmentName: string;
-  stats: DashboardStats[];
-  quickActions: QuickAction[];
-  recentRequests: RecentRequest[];
-  departmentOverview: DepartmentOverview;
-  unreadNotifications: number;
+    welcomeMessage: string;
+    role: string;
+    departmentName: string;
+    stats: DashboardStats[];
+    quickActions: QuickAction[];
+    recentRequests: RecentRequest[];
+    departmentOverview: DepartmentOverview;
+    unreadNotifications: number;
 }
 
 export interface StaffDashboard {
-  welcomeMessage: string;
-  role: string;
-  officeName: string;
-  stats: DashboardStats[];
-  quickActions: QuickAction[];
-  recentRequests: RecentRequest[];
-  cartItems: CartItem[];
-  cartTotal: number;
-  unreadNotifications: number;
+    welcomeMessage: string;
+    role: string;
+    officeName: string;
+    stats: DashboardStats[];
+    quickActions: QuickAction[];
+    recentRequests: RecentRequest[];
+    cartItems: CartItem[];
+    cartTotal: number;
+    unreadNotifications: number;
 }

@@ -24,6 +24,7 @@ export function useAuthQueries() {
         clearUser,
         setError,
         clearError,
+        logout
     } = useAuthStore();
 
     // Get current user profile
@@ -101,6 +102,7 @@ export function useAuthQueries() {
             // Even if logout fails on server, clear local state
             
             clearUser()
+            logout()
             queryClient.clear();
         },
     });

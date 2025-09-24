@@ -18,8 +18,8 @@ export const notificationApi = {
         const params = new URLSearchParams();
 
         if (filters?.type) params.append('type', filters.type);
-        if (filters?.isRead !== undefined)
-            params.append('isRead', filters.isRead.toString());
+        if (filters?.read !== undefined)
+            params.append('isRead', filters.read.toString());
         if (filters?.search) params.append('search', filters.search);
         if (pagination?.page) params.append('page', pagination.page.toString());
         if (pagination?.size) params.append('size', pagination.size.toString());

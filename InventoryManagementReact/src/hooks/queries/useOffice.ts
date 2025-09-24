@@ -6,12 +6,7 @@ import type {
     UpdateOfficeRequest,
     OfficeFilters,
 } from '@/types/office';
-import { toast } from 'sonner';
-import {
-    formatApiError,
-    getFriendlyErrorMessage,
-    formatValidationErrors,
-} from '@/lib/error-utils';
+import { formErrorHandler } from '@/lib/formErrorHandler';
 
 // Query keys
 export const officeKeys = {
@@ -58,25 +53,20 @@ export const useCreateOffice = () => {
     return useMutation({
         mutationFn: (office: CreateOfficeRequest) =>
             officeApi.createOffice(office),
-        onSuccess: () => {
+        onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: officeKeys.lists() });
             queryClient.invalidateQueries({ queryKey: officeKeys.names() });
-            toast.success('Office created successfully');
-        },
-        onError: (error: Error) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
 
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to create office: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to create office: ${friendlyMessage}`);
-            }
+            // Show success toast
+            formErrorHandler.success({
+                operation: 'create',
+                entity: 'office',
+                entityName: variables.name,
+            });
+        },
+        onError: (error: Error, variables) => {
+            // Show error toast with context
+            formErrorHandler.createOffice(error, variables.name);
         },
     });
 };
@@ -88,26 +78,22 @@ export const useUpdateOffice = () => {
     return useMutation({
         mutationFn: ({ id, data }: { id: number; data: UpdateOfficeRequest }) =>
             officeApi.updateOffice(id, data),
-        onSuccess: (_, { id }) => {
+        onSuccess: (data, { id }) => {
             queryClient.invalidateQueries({ queryKey: officeKeys.lists() });
             queryClient.invalidateQueries({ queryKey: officeKeys.detail(id) });
             queryClient.invalidateQueries({ queryKey: officeKeys.names() });
-            toast.success('Office updated successfully');
-        },
-        onError: (error: Error) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
 
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to update office: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to update office: ${friendlyMessage}`);
-            }
+            // Show success toast
+            formErrorHandler.success({
+                operation: 'update',
+                entity: 'office',
+                entityName: data.name,
+                entityId: data.id,
+            });
+        },
+        onError: (error: Error, variables) => {
+            // Show error toast with context
+            formErrorHandler.createOffice(error, variables.data.name);
         },
     });
 };
@@ -121,22 +107,16 @@ export const useDeleteOffice = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: officeKeys.lists() });
             queryClient.invalidateQueries({ queryKey: officeKeys.names() });
-            toast.success('Office deleted successfully');
+
+            // Show success toast
+            formErrorHandler.success({
+                operation: 'delete',
+                entity: 'office',
+            });
         },
         onError: (error: Error) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
-
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to delete office: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to delete office: ${friendlyMessage}`);
-            }
+            // Show error toast
+            formErrorHandler.createOffice(error);
         },
     });
 };

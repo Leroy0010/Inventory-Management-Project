@@ -9,7 +9,7 @@ export interface CreateBatchDto {
 export interface InventoryBatch {
     id: number;
     quantity: number;
-    totalPrice: number;
+    unitPrice: number;
     supplierName?: string;
     invoiceId?: string;
     remainingQuantity: number;

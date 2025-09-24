@@ -23,6 +23,9 @@ export default function CartNotes() {
                 <p>
                     • Contact your storekeeper if you have any questions
                 </p>
+                <p>
+                    • Kindly fulfill the request when items get delivered
+                </p>
             </CardContent>
         </Card>
     );

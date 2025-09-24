@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { ImageUploadPreview } from './image-upload/ImageUploadPreview';
@@ -61,6 +61,20 @@ export function ImageUpload({
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Reset internal state when value becomes null
+    useEffect(() => {
+        if (value === null) {
+            setPreview(null);
+            setError(null);
+            setUploadProgress(0);
+            setIsUploading(false);
+            setIsUploaded(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    }, [value]);
+
     // Handle file validation
     const validateFile = useCallback(
         (file: File): string | null => {
@@ -103,7 +117,7 @@ export function ImageUpload({
 
             // Start upload simulation
             const uploadSuccess = await simulateUpload(file);
-            
+
             if (uploadSuccess) {
                 onChange(file);
             } else {
@@ -185,7 +199,7 @@ export function ImageUpload({
         try {
             // Simulate network delay based on file size
             const baseDelay = 200; // Base delay in ms
-            const sizeDelay = Math.min(file.size / (1024 * 1024) * 50, 1000); // Max 1s additional delay
+            const sizeDelay = Math.min((file.size / (1024 * 1024)) * 50, 1000); // Max 1s additional delay
             const totalDelay = baseDelay + sizeDelay;
 
             // Simulate realistic upload progress with varying speeds
@@ -211,21 +225,25 @@ export function ImageUpload({
                     'Upload failed: Server error',
                     'Upload failed: File too large',
                     'Upload failed: Invalid file format',
-                    'Upload failed: Connection lost'
+                    'Upload failed: Connection lost',
                 ];
-                const randomError = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+                const randomError =
+                    errorMessages[
+                        Math.floor(Math.random() * errorMessages.length)
+                    ];
                 throw new Error(randomError);
             }
 
             // Simulate server processing time
             await new Promise((resolve) => setTimeout(resolve, 300));
-            
+
             setIsUploading(false);
             setIsUploaded(true);
             onUploadComplete?.(file);
             return true;
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+            const errorMessage =
+                error instanceof Error ? error.message : 'Upload failed';
             setError(errorMessage);
             onError?.(errorMessage);
             onUploadError?.(errorMessage);
@@ -318,10 +336,7 @@ export function ImageUpload({
                 accept={acceptedTypes.join(',')}
             />
 
-            <ImageUploadError
-                error={error}
-                onRetry={retryUpload}
-            />
+            <ImageUploadError error={error} onRetry={retryUpload} />
 
             <ImageUploadProgress
                 isUploading={isUploading}

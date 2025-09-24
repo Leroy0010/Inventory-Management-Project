@@ -23,7 +23,7 @@ export default function StorekeeperReportSection() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Button
                         variant="outline"
                         className="h-auto p-4 flex flex-col items-center gap-2"

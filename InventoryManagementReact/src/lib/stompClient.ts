@@ -46,7 +46,7 @@ export class StompNotificationClient {
                     ),
                 debug: this.config.debug || (() => {}),
                 onConnect: (frame) => {
-                    console.log("✅ STOMP Connected:", frame);
+                    // console.log("✅ STOMP Connected:", frame);
                     this.isConnected = true;
                     this.reconnectAttempts = 0;
                     this.config.onConnect?.(frame);
@@ -73,7 +73,7 @@ export class StompNotificationClient {
                     this.handleReconnect();
                 },
                 onDisconnect: () => {
-                    console.log("⚠️ STOMP Disconnected");
+                    // console.log("⚠️ STOMP Disconnected");
                     this.isConnected = false;
                     this.config.onDisconnect?.();
                 },
@@ -86,9 +86,9 @@ export class StompNotificationClient {
     private handleReconnect() {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
-            console.log(
-                `🔄 Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`
-            );
+            // console.log(
+            //     `🔄 Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`
+            // );
 
             setTimeout(() => {
                 this.connect().catch(() => {
@@ -96,7 +96,7 @@ export class StompNotificationClient {
                 });
             }, this.reconnectDelay * this.reconnectAttempts);
         } else {
-            console.error("❌ Max reconnection attempts reached");
+            // console.error("❌ Max reconnection attempts reached");
         }
     }
 
@@ -119,7 +119,7 @@ export class StompNotificationClient {
             const s = this.client.subscribe(destination, handler);
             this.subscriptions.set(id, s);
         } else {
-            console.log("⏳ Connection not ready, queueing subscription:", destination);
+            // console.log("⏳ Connection not ready, queueing subscription:", destination);
             this.pendingSubscriptions.push({ destination, handler, id });
         }
 

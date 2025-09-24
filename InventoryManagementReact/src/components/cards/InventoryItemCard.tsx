@@ -10,10 +10,12 @@ import {
     Package,
     AlertTriangle,
     RefreshCw,
+    Minus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { InventoryItemResponseDto } from '@/types/inventoryItem';
-import { useCartQueries } from '@/hooks/queries/useCart';
+import { useCartQueries, useIsItemInCart } from '@/hooks/queries/useCart';
+import { useAuthStore } from '@/stores/authStore';
 import {
     formatApiError,
     getFriendlyErrorMessage,
@@ -41,41 +43,32 @@ const InventoryItemCard = memo(function InventoryItemCard({
     className,
 }: InventoryItemCardProps) {
     const [isHovered, setIsHovered] = useState(false);
-    const { addItemMutation } = useCartQueries();
+    const { user } = useAuthStore();
+    const { addItemMutation, removeItemMutation } = useCartQueries(
+        user?.role === 'STAFF'
+    );
+    const {
+        isInCart,
+        cartItem,
+        isLoading: isCartLoading,
+    } = useIsItemInCart(item.id, user?.role === 'STAFF');
 
     const needsReorder = item.quantity <= item.reorderLevel;
 
-    const handleAddToCart = () => {
+    const handleToggleCart = () => {
         if (onAddToCart) {
             onAddToCart(item);
         } else {
-            // Default cart functionality with error handling
-            addItemMutation.mutate(
-                { itemId: item.id, quantity: 1 },
-                {
-                    onError: (error: unknown) => {
-                        const apiError = formatApiError(error);
-                        const friendlyMessage =
-                            getFriendlyErrorMessage(apiError);
-                        const validationErrors = formatValidationErrors(
-                            apiError.details || null
-                        );
-
-                        if (validationErrors.length > 0) {
-                            toast.error(
-                                `Failed to add ${item.name} to cart: ${friendlyMessage}`,
-                                {
-                                    description: validationErrors.join(', '),
-                                }
-                            );
-                        } else {
-                            toast.error(
-                                `Failed to add ${item.name} to cart: ${friendlyMessage}`
-                            );
-                        }
-                    },
-                }
-            );
+            if (isInCart) {
+                // Remove from cart
+                removeItemMutation.mutate({
+                    itemId: item.id,
+                    quantity: cartItem?.quantity || 1,
+                });
+            } else {
+                // Add to cart
+                addItemMutation.mutate({ itemId: item.id, quantity: 1 });
+            }
         }
     };
 
@@ -113,7 +106,7 @@ const InventoryItemCard = memo(function InventoryItemCard({
         >
             {/* Image Container */}
             <div className="relative p-4 pb-2">
-                <div className="relative w-full h-[140px] bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                <div className="relative w-full h-40 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
                     {item.imagePath ? (
                         <img
                             src={item.imagePath}
@@ -140,22 +133,30 @@ const InventoryItemCard = memo(function InventoryItemCard({
 
             {/* Content Container */}
             <CardContent className="flex-1 flex flex-col p-4 pt-2">
-                {/* Item ID */}
-                <div className="text-center mb-2">
-                    <Badge variant="secondary" className="text-xs font-medium">
-                        ID: {item.id}
-                    </Badge>
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-3">
+                    <div className="flex items-center justify-center space-x-4 text-sm">
+                        {/* Item ID */}
+                        <Badge
+                            variant="secondary"
+                            className="text-xs font-medium"
+                        >
+                            ID: {item.id}
+                        </Badge>
+                        <div className="text-gray-300 dark:text-gray-600">
+                            |
+                        </div>
+
+                        {/* Unit */}
+                        <p className="text-sm text-gray-600 dark:text-gray-400 text-center italic mb-3">
+                            {item.unit}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Item Name */}
                 <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 text-center mb-1 line-clamp-2">
                     {item.name}
                 </h3>
-
-                {/* Unit */}
-                <p className="text-sm text-gray-600 dark:text-gray-400 text-center italic mb-3">
-                    {item.unit}
-                </p>
 
                 {/* Storekeeper Fields */}
                 {isStorekeeperView && (
@@ -218,21 +219,40 @@ const InventoryItemCard = memo(function InventoryItemCard({
                             </Button>
                         </div>
                     ) : (
-                        // Staff Add to Cart Button
+                        // Staff Toggle Cart Button
                         <Button
-                            onClick={handleAddToCart}
-                            disabled={addItemMutation.isPending}
-                            className="w-full bg-green-500 hover:bg-green-600"
+                            onClick={handleToggleCart}
+                            disabled={
+                                addItemMutation.isPending ||
+                                removeItemMutation.isPending ||
+                                isCartLoading
+                            }
+                            className={cn(
+                                'w-full transition-colors duration-200',
+                                isInCart
+                                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                                    : 'bg-green-500 hover:bg-green-600 text-white'
+                            )}
                         >
-                            {addItemMutation.isPending ? (
+                            {addItemMutation.isPending ||
+                            removeItemMutation.isPending ? (
                                 <>
                                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                                    Adding...
+                                    {isInCart ? 'Removing...' : 'Adding...'}
                                 </>
                             ) : (
                                 <>
-                                    <ShoppingCart className="h-4 w-4 mr-2" />
-                                    Add to Cart
+                                    {isInCart ? (
+                                        <>
+                                            <Minus className="h-4 w-4 mr-2" />
+                                            Remove from Cart
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ShoppingCart className="h-4 w-4 mr-2" />
+                                            Add to Cart
+                                        </>
+                                    )}
                                 </>
                             )}
                         </Button>

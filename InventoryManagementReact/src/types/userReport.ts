@@ -1,6 +1,6 @@
 export interface UserReportItemDto {
-    inventoryCode: number; // Item ID
-    inventoryName: string;
+    itemId: number;
+    itemName: string;
     unit: string;
     quantityReceived: number;
 }
@@ -8,28 +8,30 @@ export interface UserReportItemDto {
 export interface UserReportRequest {
     userId?: number;
     year?: number;
+    startDate?: string; // ISO date string
+    endDate?: string; // ISO date string
 }
 
 export interface UserReportFilters {
-    search?: string; // Search by user name or email
+    userId?: number; // Filter by specific user ID
     year?: number;
-    sortBy?: 'userName' | 'quantityReceived' | 'inventoryCode';
+    startDate?: string;
+    endDate?: string;
+    sortBy?: 'itemId' | 'itemName' | 'quantityReceived';
     sortOrder?: 'asc' | 'desc';
 }
 
-export interface UserReportSummary {
-    userId: number;
-    userName: string;
-    userEmail: string;
-    officeName: string; // Changed from departmentName to officeName
-    totalItemsReceived: number;
-    totalQuantityReceived: number;
-    items: UserReportItemDto[];
+export interface UserDetailsDto {
+    id: number;
+    fullName: string;
+    email: string;
+    phone?: string;
+    officeName?: string;
 }
 
 export interface UserReportResponse {
-    summaries: UserReportSummary[];
-    totalUsers: number;
+    items: UserReportItemDto[];
+    userDetails: UserDetailsDto;
     totalItems: number;
     totalQuantity: number;
 }

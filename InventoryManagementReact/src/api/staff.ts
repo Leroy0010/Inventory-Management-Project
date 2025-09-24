@@ -56,7 +56,7 @@ export const staffApi = {
   // Toggle staff active status
   toggleStaffStatus: async (request: ToggleStaffStatusRequest): Promise<Staff> => {
     try {
-      return await api.put<Staff>('/user/update-status', request);
+      return await api.put<Staff>('/users/update-status', request);
     } catch (error) {
       throw new Error(handleApiError(error));
     }

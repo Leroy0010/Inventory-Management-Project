@@ -1,11 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { departmentApi } from '@/api/department';
-import { toast } from 'sonner';
-import {
-    formatApiError,
-    getFriendlyErrorMessage,
-    formatValidationErrors,
-} from '@/lib/error-utils';
+import { formErrorHandler } from '@/lib/formErrorHandler';
 
 // Query keys for departments
 export const departmentKeys = {
@@ -38,24 +33,19 @@ export const useDepartmentQueries = () => {
     // Create department mutation
     const createDepartmentMutation = useMutation({
         mutationFn: departmentApi.createDepartment,
-        onSuccess: () => {
+        onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: departmentKeys.lists() });
-            toast.success('Department created successfully!');
-        },
-        onError: (error: Error) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
 
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to create department: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to create department: ${friendlyMessage}`);
-            }
+            // Show success toast
+            formErrorHandler.success({
+                operation: 'create',
+                entity: 'department',
+                entityName: data.name,
+            });
+        },
+        onError: (error: Error, variables) => {
+            // Show error toast with context
+            formErrorHandler.createDepartment(error, variables.name);
         },
     });
 
@@ -63,24 +53,20 @@ export const useDepartmentQueries = () => {
     const updateDepartmentMutation = useMutation({
         mutationFn: ({ id, name }: { id: number; name: string }) =>
             departmentApi.updateDepartment(id, name),
-        onSuccess: () => {
+        onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: departmentKeys.lists() });
-            toast.success('Department updated successfully!');
-        },
-        onError: (error: Error) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
 
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to update department: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to update department: ${friendlyMessage}`);
-            }
+            // Show success toast
+            formErrorHandler.success({
+                operation: 'update',
+                entity: 'department',
+                entityName: data.name,
+                entityId: data.id,
+            });
+        },
+        onError: (error: Error, variables) => {
+            // Show error toast with context
+            formErrorHandler.createDepartment(error, variables.name);
         },
     });
 
@@ -89,22 +75,16 @@ export const useDepartmentQueries = () => {
         mutationFn: departmentApi.deleteDepartment,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: departmentKeys.lists() });
-            toast.success('Department deleted successfully!');
+
+            // Show success toast
+            formErrorHandler.success({
+                operation: 'delete',
+                entity: 'department',
+            });
         },
         onError: (error: Error) => {
-            const apiError = formatApiError(error);
-            const friendlyMessage = getFriendlyErrorMessage(apiError);
-            const validationErrors = formatValidationErrors(
-                apiError.details || null
-            );
-
-            if (validationErrors.length > 0) {
-                toast.error(`Failed to delete department: ${friendlyMessage}`, {
-                    description: validationErrors.join(', '),
-                });
-            } else {
-                toast.error(`Failed to delete department: ${friendlyMessage}`);
-            }
+            // Show error toast
+            formErrorHandler.createDepartment(error);
         },
     });
 
