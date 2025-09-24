@@ -12,3 +12,5 @@ databaseChangeLog:
       file: db/changelog/db.changelog-005-refresh-tokens.yaml
   - include:
       file: db/changelog/db.changelog-006-user-report-optimizations.yaml
+  - include:
+      file: db/changelog/db.changelog-007-alter-inventory-batches-table.yaml

@@ -25,8 +25,8 @@ spring:
                     google:
                         client-id: ${GOOGLE_CLIENT_ID}
                         client-secret: ${GOOGLE_CLIENT_SECRET}
-                        # Web application redirect URI
-                        redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:5173/auth/callback}
+                        # Spring Security OAuth2 callback URI
+                        redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
                         scope:
                             - email
                             - profile
@@ -42,17 +42,19 @@ spring:
                         user-name-attribute: email
     mail:
         host: ${MAIL_HOST:smtp.gmail.com}
-        port: ${MAIL_PORT:587}
+        port: ${MAIL_PORT:465}
         username: ${MAIL_USERNAME}
         password: ${MAIL_PASSWORD}
         properties:
             mail:
+                debug: true
                 smtp:
                     auth: ${MAIL_SMTP_AUTH:true}
                     starttls:
-                        enabled: ${MAIL_SMTP_STARTTLS_ENABLED:true}
-                        required: ${MAIL_SMTP_STARTTLS_REQUIRED:true}
+                        enabled: ${MAIL_SMTP_STARTTLS_ENABLED:false}
+                        required: ${MAIL_SMTP_STARTTLS_REQUIRED:false}
                     ssl:
+                        enable: true
                         protocols: ${MAIL_SMTP_SSL_PROTOCOLS:TLSv1.2}
                 test-connection: ${MAIL_TEST_CONNECTION:true} # You might want to set this to false for production if it causes issues on startup
     task:
@@ -65,9 +67,9 @@ spring:
 
 jwt:
     secret: ${JWT_SECRET}
-    expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
+    expiration: ${JWT_EXPIRATION:1800000} # 30 minutes in milliseconds
     refresh:
-        expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days in milliseconds
+        expiration: ${JWT_REFRESH_EXPIRATION:7200000} # 2 hours in milliseconds
         max-tokens-per-user: ${JWT_MAX_TOKENS_PER_USER:5}
     cookie:
         name: ${JWT_COOKIE_NAME:jwt}
@@ -97,7 +99,13 @@ app:
         base-url: ${FRONTEND_BASE_URL}
 
 google:
-  drive:
-    credentials-file: ${GOOGLE_DRIVE_CREDENTIALS}
-    root-folder-id: ${GOOGLE_DRIVE_FOLDER_ID}
+    drive:
+        credentials-classpath: ${GOOGLE_DRIVE_CREDENTIALS_CLASS_PATH:c:/run/secrets/credentials.json}
+        root-folder-id: ${GOOGLE_DRIVE_FOLDER_ID}
 
+aws:
+  s3:
+    bucket-name: ${AWS_S3_BUCKET_NAME}
+    region: ${AWS_S3_REGION}
+    access-key: ${AWS_S3_ACCESS_KEY}
+    secret-key: ${AWS_S3_SECRET_KEY}

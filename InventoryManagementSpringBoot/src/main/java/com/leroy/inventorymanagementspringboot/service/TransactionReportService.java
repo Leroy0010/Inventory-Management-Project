@@ -1,4 +1,4 @@
-package com.leroy.inventorymanagementspringboot.service.report;
+package com.leroy.inventorymanagementspringboot.service;
 
 import com.leroy.inventorymanagementspringboot.dto.TransactionReportDto;
 import com.leroy.inventorymanagementspringboot.dto.TransactionReportRequest;

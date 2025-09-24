@@ -5,19 +5,17 @@ import com.leroy.inventorymanagementspringboot.dto.request.RegisterStoreKeeperDt
 import com.leroy.inventorymanagementspringboot.dto.request.UpdatePasswordRequest;
 import com.leroy.inventorymanagementspringboot.dto.request.UpdateProfileRequest;
 import com.leroy.inventorymanagementspringboot.dto.response.UserResponseDto;
-import com.leroy.inventorymanagementspringboot.entity.Department;
-import com.leroy.inventorymanagementspringboot.entity.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
-import java.util.Optional;
+
 
 public interface UserServiceInterface {
-    User registerAdminOrStoreKeeperByAdmin(RegisterStoreKeeperDto registrationDto);
+    UserResponseDto registerAdminOrStoreKeeperByAdmin(RegisterStoreKeeperDto registrationDto);
 
-    User registerStaffByStoreKeeper(RegisterStaffDto registrationDto, UserDetails userDetails);
+    UserResponseDto registerStaffByStoreKeeper(RegisterStaffDto registrationDto, UserDetails userDetails);
 
-    Optional<List<UserResponseDto>> getUsers(Department department);
+    List<UserResponseDto> getUsers();
 
     void setStaffStatus(UserResponseDto staff);
     

@@ -13,43 +13,36 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserActivitySummaryDto {
-    
+
     // User counts
     private Integer totalUsers;
     private Integer activeUsers;
     private Integer inactiveUsers;
     private Integer staffUsers;
-    private Integer storekeeperUsers;
-    
+
     // Request counts
     private Integer totalRequestsSubmitted;
     private Integer totalRequestsApproved;
     private Integer totalRequestsRejected;
     private Integer totalRequestsFulfilled;
     private Integer pendingRequests;
-    
-    // Value totals
-    private BigDecimal totalValueRequested;
-    private BigDecimal totalValueApproved;
-    private BigDecimal totalValueRejected;
-    private BigDecimal totalValueFulfilled;
-    
+
+    // Removed value totals - using quantities only
+
     // Calculated metrics
     private Double averageRequestsPerUser;
     private Double overallApprovalRate;
     private Double overallRejectionRate;
     private Double overallFulfillmentRate;
-    
+
     // Top performers
     private List<TopRequesterDto> topRequesters;
-    private List<TopApproverDto> topApprovers;
     private List<OfficeActivityDto> officeActivity;
-    
+
     // Constructor for basic summary
     public UserActivitySummaryDto(Integer totalUsers, Integer activeUsers, Integer inactiveUsers,
-                                 Integer totalRequestsSubmitted, Integer totalRequestsApproved,
-                                 Integer totalRequestsRejected, Integer totalRequestsFulfilled,
-                                 BigDecimal totalValueRequested, BigDecimal totalValueApproved) {
+            Integer totalRequestsSubmitted, Integer totalRequestsApproved,
+            Integer totalRequestsRejected, Integer totalRequestsFulfilled) {
         this.totalUsers = totalUsers;
         this.activeUsers = activeUsers;
         this.inactiveUsers = inactiveUsers;
@@ -57,45 +50,33 @@ public class UserActivitySummaryDto {
         this.totalRequestsApproved = totalRequestsApproved;
         this.totalRequestsRejected = totalRequestsRejected;
         this.totalRequestsFulfilled = totalRequestsFulfilled;
-        this.totalValueRequested = totalValueRequested;
-        this.totalValueApproved = totalValueApproved;
-        
+
         // Calculate derived metrics
         this.averageRequestsPerUser = totalUsers > 0 ? (double) totalRequestsSubmitted / totalUsers : 0.0;
-        this.overallApprovalRate = totalRequestsSubmitted > 0 ? 
-            (double) totalRequestsApproved / totalRequestsSubmitted : 0.0;
-        this.overallRejectionRate = totalRequestsSubmitted > 0 ? 
-            (double) totalRequestsRejected / totalRequestsSubmitted : 0.0;
-        this.overallFulfillmentRate = totalRequestsApproved > 0 ? 
-            (double) totalRequestsFulfilled / totalRequestsApproved : 0.0;
+        this.overallApprovalRate = totalRequestsSubmitted > 0 ? (double) totalRequestsApproved / totalRequestsSubmitted
+                : 0.0;
+        this.overallRejectionRate = totalRequestsSubmitted > 0 ? (double) totalRequestsRejected / totalRequestsSubmitted
+                : 0.0;
+        this.overallFulfillmentRate = totalRequestsApproved > 0
+                ? (double) totalRequestsFulfilled / totalRequestsApproved
+                : 0.0;
     }
-    
+
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     public static class TopRequesterDto {
         private Integer userId;
-        private String userName;
+        private String fullName;
+        private String email;
         private String officeName;
         private Integer requestCount;
-        private BigDecimal totalValue;
+        private Integer itemCount; // Changed from totalValue to itemCount
         private Double approvalRate;
+        private Double fulfillmentRate;
     }
-    
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class TopApproverDto {
-        private Integer userId;
-        private String userName;
-        private String officeName;
-        private Integer approvalCount;
-        private Integer rejectionCount;
-        private Double approvalRate;
-    }
-    
+
     @Getter
     @Setter
     @AllArgsConstructor
@@ -105,7 +86,7 @@ public class UserActivitySummaryDto {
         private String officeName;
         private Integer userCount;
         private Integer requestCount;
-        private BigDecimal totalValue;
+        private Integer itemCount; // Changed from totalValue to itemCount
         private Double averageRequestsPerUser;
     }
 }

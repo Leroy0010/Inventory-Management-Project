@@ -17,6 +17,28 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                     unique: true
+              - column:
+                  name: description
+                  type: TEXT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: active
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
 
         - createTable:
             tableName: offices
@@ -52,6 +74,7 @@ databaseChangeLog:
         - addUniqueConstraint:
             tableName: offices
             columnNames: department_id, name
+            constraintName: uq_department_office_name
 
 
         - createTable:
@@ -137,6 +160,12 @@ databaseChangeLog:
                   type: TEXT
                   constraints:
                     nullable: true
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
 
 
         - createTable:

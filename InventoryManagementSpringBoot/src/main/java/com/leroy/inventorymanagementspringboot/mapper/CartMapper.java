@@ -12,6 +12,7 @@ import java.util.List;
 public interface CartMapper {
 
     @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "cartId", source = "id")
     CartResponseDto toCartResponseDto(Cart cart);
 
     @Mapping(target = "itemId", source = "inventoryItem.id")

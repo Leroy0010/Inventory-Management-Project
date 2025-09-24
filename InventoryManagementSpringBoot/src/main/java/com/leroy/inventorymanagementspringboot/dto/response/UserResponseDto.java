@@ -17,4 +17,5 @@ public class UserResponseDto {
     private String roleName;
     private String fullName;
     private String departmentName;
+    private String createdAt;
 }

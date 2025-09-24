@@ -23,7 +23,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional; // Import Optional
 import java.util.stream.Collectors;
 
 /**
@@ -174,9 +173,8 @@ public class RequestService implements RequestServiceInterface {
         // Set the collection of request items for the request. Using HashSet for unique items.
         request.setItems(new HashSet<>(requestItems));
 
-        // Notify the requester about the successful submission of their request.
-        notificationService
-                .notifyWithRequest(requester, "Request Submission", "Your request has been successfully submitted.", NotificationType.NEW_REQUEST, request, timestamp);
+        // Don't notify the requester of their own request submission
+        // They will only receive notifications when their request is approved/rejected/fulfilled
 
         // Log the initial status change (PENDING) in the request's history.
         requestStatusHistoryService.saveStatusChange(request, pendingStatus, requester, timestamp);
@@ -408,7 +406,7 @@ public class RequestService implements RequestServiceInterface {
 
         // Attempt to find a storekeeper in the user's department to notify about the new request.
         // User's department is obtained via their office, as staff users don't have a direct department field.
-        Optional<User> storekeeperOptional = userRepository.findByDepartmentAndRole(user.getOffice().getDepartment(), roleRepository.findByName("STOREKEEPER").orElseThrow());
+        var storekeeperOptional = userRepository.findByDepartmentAndRole(user.getOffice().getDepartment(), roleRepository.findByName("STOREKEEPER").orElseThrow());
 
         if (storekeeperOptional.isPresent()) {
             User storekeeper = storekeeperOptional.get();
@@ -424,10 +422,6 @@ public class RequestService implements RequestServiceInterface {
             // Log a warning if no storekeeper is found for the department.
             logger.warn("No storekeeper found in department {} to notify for new request.", user.getOffice().getDepartment().getName());
         }
-
-        // Notify the requester about the successful submission of their request.
-        notificationService
-                .notifyWithRequest(user, "Request Submission", "Your request has been successfully submitted.", NotificationType.NEW_REQUEST, request, request.getSubmittedAt());
 
         return response;
     }

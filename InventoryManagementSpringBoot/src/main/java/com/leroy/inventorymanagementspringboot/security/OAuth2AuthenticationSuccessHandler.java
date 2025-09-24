@@ -1,15 +1,7 @@
 package com.leroy.inventorymanagementspringboot.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leroy.inventorymanagementspringboot.entity.RefreshToken;
-import com.leroy.inventorymanagementspringboot.entity.User;
-import com.leroy.inventorymanagementspringboot.mapper.UserMapper;
-import com.leroy.inventorymanagementspringboot.repository.UserRepository;
-import com.leroy.inventorymanagementspringboot.service.RefreshTokenService;
-import com.leroy.inventorymanagementspringboot.util.CookieUtil;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +11,16 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.Map;
+import com.leroy.inventorymanagementspringboot.entity.RefreshToken;
+import com.leroy.inventorymanagementspringboot.entity.User;
+import com.leroy.inventorymanagementspringboot.repository.UserRepository;
+import com.leroy.inventorymanagementspringboot.service.CustomUserDetailService;
+import com.leroy.inventorymanagementspringboot.service.RefreshTokenService;
+import com.leroy.inventorymanagementspringboot.util.CookieUtil;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
@@ -31,8 +31,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
     private final CookieUtil cookieUtil;
-    private final UserMapper userMapper;
-    private final ObjectMapper objectMapper;
+    private final CustomUserDetailService userDetailsService;
 
     @Value("${app.frontend.base-url:http://localhost:5173}")
     private String frontendBaseUrl;
@@ -42,14 +41,12 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             JwtUtil jwtUtil,
             RefreshTokenService refreshTokenService,
             CookieUtil cookieUtil,
-            UserMapper userMapper,
-            ObjectMapper objectMapper) {
+            CustomUserDetailService userDetailsService) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.refreshTokenService = refreshTokenService;
         this.cookieUtil = cookieUtil;
-        this.userMapper = userMapper;
-        this.objectMapper = objectMapper;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -58,8 +55,6 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         try {
             OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
             String email = oauth2User.getAttribute("email");
-            String name = oauth2User.getAttribute("name");
-            String picture = oauth2User.getAttribute("picture");
 
             logger.info("OAuth2 authentication successful for user: {}", email);
 
@@ -67,8 +62,11 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
+            // Load user details properly using CustomUserDetailService
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
             // Generate JWT token
-            String jwt = jwtUtil.generateToken((UserDetails) user);
+            String jwt = jwtUtil.generateToken(userDetails);
 
             // Create refresh token
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
@@ -77,41 +75,19 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             cookieUtil.createJwtCookie(response, jwt, jwtUtil.getJwtExpirationSeconds());
             cookieUtil.createRefreshTokenCookie(response, refreshToken.getToken(), jwtUtil.getRefreshTokenExpirationSeconds());
 
-            // Create response data
-            Map<String, Object> responseData = Map.of(
-                    "success", true,
-                    "message", "Authentication successful",
-                    "user", userMapper.toAuthenticationResponse(user)
-            );
+            // Redirect to React app with success
+            String redirectUrl = frontendBaseUrl + "/login?google_auth=success";
+            response.sendRedirect(redirectUrl);
 
-            // Set response headers for security
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            
-            // Add security headers
-            response.setHeader("X-Content-Type-Options", "nosniff");
-            response.setHeader("X-Frame-Options", "DENY");
-            response.setHeader("X-XSS-Protection", "1; mode=block");
-            response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-
-            // Write response
-            objectMapper.writeValue(response.getWriter(), responseData);
-
-            logger.info("OAuth2 authentication completed successfully for user: {}", email);
+            logger.info("OAuth2 authentication completed successfully for user: {}, redirected to: {}", email, redirectUrl);
 
         } catch (Exception e) {
             logger.error("OAuth2 authentication failed: {}", e.getMessage(), e);
             
-            // Create error response
-            Map<String, Object> errorResponse = Map.of(
-                    "success", false,
-                    "message", "Authentication failed: " + e.getMessage()
-            );
-
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            objectMapper.writeValue(response.getWriter(), errorResponse);
+            // Redirect to React app with error
+            String redirectUrl = frontendBaseUrl + "/login?google_auth=error&message=" + 
+                java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
+            response.sendRedirect(redirectUrl);
         }
     }
 }

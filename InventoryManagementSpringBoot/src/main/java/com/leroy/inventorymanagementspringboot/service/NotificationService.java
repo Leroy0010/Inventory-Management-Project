@@ -97,9 +97,21 @@ public class NotificationService implements NotificationServiceInterface {
     public void markAsRead(Long id) {
         notificationRepository.findById(id).ifPresent(notification -> {
             notification.setRead(true);
-            notificationRepository.save(notification);
+            Notification savedNotification = notificationRepository.save(notification);
+            
+            // Broadcast the update via WebSocket
+            WebSocketNotificationDto socketDto = new WebSocketNotificationDto(
+                    savedNotification.getId(),
+                    savedNotification.getTitle(),
+                    savedNotification.getMessage(),
+                    savedNotification.isRead(),
+                    savedNotification.getType(),
+                    savedNotification.getRequest() != null ? savedNotification.getRequest().getId() : null,
+                    savedNotification.getInventoryItem() != null ? savedNotification.getInventoryItem().getId() : null,
+                    savedNotification.getCreatedAt()
+            );
+            messagingTemplate.convertAndSend("/topic/notifications/user-" + savedNotification.getUser().getId(), socketDto);
         });
-
     }
 
     @Override
@@ -112,6 +124,19 @@ public class NotificationService implements NotificationServiceInterface {
             notification.setRead(true);
             notificationRepository.save(notification);
         });
+        
+        // Broadcast the update via WebSocket for all notifications
+        WebSocketNotificationDto socketDto = new WebSocketNotificationDto(
+                null, // null ID indicates bulk update
+                "All notifications marked as read",
+                "All your notifications have been marked as read",
+                true,
+                NotificationType.GENERAL,
+                null,
+                null,
+                new Timestamp(System.currentTimeMillis())
+        );
+        messagingTemplate.convertAndSend("/topic/notifications/user-" + user.getId(), socketDto);
     }
 
     @Override

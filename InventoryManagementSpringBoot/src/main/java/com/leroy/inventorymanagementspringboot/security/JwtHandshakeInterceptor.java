@@ -1,5 +1,6 @@
 package com.leroy.inventorymanagementspringboot.security;
 
+import com.leroy.inventorymanagementspringboot.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,14 +12,17 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     private static final Logger logger = LogManager.getLogger(JwtHandshakeInterceptor.class);
     private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
 
-    public JwtHandshakeInterceptor(JwtUtil jwtUtil) {
+    public JwtHandshakeInterceptor(JwtUtil jwtUtil, CookieUtil cookieUtil) {
         this.jwtUtil = jwtUtil;
+        this.cookieUtil = cookieUtil;
     }
 
     @Override
@@ -27,24 +31,40 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) {
 
+        logger.debug("WebSocket handshake attempt from: {}", request.getRemoteAddress());
+
         if (request instanceof ServletServerHttpRequest servletRequest) {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
-            String authHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
 
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                logger.error("❌ WebSocket handshake failed: Missing or malformed Authorization header");
+            // 1. Try Authorization header
+            String token = null;
+            String authHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+                logger.debug("JWT found in Authorization header, length: {}", token.length());
+            }
+
+            // 2. If no header, try JWT cookie
+            if (token == null) {
+                Optional<String> jwtFromCookie = cookieUtil.getJwtFromCookie(httpRequest);
+                if (jwtFromCookie.isPresent()) {
+                    token = jwtFromCookie.get();
+                    logger.debug("JWT found in cookie, length: {}", token.length());
+                }
+            }
+
+            if (token == null) {
+                logger.error("❌ WebSocket handshake failed: No JWT found in header or cookie");
                 return false;
             }
 
-            String token = authHeader.substring(7);
-
             try {
                 String username = jwtUtil.extractUsername(token);
-                // Just check if it's valid — no UserDetails needed here
-                jwtUtil.extractAllClaims(token); // Ensures token is valid and not expired
+                jwtUtil.extractAllClaims(token); // validate (throws if invalid/expired)
 
                 logger.info("✅ WebSocket handshake passed for user: {}", username);
                 attributes.put("username", username);
+                attributes.put("userId", username); // Add userId for potential use
                 return true;
 
             } catch (Exception e) {

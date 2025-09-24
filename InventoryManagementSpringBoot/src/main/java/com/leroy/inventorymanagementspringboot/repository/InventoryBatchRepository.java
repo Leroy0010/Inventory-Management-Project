@@ -1,5 +1,7 @@
 package com.leroy.inventorymanagementspringboot.repository;
 
+import com.leroy.inventorymanagementspringboot.dto.response.InventoryBatchResponseDto;
+import com.leroy.inventorymanagementspringboot.entity.Department;
 import com.leroy.inventorymanagementspringboot.entity.InventoryBatch;
 import com.leroy.inventorymanagementspringboot.entity.InventoryItem;
 import jakarta.persistence.LockModeType;
@@ -20,4 +22,5 @@ public interface InventoryBatchRepository extends JpaRepository<InventoryBatch, 
     @Query("SELECT COALESCE(SUM(b.remainingQuantity), 0) FROM InventoryBatch b WHERE b.inventoryItem = :item AND b.remainingQuantity > 0")
     Integer sumRemainingQuantityByItem(@Param("item") InventoryItem item);
 
+    List<InventoryBatch> findAllByInventoryItem_Department(Department inventoryItem_department);
 }

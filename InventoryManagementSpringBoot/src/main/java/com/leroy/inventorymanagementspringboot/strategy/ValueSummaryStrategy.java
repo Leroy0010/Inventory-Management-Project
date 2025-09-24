@@ -8,8 +8,8 @@ import com.leroy.inventorymanagementspringboot.repository.InventoryBalanceReposi
 import com.leroy.inventorymanagementspringboot.repository.InventoryItemRepository;
 import com.leroy.inventorymanagementspringboot.repository.StockTransactionRepository;
 import com.leroy.inventorymanagementspringboot.service.InventorySnapshotService;
-import com.leroy.inventorymanagementspringboot.service.report.calculator.AverageCostCalculator;
-import com.leroy.inventorymanagementspringboot.service.report.calculator.FifoCostCalculator;
+import com.leroy.inventorymanagementspringboot.service.AverageCostCalculator;
+import com.leroy.inventorymanagementspringboot.service.FifoCostCalculator;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

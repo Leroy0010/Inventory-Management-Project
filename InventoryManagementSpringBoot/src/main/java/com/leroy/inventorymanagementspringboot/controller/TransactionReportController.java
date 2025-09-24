@@ -2,7 +2,7 @@ package com.leroy.inventorymanagementspringboot.controller;
 
 import com.leroy.inventorymanagementspringboot.dto.TransactionReportDto;
 import com.leroy.inventorymanagementspringboot.dto.TransactionReportRequest;
-import com.leroy.inventorymanagementspringboot.service.report.TransactionReportService;
+import com.leroy.inventorymanagementspringboot.service.TransactionReportService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

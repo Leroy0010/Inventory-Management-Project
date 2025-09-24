@@ -5,7 +5,7 @@ import com.leroy.inventorymanagementspringboot.entity.InventoryItem;
 import com.leroy.inventorymanagementspringboot.entity.StockTransaction;
 import com.leroy.inventorymanagementspringboot.enums.StockTransactionType;
 import com.leroy.inventorymanagementspringboot.repository.StockTransactionRepository;
-import com.leroy.inventorymanagementspringboot.service.report.calculator.AverageCostCalculator;
+import com.leroy.inventorymanagementspringboot.service.AverageCostCalculator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

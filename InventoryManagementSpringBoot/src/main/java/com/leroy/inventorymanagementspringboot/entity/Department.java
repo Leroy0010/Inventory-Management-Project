@@ -1,10 +1,15 @@
 package com.leroy.inventorymanagementspringboot.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter @Setter
+import java.time.LocalDate;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "departments")
 public class Department {
@@ -15,9 +20,20 @@ public class Department {
     @Column(nullable=false, unique=true)
     private String name;
 
-    public Department(String name) {this.name = name;}
+    @Column(nullable=false)
+    private boolean active;
 
-    public Department() {}
+    @Column(name = "created_at", nullable = false)
+    private LocalDate createdAt;
+
+    @Column(name = "updated_at",  nullable = false)
+    private LocalDate updatedAt;
+
+    private String description;
+
+
+    public Department(String name) {this.name = name; createdAt = LocalDate.now(); active = true; updatedAt = LocalDate.now();}
+
 
     @Override
     public String toString() {

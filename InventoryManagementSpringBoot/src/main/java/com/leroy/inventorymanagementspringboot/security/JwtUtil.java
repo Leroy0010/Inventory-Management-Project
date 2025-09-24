@@ -1,9 +1,12 @@
 package com.leroy.inventorymanagementspringboot.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,11 +30,11 @@ public class JwtUtil {
 
     @Value("${jwt.expiration}")
     private long jwtExpirationMs;
-    
+
     @Value("${jwt.refresh.expiration}")
     private long refreshTokenExpirationMs;
 
-    private static final String JWT_ALGORITHM = "HS512"; // Keep HS512 as your chosen algorithm
+    private static final String JWT_ALGORITHM = "HS512";
 
     private final Logger logger = LogManager.getLogger(JwtUtil.class);
 
@@ -41,14 +44,26 @@ public class JwtUtil {
 
     @PostConstruct
     public void debugKeyLength() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-//        System.out.println("✅ JWT Key length (decoded): " + keyBytes.length + " bytes");
-//        logger.info("JWT Key length (decoded): " + keyBytes.length + " bytes");
+        try {
+            if (secret == null || secret.trim().isEmpty()) {
+                logger.error("JWT secret is not configured! Please set jwt.secret property.");
+                throw new IllegalStateException("JWT secret is not configured.");
+            }
 
-        // Add a check to warn if the key is too short for HS512
-        if (keyBytes.length < 64) {
-            System.err.println("❌ WARNING: JWT secret key is too short for HS512 algorithm! Expected at least 64 bytes (512 bits), got " + keyBytes.length + " bytes.");
-            logger.warn("JWT secret key is too short for HS512 algorithm! Expected at least 64 bytes (512 bits), got {} bytes.", keyBytes.length);
+            byte[] keyBytes = Decoders.BASE64.decode(secret);
+            logger.info("JWT Key length (decoded): {} bytes", keyBytes.length);
+
+            // Add a check to warn if the key is too short for HS512
+            if (keyBytes.length < 64) {
+                logger.error("JWT secret key is too short for HS512 algorithm! Expected at least 64 bytes (512 bits), got {} bytes.", keyBytes.length);
+                throw new IllegalArgumentException("Secret key must be at least 512 bits (64 bytes) for HS512 algorithm. Current length: " + keyBytes.length);
+            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            logger.error("JWT secret configuration error: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error validating JWT secret: {}", e.getMessage());
+            throw new IllegalStateException("Failed to validate JWT secret: " + e.getMessage(), e);
         }
     }
 
@@ -66,12 +81,11 @@ public class JwtUtil {
             Map<String, Object> extraClaims,
             UserDetails userDetails
     ) {
-        // Get all roles as a List
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        extraClaims.put("roles", roles); // Store as List
+        extraClaims.put("roles", roles);
 
         return Jwts
                 .builder()
@@ -83,42 +97,37 @@ public class JwtUtil {
                 .signWith(getSignInKey(), Jwts.SIG.HS512)
                 .compact();
     }
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-//        System.out.println("Validating token for user: " + username + ". Expected: " + userDetails.getUsername());
         logger.debug("Validating token for user: {}. Expected: {}", username, userDetails.getUsername());
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
-    
-    /**
-     * Generate a refresh token (simple UUID-based token, not JWT)
-     */
+
     public String generateRefreshToken() {
         return java.util.UUID.randomUUID().toString();
     }
-    
-    /**
-     * Get refresh token expiration time in seconds
-     */
+
     public int getRefreshTokenExpirationSeconds() {
         return (int) (refreshTokenExpirationMs / 1000);
     }
-    
-    /**
-     * Get JWT token expiration time in seconds
-     */
+
     public int getJwtExpirationSeconds() {
         return (int) (jwtExpirationMs / 1000);
     }
 
     private boolean isTokenExpired(String token) {
-        Date expiration = extractExpiration(token);
-        boolean expired = expiration.before(new Date());
-        if (expired) {
-            System.err.println("❌ Token expired at: " + expiration);
-            logger.warn("Token expired at: {}", expiration);
+        try {
+            Date expiration = extractExpiration(token);
+            boolean expired = expiration.before(new Date());
+            if (expired) {
+                logger.warn("Token expired at: {}", expiration);
+            }
+            return expired;
+        } catch (ExpiredJwtException e) {
+            logger.warn("Token is expired. Message: {}", e.getMessage());
+            return true;
         }
-        return expired;
     }
 
     private Date extractExpiration(String token) {
@@ -133,30 +142,32 @@ public class JwtUtil {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-        } catch (io.jsonwebtoken.security.SignatureException e) {
-            System.err.println("❌ JWT Signature validation failed: " + e.getMessage());
-            logger.error("JWT Signature validation failed: {}", e.getMessage());
-            throw new RuntimeException("Invalid JWT signature", e);
-        } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            System.err.println("❌ JWT token expired: " + e.getMessage());
-            logger.error("JWT token expired: {}", e.getMessage());
-            throw new RuntimeException("JWT token expired", e);
+        } catch (SignatureException | MalformedJwtException e) {
+            logger.error("Invalid JWT signature or format: {}", e.getMessage());
+            throw e;
+        } catch (ExpiredJwtException e) {
+            logger.error("JWT token is expired: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
-            System.err.println("❌ Error parsing JWT: " + e.getMessage());
             logger.error("Error parsing JWT: {}", e.getMessage());
             throw new RuntimeException("Error parsing JWT", e);
         }
     }
 
     private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        // Corrected check for HS512: needs at least 64 bytes (512 bits)
-        if (keyBytes.length < 64) {
-            System.err.println("❌ ERROR: Provided JWT secret key is too short for HS512 algorithm! Expected at least 64 bytes, but got " + keyBytes.length + " bytes.");
-            // You might want to throw an exception here to prevent the application from running with an insecure key
-            throw new IllegalArgumentException("Secret key must be at least 512 bits (64 bytes) for HS512 algorithm. Current length: " + keyBytes.length);
-        }
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
+        try {
+            if (secret == null || secret.trim().isEmpty()) {
+                throw new IllegalStateException("JWT secret is not configured.");
+            }
 
+            byte[] keyBytes = Decoders.BASE64.decode(secret);
+            if (keyBytes.length < 64) {
+                throw new IllegalArgumentException("Secret key must be at least 512 bits (64 bytes) for HS512 algorithm. Current length: " + keyBytes.length);
+            }
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            logger.error("JWT secret key configuration error: {}", e.getMessage());
+            throw e;
+        }
+    }
 }

@@ -7,7 +7,7 @@ import com.leroy.inventorymanagementspringboot.entity.Department;
 import com.leroy.inventorymanagementspringboot.entity.User;
 import com.leroy.inventorymanagementspringboot.enums.CostFlowMethod;
 import com.leroy.inventorymanagementspringboot.repository.UserRepository;
-import com.leroy.inventorymanagementspringboot.service.report.InventorySummaryReportService;
+import com.leroy.inventorymanagementspringboot.service.InventorySummaryReportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

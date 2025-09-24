@@ -10,9 +10,12 @@ import java.sql.Timestamp;
 public class InventoryBatchResponseDto {
     private long id;
     private int quantity;
-    private BigDecimal totalPrice;
+    private BigDecimal unitPrice;
     private int remainingQuantity;
     private int inventoryItemId;
     private String inventoryItemName;
+    private String supplierName;
+    private String invoiceId;
     private Timestamp batchDate;
 }
+

@@ -2,6 +2,7 @@ package com.leroy.inventorymanagementspringboot.config;
 
 import com.leroy.inventorymanagementspringboot.security.JwtHandshakeInterceptor;
 import com.leroy.inventorymanagementspringboot.security.JwtUtil;
+import com.leroy.inventorymanagementspringboot.util.CookieUtil;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
@@ -11,9 +12,11 @@ import org.springframework.web.socket.config.annotation.*;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
 
-    public WebSocketConfig(JwtUtil jwtUtil) {
+    public WebSocketConfig(JwtUtil jwtUtil, CookieUtil cookieUtil) {
         this.jwtUtil = jwtUtil;
+        this.cookieUtil = cookieUtil;
     }
 
     @Override
@@ -27,7 +30,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry
                 .addEndpoint("/ws-notifications")
                 .setAllowedOriginPatterns("*")
-                .addInterceptors(new JwtHandshakeInterceptor(jwtUtil));
-        //.withSockJS(); // Optional: remove if you're not using SockJS fallback
+                .addInterceptors(new JwtHandshakeInterceptor(jwtUtil, cookieUtil))
+                .withSockJS(); // Enable SockJS fallback for better compatibility
     }
 }

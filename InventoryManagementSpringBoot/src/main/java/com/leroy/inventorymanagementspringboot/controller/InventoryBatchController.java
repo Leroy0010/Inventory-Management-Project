@@ -9,13 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/batch")
+@RequestMapping("/api/batches")
 public class InventoryBatchController {
     private final InventoryBatchService inventoryBatchService;
 
@@ -30,4 +29,18 @@ public class InventoryBatchController {
                 .status(HttpStatus.CREATED)
                 .body(inventoryBatchService.addInventoryBatch(createBatchDto, storeKeeper));
     }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('STOREKEEPER')")
+    public ResponseEntity<List<InventoryBatchResponseDto>> getAllInventoryBatches(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(inventoryBatchService.getAllInventoryBatches(userDetails));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('STOREKEEPER')")
+    public ResponseEntity<InventoryBatchResponseDto> getAllInventoryBatches(@PathVariable long id) {
+        return ResponseEntity.ok(inventoryBatchService.getInventoryBatchById(id));
+    }
+
+
 }

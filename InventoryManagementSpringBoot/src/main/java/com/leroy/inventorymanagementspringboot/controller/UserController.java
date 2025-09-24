@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -37,29 +37,27 @@ public class UserController {
 
     @PostMapping("/admin/register-user")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<User> registerUserByAdmin(@Valid @RequestBody RegisterStoreKeeperDto dto) {
-        User registeredUser = userService.registerAdminOrStoreKeeperByAdmin(dto);
+    public ResponseEntity<UserResponseDto> registerUserByAdmin(@Valid @RequestBody RegisterStoreKeeperDto dto) {
+        var registeredUser = userService.registerAdminOrStoreKeeperByAdmin(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
     }
 
     @PostMapping("/storekeeper/register-staff")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<User> registerStaffByUser(
+    public ResponseEntity<UserResponseDto> registerStaffByUser(
             @Valid @RequestBody RegisterStaffDto dto,
             @AuthenticationPrincipal UserDetails authenticatedUser) {
 
-        User registeredStaff = userService.registerStaffByStoreKeeper(dto, authenticatedUser);
+        var registeredStaff = userService.registerStaffByStoreKeeper(dto, authenticatedUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredStaff);
     }
 
-    @GetMapping("/admin/get-users")
+    @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<UserResponseDto>> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
-        User storekeeper = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Optional<List<UserResponseDto>> users = userService.getUsers(storekeeper.getDepartment());
-        return users.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.noContent().build());
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+       return ResponseEntity.ok(userService.getUsers());
     }
+
 
     @GetMapping("/storekeeper/get-users")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
@@ -68,14 +66,14 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @PutMapping("/user/update-status") // Changed to PUT for updating state
-    @PreAuthorize("hasAnyRole('STOREKEEPER', 'ADMIN')")
-    public ResponseEntity<?> updateUserStatus(@Valid @RequestBody UserResponseDto userResponseDto) {
+    @PutMapping("/update-status") // Changed to PUT for updating state
+    @PreAuthorize("hasAnyAuthority('STOREKEEPER', 'ADMIN')")
+    public ResponseEntity<UserResponseDto> updateUserStatus(@Valid @RequestBody UserResponseDto userResponseDto) {
         userService.setStaffStatus(userResponseDto);
         return ResponseEntity.ok(userResponseDto);
     }
 
-    @GetMapping("/users/get-general-notification-service-emails")
+    @GetMapping("/get-general-notification-service-emails")
     @PreAuthorize("hasAnyAuthority('STOREKEEPER', 'ADMIN')")
     public ResponseEntity<Optional<List<String>>> getGeneralNotificationServiceEmails(@AuthenticationPrincipal UserDetails userDetails) {
         try {
@@ -87,7 +85,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/users/get-profile")
+    @GetMapping("/get-profile")
     public ResponseEntity<UserResponseDto> fetchUserDetails(@AuthenticationPrincipal UserDetails userDetails) {
         try {
             return ResponseEntity.ok(userService.fetchUserDetails(userDetails));
@@ -96,7 +94,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/users/change-password")
+    @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             userService.changePassword(updatePasswordRequest, userDetails);
@@ -108,7 +106,7 @@ public class UserController {
         }
     }
     
-    @PutMapping("/users/update-profile")
+    @PutMapping("/update-profile")
     public ResponseEntity<UserResponseDto> updateProfile(@Valid @RequestBody UpdateProfileRequest updateProfileRequest, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             UserResponseDto updatedUser = userService.updateProfile(updateProfileRequest, userDetails);
@@ -120,9 +118,10 @@ public class UserController {
         }
     }
 
-    @GetMapping("/users/get-all-emails-and-ids")
+
+    @GetMapping("/get-all-emails-and-ids")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<Optional<List<UserEmailAndIdDto>>> getAllUserEmailsAndIds(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<UserEmailAndIdDto>> getAllUserEmailsAndIds(@AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(userService.getEmailsAndIds(userDetails));
     }
 }

@@ -9,7 +9,6 @@ import com.leroy.inventorymanagementspringboot.exception.RateLimitExceededExcept
 import com.leroy.inventorymanagementspringboot.repository.UserRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,11 +31,13 @@ public class PasswordResetService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
-    private final LoadingCache<String, LocalDateTime> resetRequestCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(1, TimeUnit.MINUTES) // 1 minute cooldown per email
-            .build(new CacheLoader<String, LocalDateTime>() {
-                public LocalDateTime load(String key) {
-                    return LocalDateTime.now();
+    // Rate limiting: allow 1 request per minute per email
+    private final LoadingCache<String, Integer> resetRequestCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.MINUTES) // Cache expires after 1 minute
+            .build(new CacheLoader<String, Integer>() {
+                @Override
+                public Integer load(@org.springframework.lang.NonNull String key) {
+                    return 0; // Start with 0 requests
                 }
             });
 
@@ -47,39 +48,55 @@ public class PasswordResetService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Map<String, Object> generateTokenForUser(String userEmail){
-        // Apply rate limiting
+    /**
+     * For password reset requests (rate limited).
+     */
+    public Map<String, Object> generateTokenForUser(String userEmail) {
         try {
-            LocalDateTime lastRequestTime = resetRequestCache.get(userEmail);
-            if (LocalDateTime.now().isBefore(lastRequestTime.plusMinutes(1))) {
-                throw new RateLimitExceededException("Password reset request limit exceeded for this email. Please try again after 1 minute.");
+            // Check if user has already made a request in the last minute
+            Integer requestCount = resetRequestCache.get(userEmail);
+            if (requestCount > 0) {
+                logger.warn("Rate limit exceeded for password reset request from email: {}", userEmail);
+                throw new RateLimitExceededException("Too many password reset requests. Please wait 1 minute before trying again.");
             }
+            
+            // Increment the request count for this email
+            resetRequestCache.put(userEmail, 1);
+            logger.info("Password reset request allowed for email: {}", userEmail);
         } catch (ExecutionException e) {
-            logger.error("Error accessing reset request cache for {}: {}", userEmail, e.getMessage());
+            // If there's an error getting from cache, allow the request but still increment
+            resetRequestCache.put(userEmail, 1);
+            logger.info("Password reset request allowed for email: {} (cache error)", userEmail);
         }
-        resetRequestCache.put(userEmail, LocalDateTime.now()); // Update last request time
 
+        return createAndSaveToken(userEmail);
+    }
+
+    /**
+     * For new user registration (no rate limit).
+     */
+    public Map<String, Object> generateTokenForNewUser(String userEmail) {
+        return createAndSaveToken(userEmail);
+    }
+
+    /**
+     * Shared logic to create token + save on user.
+     */
+    private Map<String, Object> createAndSaveToken(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> {
-                    logger.warn("Password reset request for non-existent email: {}", userEmail);
-                    // Return a generic error message for security, don't reveal if email exists.
-                    // Or for this example, throw for explicit handling in controller.
-                    return new RuntimeException("No user found with that email address.");
-                });
+                .orElseThrow(() -> new RuntimeException("No user found with that email address."));
 
-        // Generate a new token
         String newToken = UUID.randomUUID().toString();
-        // Set expiry to 15 minutes from now
         Timestamp expiryTime = Timestamp.from(LocalDateTime.now().plusMinutes(15).toInstant(ZoneOffset.UTC));
 
         user.setPasswordResetToken(newToken);
         user.setResetPasswordExpiresAt(expiryTime);
-        userRepository.save(user); // Save the token and expiry on the user entity
+        userRepository.save(user);
+
         Map<String, Object> map = new HashMap<>();
         map.put("token", newToken);
         map.put("user", user);
         return map;
-
     }
 
     @Transactional
@@ -113,6 +130,42 @@ public class PasswordResetService {
         user.setResetPasswordExpiresAt(null); // Clear expiry
         userRepository.save(user);
         logger.info("Password successfully reset for user: {}", user.getEmail());
+    }
+
+    /**
+     * Check if an email is currently rate limited
+     */
+    public boolean isRateLimited(String userEmail) {
+        try {
+            Integer requestCount = resetRequestCache.get(userEmail);
+            return requestCount > 0;
+        } catch (ExecutionException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Clear rate limit for a specific email (useful for testing)
+     */
+    public void clearRateLimit(String userEmail) {
+        resetRequestCache.invalidate(userEmail);
+        logger.info("Rate limit cleared for email: {}", userEmail);
+    }
+
+    /**
+     * Get remaining time until rate limit expires (in seconds)
+     */
+    public long getRemainingRateLimitTime(String userEmail) {
+        try {
+            if (!isRateLimited(userEmail)) {
+                return 0;
+            }
+            // Since we're using expireAfterWrite, we can't get exact remaining time
+            // This is a simplified implementation
+            return 60; // Assume 1 minute remaining
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
 //    // Scheduled task to clean up expired tokens periodically

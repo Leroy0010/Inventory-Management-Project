@@ -30,10 +30,11 @@ public class EmailService {
     @Value("${app.frontend.base-url}")
     private String frontendBaseUrl; // For building links in emails
 
-    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine, PasswordResetService passwordResetService, PasswordResetService passwordResetService1) {
+    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
     }
+
 
     @Async
     public void sendAccountCreatedNotification(String toEmail, String userName, String token) {
@@ -41,7 +42,7 @@ public class EmailService {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
-            String secureLink = frontendBaseUrl + "/reset-password?token=" + token;
+            String secureLink = frontendBaseUrl + "/forgot-password?token=" + token;
 
             Context context = new Context();
             context.setVariable("userName", userName);
@@ -67,7 +68,7 @@ public class EmailService {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
-            String resetLink = frontendBaseUrl + "/reset-password?token=" + token;
+            String resetLink = frontendBaseUrl + "/forgot-password?token=" + token;
             Context context = new Context();
             context.setVariable("userName", userName);
             context.setVariable("resetLink", resetLink);

@@ -1,17 +1,23 @@
 package com.leroy.inventorymanagementspringboot.service;
 
 import com.leroy.inventorymanagementspringboot.dto.report.*;
+import com.leroy.inventorymanagementspringboot.entity.Department;
 import com.leroy.inventorymanagementspringboot.entity.User;
 import com.leroy.inventorymanagementspringboot.repository.*;
 import com.leroy.inventorymanagementspringboot.servicei.UserActivityReportServiceInterface;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional(readOnly = true)
@@ -24,10 +30,10 @@ public class UserActivityReportService implements UserActivityReportServiceInter
     private final DepartmentRepository departmentRepository;
 
     public UserActivityReportService(UserRepository userRepository,
-                                   RequestRepository requestRepository,
-                                   RequestItemRepository requestItemRepository,
-                                   OfficeRepository officeRepository,
-                                   DepartmentRepository departmentRepository) {
+            RequestRepository requestRepository,
+            RequestItemRepository requestItemRepository,
+            OfficeRepository officeRepository,
+            DepartmentRepository departmentRepository) {
         this.userRepository = userRepository;
         this.requestRepository = requestRepository;
         this.requestItemRepository = requestItemRepository;
@@ -36,20 +42,22 @@ public class UserActivityReportService implements UserActivityReportServiceInter
     }
 
     @Override
-    public UserActivityReportResponseDto generateUserActivityReport(UserActivityReportRequest request, User currentUser) {
+    public UserActivityReportResponseDto generateUserActivityReport(UserActivityReportRequest request,
+            User currentUser) {
         // Get current user's department
         Integer departmentId = currentUser.getDepartment().getId();
-        
+
         // Generate report for the department
         return generateDepartmentUserActivityReport(request, departmentId, currentUser);
     }
 
     @Override
-    public UserActivityReportResponseDto generateOfficeUserActivityReport(UserActivityReportRequest request, Integer officeId) {
+    public UserActivityReportResponseDto generateOfficeUserActivityReport(UserActivityReportRequest request,
+            Integer officeId) {
         // Get office to find department
         var office = officeRepository.findById(officeId)
                 .orElseThrow(() -> new IllegalArgumentException("Office not found"));
-        
+
         // Generate report for the specific office
         return generateDepartmentUserActivityReport(request, office.getDepartment().getId(), null, officeId);
     }
@@ -58,20 +66,20 @@ public class UserActivityReportService implements UserActivityReportServiceInter
     public UserActivityReportResponseDto getUserActivitySummary(User currentUser, Integer year) {
         UserActivityReportRequest request = new UserActivityReportRequest();
         request.setYear(year != null ? year : LocalDate.now().getYear());
-        
+
         return generateUserActivityReport(request, currentUser);
     }
 
-    private UserActivityReportResponseDto generateDepartmentUserActivityReport(UserActivityReportRequest request, 
-                                                                             Integer departmentId, 
-                                                                             User currentUser) {
+    private UserActivityReportResponseDto generateDepartmentUserActivityReport(UserActivityReportRequest request,
+            Integer departmentId,
+            User currentUser) {
         return generateDepartmentUserActivityReport(request, departmentId, currentUser, null);
     }
 
-    private UserActivityReportResponseDto generateDepartmentUserActivityReport(UserActivityReportRequest request, 
-                                                                             Integer departmentId, 
-                                                                             User currentUser,
-                                                                             Integer officeId) {
+    private UserActivityReportResponseDto generateDepartmentUserActivityReport(UserActivityReportRequest request,
+            Integer departmentId,
+            User currentUser,
+            Integer officeId) {
         // Validate request
         if (!request.isValid()) {
             throw new IllegalArgumentException("Invalid request parameters. Must provide either year or date range.");
@@ -79,15 +87,15 @@ public class UserActivityReportService implements UserActivityReportServiceInter
 
         // Get department name
         String departmentName = departmentRepository.findById(departmentId)
-                .map(d -> d.getName())
+                .map(Department::getName)
                 .orElse("Unknown Department");
 
         // Get user activities for the department
         List<UserActivityItemDto> userActivities = getUserActivitiesForDepartment(
-                departmentId, request, officeId);
+                departmentId, request, officeId, currentUser);
 
         // Generate summary statistics
-        UserActivitySummaryDto summary = generateSummaryStatistics(userActivities, departmentId);
+        UserActivitySummaryDto summary = generateSummaryStatistics(userActivities);
 
         // Create response
         UserActivityReportResponseDto response = new UserActivityReportResponseDto(
@@ -102,15 +110,23 @@ public class UserActivityReportService implements UserActivityReportServiceInter
         return response;
     }
 
-    private List<UserActivityItemDto> getUserActivitiesForDepartment(Integer departmentId, 
-                                                                   UserActivityReportRequest request, 
-                                                                   Integer officeId) {
-        // This would typically use a custom repository method
-        // For now, we'll use the existing repository methods and build the data
-        
-        // Get all users in the department
-        List<User> users = userRepository.findByDepartmentId(departmentId);
-        
+    private List<UserActivityItemDto> getUserActivitiesForDepartment(Integer departmentId,
+            UserActivityReportRequest request,
+            Integer officeId,
+            User currentUser) {
+        // Get users based on the relationship: staff.getOffice().getDepartment() ==
+        // storekeeper.getDepartment()
+        // This includes staff users whose office belongs to the storekeeper's
+        // department
+        List<User> users = userRepository.findUsersByOfficeDepartment(departmentId);
+
+        // Exclude the current user (storekeeper) who is generating the report
+        if (currentUser != null) {
+            users = users.stream()
+                    .filter(user -> !user.getId().equals(currentUser.getId()))
+                    .collect(Collectors.toList());
+        }
+
         // Filter by office if specified
         if (officeId != null) {
             users = users.stream()
@@ -119,12 +135,9 @@ public class UserActivityReportService implements UserActivityReportServiceInter
         }
 
         // Apply additional filters
-        if (request.getSearch() != null && !request.getSearch().trim().isEmpty()) {
-            String searchTerm = request.getSearch().toLowerCase();
+        if (request.getUserId() != null) {
             users = users.stream()
-                    .filter(user -> 
-                        user.getFullName().toLowerCase().contains(searchTerm) ||
-                        user.getEmail().toLowerCase().contains(searchTerm))
+                    .filter(user -> user.getId().equals(request.getUserId()))
                     .collect(Collectors.toList());
         }
 
@@ -136,7 +149,7 @@ public class UserActivityReportService implements UserActivityReportServiceInter
 
         if (request.getRoleFilter() != null && !request.getRoleFilter().trim().isEmpty()) {
             users = users.stream()
-                    .filter(user -> user.getRole() != null && 
+                    .filter(user -> user.getRole() != null &&
                             user.getRole().getName().equals(request.getRoleFilter()))
                     .collect(Collectors.toList());
         }
@@ -150,60 +163,180 @@ public class UserActivityReportService implements UserActivityReportServiceInter
     private UserActivityItemDto buildUserActivityItem(User user, UserActivityReportRequest request) {
         // Get request statistics for the user
         var requestStats = getRequestStatisticsForUser(user.getId(), request);
-        
+
         // Build DTO
         UserActivityItemDto dto = new UserActivityItemDto();
         dto.setUserId(user.getId());
-        dto.setUserName(user.getFullName());
-        dto.setUserEmail(user.getEmail());
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
         dto.setUserRole(user.getRole() != null ? user.getRole().getName() : "UNKNOWN");
         dto.setOfficeName(user.getOffice() != null ? user.getOffice().getName() : "No Office");
-        dto.setDepartmentName(user.getDepartment() != null ? user.getDepartment().getName() : "No Department");
+        // Get department name from office if user doesn't have direct department
+        // assignment
+        String departmentName = "No Department";
+        if (user.getDepartment() != null) {
+            departmentName = user.getDepartment().getName();
+        } else if (user.getOffice() != null && user.getOffice().getDepartment() != null) {
+            departmentName = user.getOffice().getDepartment().getName();
+        }
+        dto.setDepartmentName(departmentName);
         dto.setIsActive(user.isActive());
-        
-        // Set request statistics
+
+        // Set request statistics (int fields are never null)
         dto.setTotalRequestsSubmitted(requestStats.getTotalSubmitted());
         dto.setTotalRequestsApproved(requestStats.getTotalApproved());
         dto.setTotalRequestsRejected(requestStats.getTotalRejected());
         dto.setTotalRequestsFulfilled(requestStats.getTotalFulfilled());
-        dto.setPendingRequests(requestStats.getPending());
-        
-        // Set value statistics
-        dto.setTotalValueRequested(requestStats.getTotalValueRequested());
-        dto.setTotalValueApproved(requestStats.getTotalValueApproved());
-        dto.setTotalValueRejected(requestStats.getTotalValueRejected());
-        dto.setTotalValueFulfilled(requestStats.getTotalValueFulfilled());
-        
+
+        // Calculate pending requests: submitted - approved - rejected
+        int submitted = requestStats.getTotalSubmitted();
+        int approved = requestStats.getTotalApproved();
+        int rejected = requestStats.getTotalRejected();
+        dto.setPendingRequests(Math.max(0, submitted - approved - rejected));
+
+        // Removed value statistics - using quantities only
+
         // Set timestamps
         dto.setLastRequestSubmitted(requestStats.getLastSubmitted());
         dto.setLastRequestApproved(requestStats.getLastApproved());
         dto.setLastRequestRejected(requestStats.getLastRejected());
         dto.setLastRequestFulfilled(requestStats.getLastFulfilled());
         dto.setLastActivity(requestStats.getLastActivity());
-        
-        // Set item counts
+
+        // Set item counts (int fields are never null)
         dto.setTotalItemsRequested(requestStats.getTotalItemsRequested());
         dto.setTotalItemsApproved(requestStats.getTotalItemsApproved());
         dto.setTotalItemsRejected(requestStats.getTotalItemsRejected());
         dto.setTotalItemsFulfilled(requestStats.getTotalItemsFulfilled());
-        
+
+        // Calculate rates
+        int fulfilled = requestStats.getTotalFulfilled();
+
+        dto.setApprovalRate(submitted > 0 ? (double) approved / submitted : 0.0);
+        dto.setRejectionRate(submitted > 0 ? (double) rejected / submitted : 0.0);
+        dto.setFulfillmentRate(approved > 0 ? (double) fulfilled / approved : 0.0);
+
         return dto;
     }
 
     private RequestStatistics getRequestStatisticsForUser(Integer userId, UserActivityReportRequest request) {
-        // This would typically use custom repository queries
-        // For now, we'll return mock data - in real implementation, this would query the database
-        
-        // TODO: Implement actual database queries
-        return new RequestStatistics();
+        RequestStatistics stats = new RequestStatistics();
+
+        // Get date range for filtering
+        LocalDate startDate = getStartDate(request);
+        LocalDate endDate = getEndDate(request);
+
+        // Validate dates
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Invalid date range: startDate=" + startDate + ", endDate=" + endDate);
+        }
+
+        try {
+            // Get request counts by status
+            var requestCounts = requestRepository.getRequestCountsByUserAndDateRange(userId,
+                    java.sql.Timestamp.valueOf(startDate.atStartOfDay()),
+                    java.sql.Timestamp.valueOf(endDate.atTime(23, 59, 59)));
+            for (Object[] result : requestCounts) {
+                String status = (String) result[0];
+                Long count = (Long) result[1];
+                switch (status) {
+                    case "SUBMITTED" -> stats.setTotalSubmitted(count.intValue());
+                    case "APPROVED" -> stats.setTotalApproved(count.intValue());
+                    case "REJECTED" -> stats.setTotalRejected(count.intValue());
+                    case "FULFILLED" -> stats.setTotalFulfilled(count.intValue());
+                    case "PENDING" -> stats.setPending(count.intValue());
+                }
+            }
+
+            // Removed value totals - using quantities only
+
+            // Get item counts
+            var itemCounts = requestItemRepository.getItemCountsByUserAndDateRange(userId,
+                    java.sql.Timestamp.valueOf(startDate.atStartOfDay()),
+                    java.sql.Timestamp.valueOf(endDate.atTime(23, 59, 59)));
+            for (Object[] result : itemCounts) {
+                String status = (String) result[0];
+                Long count = (Long) result[1];
+                switch (status) {
+                    case "SUBMITTED" -> stats.setTotalItemsRequested(count.intValue());
+                    case "APPROVED" -> stats.setTotalItemsApproved(count.intValue());
+                    case "REJECTED" -> stats.setTotalItemsRejected(count.intValue());
+                    case "FULFILLED" -> stats.setTotalItemsFulfilled(count.intValue());
+                }
+            }
+
+            // Get last activity timestamps
+            var lastActivities = requestRepository.getLastActivityTimestampsByUser(userId,
+                    java.sql.Timestamp.valueOf(startDate.atStartOfDay()),
+                    java.sql.Timestamp.valueOf(endDate.atTime(23, 59, 59)));
+            for (Object[] result : lastActivities) {
+                String status = (String) result[0];
+                java.sql.Timestamp timestamp = (java.sql.Timestamp) result[1];
+                LocalDateTime localDateTime = timestamp.toLocalDateTime();
+                switch (status) {
+                    case "SUBMITTED" -> stats.setLastSubmitted(localDateTime);
+                    case "APPROVED" -> stats.setLastApproved(localDateTime);
+                    case "REJECTED" -> stats.setLastRejected(localDateTime);
+                    case "FULFILLED" -> stats.setLastFulfilled(localDateTime);
+                }
+            }
+
+            // Calculate last activity (most recent)
+            LocalDateTime lastActivity = Stream.of(
+                    stats.getLastSubmitted(),
+                    stats.getLastApproved(),
+                    stats.getLastRejected(),
+                    stats.getLastFulfilled())
+                    .filter(java.util.Objects::nonNull)
+                    .max(LocalDateTime::compareTo)
+                    .orElse(null);
+            stats.setLastActivity(lastActivity);
+
+            return stats;
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting request statistics for user " + userId + ": " + e.getMessage(),
+                    e);
+        }
     }
 
-    private UserActivitySummaryDto generateSummaryStatistics(List<UserActivityItemDto> userActivities, Integer departmentId) {
+    private LocalDate getStartDate(UserActivityReportRequest request) {
+        if (request.getStartDate() != null) {
+            return request.getStartDate();
+        } else if (request.getYear() != null) {
+            if (request.getMonth() != null) {
+                return LocalDate.of(request.getYear(), request.getMonth(), 1);
+            } else {
+                return LocalDate.of(request.getYear(), 1, 1);
+            }
+        } else {
+            return LocalDate.now().minusYears(1); // Default to last year
+        }
+    }
+
+    private LocalDate getEndDate(UserActivityReportRequest request) {
+        if (request.getEndDate() != null) {
+            return request.getEndDate();
+        } else if (request.getYear() != null) {
+            if (request.getMonth() != null) {
+                return LocalDate.of(request.getYear(), request.getMonth(),
+                        LocalDate.of(request.getYear(), request.getMonth(), 1).lengthOfMonth());
+            } else {
+                return LocalDate.of(request.getYear(), 12, 31);
+            }
+        } else {
+            return LocalDate.now(); // Default to now
+        }
+    }
+
+    private UserActivitySummaryDto generateSummaryStatistics(List<UserActivityItemDto> userActivities) {
         // Calculate summary statistics
         int totalUsers = userActivities.size();
         int activeUsers = (int) userActivities.stream().filter(UserActivityItemDto::getIsActive).count();
         int inactiveUsers = totalUsers - activeUsers;
-        
+        int staffUsers = (int) userActivities.stream()
+                .filter(user -> "STAFF".equals(user.getUserRole()))
+                .count();
+
         int totalRequestsSubmitted = userActivities.stream()
                 .mapToInt(UserActivityItemDto::getTotalRequestsSubmitted)
                 .sum();
@@ -216,25 +349,105 @@ public class UserActivityReportService implements UserActivityReportServiceInter
         int totalRequestsFulfilled = userActivities.stream()
                 .mapToInt(UserActivityItemDto::getTotalRequestsFulfilled)
                 .sum();
-        
-        // Calculate value totals
-        var totalValueRequested = userActivities.stream()
-                .map(UserActivityItemDto::getTotalValueRequested)
-                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-        var totalValueApproved = userActivities.stream()
-                .map(UserActivityItemDto::getTotalValueApproved)
-                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-        
-        return new UserActivitySummaryDto(
-                totalUsers, activeUsers, inactiveUsers,
-                totalRequestsSubmitted, totalRequestsApproved, totalRequestsRejected, totalRequestsFulfilled,
-                totalValueRequested, totalValueApproved
-        );
+
+        // Calculate item totals
+        int totalItemsRequested = userActivities.stream()
+                .mapToInt(UserActivityItemDto::getTotalItemsRequested)
+                .sum();
+        int totalItemsApproved = userActivities.stream()
+                .mapToInt(UserActivityItemDto::getTotalItemsApproved)
+                .sum();
+        int totalItemsRejected = userActivities.stream()
+                .mapToInt(UserActivityItemDto::getTotalItemsRejected)
+                .sum();
+        int totalItemsFulfilled = userActivities.stream()
+                .mapToInt(UserActivityItemDto::getTotalItemsFulfilled)
+                .sum();
+
+        // Calculate pending requests
+        int pendingRequests = Math.max(0, totalRequestsSubmitted - totalRequestsApproved - totalRequestsRejected);
+
+        // Create summary DTO
+        UserActivitySummaryDto summary = new UserActivitySummaryDto();
+        summary.setTotalUsers(totalUsers);
+        summary.setActiveUsers(activeUsers);
+        summary.setInactiveUsers(inactiveUsers);
+        summary.setStaffUsers(staffUsers);
+        summary.setTotalRequestsSubmitted(totalRequestsSubmitted);
+        summary.setTotalRequestsApproved(totalRequestsApproved);
+        summary.setTotalRequestsRejected(totalRequestsRejected);
+        summary.setTotalRequestsFulfilled(totalRequestsFulfilled);
+        summary.setPendingRequests(pendingRequests);
+
+        // Calculate derived metrics
+        summary.setAverageRequestsPerUser(totalUsers > 0 ? (double) totalRequestsSubmitted / totalUsers : 0.0);
+        summary.setOverallApprovalRate(
+                totalRequestsSubmitted > 0 ? (double) totalRequestsApproved / totalRequestsSubmitted : 0.0);
+        summary.setOverallRejectionRate(
+                totalRequestsSubmitted > 0 ? (double) totalRequestsRejected / totalRequestsSubmitted : 0.0);
+        summary.setOverallFulfillmentRate(
+                totalRequestsApproved > 0 ? (double) totalRequestsFulfilled / totalRequestsApproved : 0.0);
+
+        // Generate top requesters (top 5 by request count)
+        List<UserActivitySummaryDto.TopRequesterDto> topRequesters = userActivities.stream()
+                .filter(user -> user.getTotalRequestsSubmitted() > 0)
+                .sorted((a, b) -> Integer.compare(b.getTotalRequestsSubmitted(), a.getTotalRequestsSubmitted()))
+                .limit(5)
+                .map(user -> {
+                    UserActivitySummaryDto.TopRequesterDto dto = new UserActivitySummaryDto.TopRequesterDto();
+                    dto.setUserId(user.getUserId());
+                    dto.setFullName(user.getFullName());
+                    dto.setEmail(user.getEmail());
+                    dto.setOfficeName(user.getOfficeName());
+                    dto.setRequestCount(user.getTotalRequestsSubmitted());
+                    dto.setItemCount(user.getTotalItemsRequested());
+                    dto.setApprovalRate(user.getApprovalRate());
+                    dto.setFulfillmentRate(user.getFulfillmentRate());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        summary.setTopRequesters(topRequesters);
+
+        // Generate office activity breakdown
+        Map<String, UserActivitySummaryDto.OfficeActivityDto> officeMap = new HashMap<>();
+        for (UserActivityItemDto user : userActivities) {
+            String officeName = user.getOfficeName();
+            officeMap.computeIfAbsent(officeName, k -> {
+                UserActivitySummaryDto.OfficeActivityDto dto = new UserActivitySummaryDto.OfficeActivityDto();
+                dto.setOfficeId(user.getUserId()); // This would need actual office ID in real implementation
+                dto.setOfficeName(officeName);
+                dto.setUserCount(0);
+                dto.setRequestCount(0);
+                dto.setItemCount(0);
+                return dto;
+            });
+
+            UserActivitySummaryDto.OfficeActivityDto office = officeMap.get(officeName);
+            office.setUserCount(office.getUserCount() + 1);
+            office.setRequestCount(office.getRequestCount() + user.getTotalRequestsSubmitted());
+            office.setItemCount(office.getItemCount() + user.getTotalItemsRequested());
+        }
+
+        // Calculate average requests per user for each office
+        List<UserActivitySummaryDto.OfficeActivityDto> officeActivity = officeMap.values().stream()
+                .peek(office -> office.setAverageRequestsPerUser(
+                        office.getUserCount() > 0 ? (double) office.getRequestCount() / office.getUserCount() : 0.0))
+                .sorted((a, b) -> Integer.compare(b.getRequestCount(), a.getRequestCount()))
+                .collect(Collectors.toList());
+        summary.setOfficeActivity(officeActivity);
+
+        return summary;
     }
 
     private String generateTimePeriodDescription(UserActivityReportRequest request) {
         if (request.getYear() != null) {
-            return "Year " + request.getYear();
+            if (request.getMonth() != null) {
+                String[] monthNames = { "", "January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December" };
+                return monthNames[request.getMonth()] + " " + request.getYear();
+            } else {
+                return "Year " + request.getYear();
+            }
         } else if (request.getStartDate() != null && request.getEndDate() != null) {
             return request.getStartDate() + " to " + request.getEndDate();
         }
@@ -242,16 +455,15 @@ public class UserActivityReportService implements UserActivityReportServiceInter
     }
 
     // Helper class for request statistics
+    @Data
     private static class RequestStatistics {
+        // Getters and setters
         private int totalSubmitted = 0;
         private int totalApproved = 0;
         private int totalRejected = 0;
         private int totalFulfilled = 0;
         private int pending = 0;
-        private java.math.BigDecimal totalValueRequested = java.math.BigDecimal.ZERO;
-        private java.math.BigDecimal totalValueApproved = java.math.BigDecimal.ZERO;
-        private java.math.BigDecimal totalValueRejected = java.math.BigDecimal.ZERO;
-        private java.math.BigDecimal totalValueFulfilled = java.math.BigDecimal.ZERO;
+        // Removed value fields - using quantities only
         private LocalDateTime lastSubmitted;
         private LocalDateTime lastApproved;
         private LocalDateTime lastRejected;
@@ -262,42 +474,5 @@ public class UserActivityReportService implements UserActivityReportServiceInter
         private int totalItemsRejected = 0;
         private int totalItemsFulfilled = 0;
 
-        // Getters and setters
-        public int getTotalSubmitted() { return totalSubmitted; }
-        public void setTotalSubmitted(int totalSubmitted) { this.totalSubmitted = totalSubmitted; }
-        public int getTotalApproved() { return totalApproved; }
-        public void setTotalApproved(int totalApproved) { this.totalApproved = totalApproved; }
-        public int getTotalRejected() { return totalRejected; }
-        public void setTotalRejected(int totalRejected) { this.totalRejected = totalRejected; }
-        public int getTotalFulfilled() { return totalFulfilled; }
-        public void setTotalFulfilled(int totalFulfilled) { this.totalFulfilled = totalFulfilled; }
-        public int getPending() { return pending; }
-        public void setPending(int pending) { this.pending = pending; }
-        public java.math.BigDecimal getTotalValueRequested() { return totalValueRequested; }
-        public void setTotalValueRequested(java.math.BigDecimal totalValueRequested) { this.totalValueRequested = totalValueRequested; }
-        public java.math.BigDecimal getTotalValueApproved() { return totalValueApproved; }
-        public void setTotalValueApproved(java.math.BigDecimal totalValueApproved) { this.totalValueApproved = totalValueApproved; }
-        public java.math.BigDecimal getTotalValueRejected() { return totalValueRejected; }
-        public void setTotalValueRejected(java.math.BigDecimal totalValueRejected) { this.totalValueRejected = totalValueRejected; }
-        public java.math.BigDecimal getTotalValueFulfilled() { return totalValueFulfilled; }
-        public void setTotalValueFulfilled(java.math.BigDecimal totalValueFulfilled) { this.totalValueFulfilled = totalValueFulfilled; }
-        public LocalDateTime getLastSubmitted() { return lastSubmitted; }
-        public void setLastSubmitted(LocalDateTime lastSubmitted) { this.lastSubmitted = lastSubmitted; }
-        public LocalDateTime getLastApproved() { return lastApproved; }
-        public void setLastApproved(LocalDateTime lastApproved) { this.lastApproved = lastApproved; }
-        public LocalDateTime getLastRejected() { return lastRejected; }
-        public void setLastRejected(LocalDateTime lastRejected) { this.lastRejected = lastRejected; }
-        public LocalDateTime getLastFulfilled() { return lastFulfilled; }
-        public void setLastFulfilled(LocalDateTime lastFulfilled) { this.lastFulfilled = lastFulfilled; }
-        public LocalDateTime getLastActivity() { return lastActivity; }
-        public void setLastActivity(LocalDateTime lastActivity) { this.lastActivity = lastActivity; }
-        public int getTotalItemsRequested() { return totalItemsRequested; }
-        public void setTotalItemsRequested(int totalItemsRequested) { this.totalItemsRequested = totalItemsRequested; }
-        public int getTotalItemsApproved() { return totalItemsApproved; }
-        public void setTotalItemsApproved(int totalItemsApproved) { this.totalItemsApproved = totalItemsApproved; }
-        public int getTotalItemsRejected() { return totalItemsRejected; }
-        public void setTotalItemsRejected(int totalItemsRejected) { this.totalItemsRejected = totalItemsRejected; }
-        public int getTotalItemsFulfilled() { return totalItemsFulfilled; }
-        public void setTotalItemsFulfilled(int totalItemsFulfilled) { this.totalItemsFulfilled = totalItemsFulfilled; }
     }
 }

@@ -3,10 +3,10 @@ package com.leroy.inventorymanagementspringboot.controller;
 import com.leroy.inventorymanagementspringboot.dto.dashboard.AdminDashboardDto;
 import com.leroy.inventorymanagementspringboot.dto.dashboard.StaffDashboardDto;
 import com.leroy.inventorymanagementspringboot.dto.dashboard.StorekeeperDashboardDto;
-import com.leroy.inventorymanagementspringboot.entity.User;
 import com.leroy.inventorymanagementspringboot.servicei.DashboardServiceInterface;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,25 +24,22 @@ public class DashboardController {
 
     @GetMapping("/admin")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<AdminDashboardDto> getAdminDashboard(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        AdminDashboardDto dashboard = dashboardService.getAdminDashboard(user);
+    public ResponseEntity<AdminDashboardDto> getAdminDashboard(@AuthenticationPrincipal UserDetails userDetails) {
+        AdminDashboardDto dashboard = dashboardService.getAdminDashboard(userDetails);
         return ResponseEntity.ok(dashboard);
     }
 
     @GetMapping("/storekeeper")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<StorekeeperDashboardDto> getStorekeeperDashboard(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        StorekeeperDashboardDto dashboard = dashboardService.getStorekeeperDashboard(user);
+    public ResponseEntity<StorekeeperDashboardDto> getStorekeeperDashboard(@AuthenticationPrincipal UserDetails userDetails) {
+        StorekeeperDashboardDto dashboard = dashboardService.getStorekeeperDashboard(userDetails);
         return ResponseEntity.ok(dashboard);
     }
 
     @GetMapping("/staff")
     @PreAuthorize("hasAuthority('STAFF')")
-    public ResponseEntity<StaffDashboardDto> getStaffDashboard(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        StaffDashboardDto dashboard = dashboardService.getStaffDashboard(user);
+    public ResponseEntity<StaffDashboardDto> getStaffDashboard(@AuthenticationPrincipal UserDetails userDetails) {
+        StaffDashboardDto dashboard = dashboardService.getStaffDashboard(userDetails);
         return ResponseEntity.ok(dashboard);
     }
 }

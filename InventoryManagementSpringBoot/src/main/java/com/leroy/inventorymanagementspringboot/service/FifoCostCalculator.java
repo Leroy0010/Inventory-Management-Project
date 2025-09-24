@@ -1,4 +1,4 @@
-package com.leroy.inventorymanagementspringboot.service.report.calculator;
+package com.leroy.inventorymanagementspringboot.service;
 
 import com.leroy.inventorymanagementspringboot.entity.*;
 import com.leroy.inventorymanagementspringboot.strategy.CostCalculatorStrategy;
@@ -24,15 +24,19 @@ public class FifoCostCalculator implements CostCalculatorStrategy {
         Timestamp startDate = Timestamp.valueOf(start.atStartOfDay());
         Timestamp endDate = Timestamp.valueOf(end.plusDays(1).atStartOfDay());
         String query = """
-            SELECT ii.quantity, b.unit_price
-            FROM inventory_issuance ii
-            JOIN request_items ri ON ii.request_item_id = ri.id
-            JOIN requests r ON ri.request_id = r.id
-            JOIN inventory_batches b ON ii.batch_id = b.id
-            WHERE ri.item_id = :itemId
-              AND r.department_id = :deptId
-              AND ii.issued_at BETWEEN :startDate AND :endDate
-        """;
+    SELECT ii.quantity, b.unit_price
+    FROM inventory_issuance ii
+    JOIN request_items ri ON ii.requested_item_id = ri.id
+    JOIN requests r ON ri.request_id = r.id
+    JOIN users u ON r.user_id = u.id
+    JOIN offices o ON u.office_id = o.id
+    JOIN departments d ON o.department_id = d.id
+    JOIN inventory_batches b ON ii.batch_id = b.id
+    WHERE ri.item_id = :itemId
+      AND d.id = :deptId
+      AND ii.issued_at BETWEEN :startDate AND :endDate
+""";
+
 
         List<Object[]> results = entityManager.createNativeQuery(query)
                 .setParameter("itemId", item.getId())

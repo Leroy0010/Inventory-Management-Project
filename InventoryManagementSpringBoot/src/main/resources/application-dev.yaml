@@ -1,67 +1,67 @@
 # Development Profile Configuration
 spring:
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/InventoryManagementDB}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
-  
-  jpa:
-    hibernate:
-      ddl-auto: ${SPRING_JPA_DDL_AUTO:validate}
-    show-sql: ${SPRING_JPA_SHOW_SQL:true}
-    properties:
-      hibernate:
-        format_sql: ${SPRING_JPA_FORMAT_SQL:true}
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+    datasource:
+        url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/InventoryManagementDB}
+        username: ${SPRING_DATASOURCE_USERNAME:postgres}
+        password: ${SPRING_DATASOURCE_PASSWORD:postgres}
 
-  devtools:
-    restart:
-      enabled: ${SPRING_DEVTOOLS_RESTART:true}
-    livereload:
-      enabled: ${SPRING_DEVTOOLS_LIVERELOAD:true}
+    jpa:
+        hibernate:
+            ddl-auto: ${SPRING_JPA_DDL_AUTO:validate}
+        show-sql: ${SPRING_JPA_SHOW_SQL:false}
+        properties:
+            hibernate:
+                format_sql: ${SPRING_JPA_FORMAT_SQL:false}
+                dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:dev@example.com}
-    password: ${MAIL_PASSWORD:dev_password}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enabled: true
-            required: true
-        test-connection: false  # Disable for development
+    devtools:
+        restart:
+            enabled: ${SPRING_DEVTOOLS_RESTART:true}
+        livereload:
+            enabled: ${SPRING_DEVTOOLS_LIVERELOAD:true}
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:dev_client_id}
-            client-secret: ${GOOGLE_CLIENT_SECRET:dev_client_secret}
+    mail:
+        host: ${MAIL_HOST:smtp.gmail.com}
+        port: ${MAIL_PORT:587}
+        username: ${MAIL_USERNAME:dev@example.com}
+        password: ${MAIL_PASSWORD:dev_password}
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enabled: true
+                        required: true
+                test-connection: false # Disable for development
+
+    security:
+        oauth2:
+            client:
+                registration:
+                    google:
+                        client-id: ${GOOGLE_CLIENT_ID:dev_client_id}
+                        client-secret: ${GOOGLE_CLIENT_SECRET:dev_client_secret}
 
 # JWT Configuration for Development
 jwt:
-  secret: ${JWT_SECRET:dev_jwt_secret_key_must_be_at_least_64_bytes_base64_encoded_for_development_only}
-  expiration: ${JWT_EXPIRATION:86400000}  # 24 hours
-  refresh:
-    expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7 days
+    secret: ${JWT_SECRET:dev_jwt_secret_key_must_be_at_least_64_bytes_base64_encoded_for_development_only}
+    expiration: ${JWT_EXPIRATION:86400000} # 24 hours
+    refresh:
+        expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days
 
 # Server Configuration for Development
 server:
-  port: ${SERVER_PORT:8080}
-  servlet:
-    session:
-      cookie:
-        secure: false  # HTTP for development
-        same-site: Lax
+    port: ${SERVER_PORT:8080}
+    servlet:
+        session:
+            cookie:
+                secure: false # HTTP for development
+                same-site: Lax
 
 # Logging for Development
 logging:
-  level:
-    com.leroy.inventorymanagementspringboot: ${LOG_LEVEL:DEBUG}
-    org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
-    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:DEBUG}
-    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:TRACE}
+    level:
+        com.leroy.inventorymanagementspringboot: ${LOG_LEVEL:DEBUG}
+        org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+        org.hibernate.SQL: ${HIBERNATE_SQL_LOG:WARN}
+        org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:WARN}

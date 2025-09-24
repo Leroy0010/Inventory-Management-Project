@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: alter-inventory-batches-table
+      author: leroy
+      changes:
+        - addColumn:
+            tableName: inventory_batches
+            columns:
+              - column:
+                  name: supplier_name
+                  type: VARCHAR(255)
+              - column:
+                  name: invoice_id
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  defaultValue: "invoice-id"

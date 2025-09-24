@@ -26,6 +26,7 @@ public interface UserMapper {
     @Mapping(target = "bio", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "phone", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     User toUser(RegisterStoreKeeperDto registerStoreKeeperDto);
 
     // Mapping for StaffRegistrationDto
@@ -36,18 +37,19 @@ public interface UserMapper {
     @Mapping(target = "office", ignore = true) // Will be set manually
     @Mapping(target = "department", ignore = true) // Will be null for STAFF
     @Mapping(target = "active" , ignore = true)
-
+    @Mapping(target = "bio", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "phone", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     User toStaffUser(RegisterStaffDto registerStaffDto);
 
-    @Mapping(target = "jwt", ignore = true)
     @Mapping(target = "role", source = "role.name")
-    @Mapping(target = "userId", source = "id")
     AuthenticationResponse toAuthenticationResponse(User user);
 
     List<UserResponseDto> toUserResponseDtoList(List<User> users);
 
     @Mapping(target = "officeName", source = "office.name")
-    @Mapping(target = "departmentName", source = "office.department.name")
+    @Mapping(target = "departmentName", ignore = true)
     @Mapping(target = "roleName", source = "role.name")
     @Mapping(target = "fullName", expression = "java(user.getFullName())")
     UserResponseDto toUserResponseDto(User user);

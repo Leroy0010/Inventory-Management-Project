@@ -1,8 +1,7 @@
 package com.leroy.inventorymanagementspringboot.service;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -33,13 +32,14 @@ public class InventoryItemService implements InventoryItemServiceInterface {
     final InventoryItemRepository inventoryItemRepository;
     final InventoryItemMapper  inventoryItemMapper;
     private final UserRepository userRepository;
-    private final GoogleDriveService googleDriveService;
+    private final S3Service s3Service;
 
-    public InventoryItemService(InventoryItemRepository inventoryItemRepository, InventoryItemMapper inventoryItemMapper, UserRepository userRepository, GoogleDriveService googleDriveService) {
+
+    public InventoryItemService(InventoryItemRepository inventoryItemRepository, InventoryItemMapper inventoryItemMapper, UserRepository userRepository, S3Service s3Service) {
         this.inventoryItemRepository = inventoryItemRepository;
         this.inventoryItemMapper = inventoryItemMapper;
         this.userRepository = userRepository;
-        this.googleDriveService = googleDriveService;
+        this.s3Service = s3Service;
     }
 
 
@@ -72,15 +72,16 @@ public class InventoryItemService implements InventoryItemServiceInterface {
             throw new IllegalArgumentException("Inventory Item already exists");
         }
 
-        InventoryItem inventoryItem = inventoryItemMapper.toInventoryItem(createInventoryItemDto);
+        var inventoryItem = inventoryItemMapper.toInventoryItem(createInventoryItemDto);
         inventoryItem.setDepartment(storekeeper.getDepartment());
 
         // Upload image to Google Drive if provided
         if (image != null && !image.isEmpty()) {
             try {
                 String departmentName = storekeeper.getDepartment().getName();
-                String imageUrl = googleDriveService.uploadMultipartFile(image, departmentName);
+                String imageUrl = s3Service.uploadMultipartFile(image ,departmentName);
                 inventoryItem.setImagePath(imageUrl);
+
             } catch (IOException e) {
                 throw new RuntimeException("Failed to upload image to Google Drive: " + e.getMessage(), e);
             }
@@ -95,17 +96,17 @@ public class InventoryItemService implements InventoryItemServiceInterface {
             entityClass = InventoryItem.class,
             logBefore = true
     )
-    public InventoryItem updateInventoryItem(UpdateInventoryItemDto inventoryItem, UserDetails  userDetails) {
+    public InventoryItem updateInventoryItem(long id, UpdateInventoryItemDto inventoryItem, UserDetails  userDetails) {
         User storekeeper = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         if(storekeeper.getDepartment() == null) {
             throw new IllegalArgumentException("Department not found");
         }
 
-        if (!inventoryItemRepository.existsById(inventoryItem.getId())) {
+        if (!inventoryItemRepository.existsById((int) id)) {
             throw new ResourceNotFoundException("Inventory Item does not exist");
         }
 
-        if (inventoryItemRepository.existsByNameAndDepartmentAndIdNot(inventoryItem.getName(), storekeeper.getDepartment(), inventoryItem.getId())) {
+        if (inventoryItemRepository.existsByNameAndDepartmentAndIdNot(inventoryItem.getName(), storekeeper.getDepartment(), (int) id)) {
             throw new IllegalArgumentException("Inventory Item already exists. Try changing the name");
         }
 
@@ -115,7 +116,7 @@ public class InventoryItemService implements InventoryItemServiceInterface {
     }
 
     @Override
-    public Optional<List<InventoryItemResponseDto>> getItemsByDepartment(UserDetails userDetails) {
+    public List<InventoryItemResponseDto> getItemsByDepartment(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         Department department;
         if (user.getRole().getName().equals("STOREKEEPER"))
@@ -127,27 +128,26 @@ public class InventoryItemService implements InventoryItemServiceInterface {
             throw new IllegalArgumentException("Department not found");
         }
 
-        Optional<List<InventoryItem>> inventoryItemsOpt = inventoryItemRepository.findAllByDepartment(department);
+        return inventoryItemRepository.findAllByDepartment(department)
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .map(item -> {
+                    int totalQuantity = item.getBatches() == null ? 0 :
+                            item.getBatches().stream()
+                                    .mapToInt(InventoryBatch::getRemainingQuantity)
+                                    .sum();
 
-        return inventoryItemsOpt.map(inventoryItems -> inventoryItems.stream().map(item -> {
-            InventoryItemResponseDto dto = new InventoryItemResponseDto();
-            dto.setId(item.getId());
-            dto.setName(item.getName());
-            dto.setDescription(item.getDescription());
-            dto.setUnit(item.getUnit());
-            dto.setImagePath(item.getImagePath());
-            dto.setReorderLevel(item.getReorderLevel());
+                    // Filter before mapping if STAFF
+                    if ("STAFF".equals(user.getRole().getName()) && totalQuantity <= 0) {
+                        return null; // will be filtered out
+                    }
 
-            // 👉 Sum up the remaining quantities from batches
-            int totalQuantity = item.getBatches() == null ? 0 :
-                    item.getBatches().stream()
-                            .mapToInt(InventoryBatch::getRemainingQuantity)
-                            .sum();
-
-            dto.setQuantity(totalQuantity);
-
-            return dto;
-        }).toList());
+                    // Delegate mapping to MapStruct, passing quantity
+                    return inventoryItemMapper.toInventoryItemResponseDto(item, totalQuantity);
+                })
+                .filter(Objects::nonNull)
+                .toList();
+//                .orElseGet(ArrayList::new);
     }
 
 
@@ -157,21 +157,21 @@ public class InventoryItemService implements InventoryItemServiceInterface {
             entityClass = InventoryItem.class,
             logBefore = true
     )
-    public InventoryItemResponseDto deleteInventoryItem(InventoryItemResponseDto inventoryItem, UserDetails userDetails) {
+    public void deleteInventoryItem(long id, UserDetails userDetails) {
         User storekeeper = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        if (!inventoryItemRepository.existsById(inventoryItem.getId())) {
+
+        if (!inventoryItemRepository.existsById((int) id)) {
             throw new IllegalArgumentException("Inventory Item does not exist");
         }
 
-        if(!inventoryItemRepository.existsByIdAndDepartment(inventoryItem.getId(), storekeeper.getDepartment())) {
+        if(!inventoryItemRepository.existsByIdAndDepartment((int) id, storekeeper.getDepartment())) {
             throw new IllegalCallerException("Item does not exist in your Inventory Collection");
         }
-        inventoryItemRepository.deleteById(inventoryItem.getId());
+        inventoryItemRepository.deleteById((int) id);
 
-        return inventoryItem;
     }
 
-    public InventoryItemResponseDto getInventoryItemById(int id, UserDetails userDetails) {
+    public InventoryItemResponseDto getInventoryItemById(long id, UserDetails userDetails) {
         User user =  userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Department department;
@@ -184,7 +184,7 @@ public class InventoryItemService implements InventoryItemServiceInterface {
             throw new IllegalArgumentException("Department not found");
         }
 
-        InventoryItem item = inventoryItemRepository.findByIdAndDepartment(id, department).orElseThrow(() -> new EntityNotFoundException("Inventory Item does not exist"));
+        InventoryItem item = inventoryItemRepository.findByIdAndDepartment((int) id, department).orElseThrow(() -> new EntityNotFoundException("Inventory Item does not exist"));
         InventoryItemResponseDto dto = new InventoryItemResponseDto();
         dto.setId(item.getId());
         dto.setName(item.getName());
@@ -204,15 +204,16 @@ public class InventoryItemService implements InventoryItemServiceInterface {
         return dto;
     }
 
-    public Optional<List<InventoryItemNameAndIdResponseDto>> getInventoryItemNameAndId(UserDetails userDetails) {
+    public List<InventoryItemNameAndIdResponseDto> getInventoryItemNameAndId(UserDetails userDetails) {
         User storekeeper =  userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         Department department =  storekeeper.getDepartment();
         if (department == null)
             throw new IllegalArgumentException("Department not found");
 
-        var items = inventoryItemRepository.findAllByDepartment(department);
+        var items = inventoryItemRepository.findAllByDepartment(department).orElseGet(ArrayList::new);
 
         return items
-                .map(itemsDto -> itemsDto.stream().map(inventoryItemMapper::toInventoryItemNameAndIdDto).toList());
+                .stream()
+                .map(inventoryItemMapper::toInventoryItemNameAndIdDto).toList();
     }
 }

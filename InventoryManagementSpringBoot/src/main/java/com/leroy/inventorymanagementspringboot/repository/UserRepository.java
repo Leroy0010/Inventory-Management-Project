@@ -14,10 +14,9 @@ import com.leroy.inventorymanagementspringboot.entity.Office;
 import com.leroy.inventorymanagementspringboot.entity.Role;
 import com.leroy.inventorymanagementspringboot.entity.User;
 
-public interface UserRepository extends JpaRepository<User,Integer> {
+public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByEmail(String email);
-
 
     Optional<List<User>> findAllByOffice_Department(Department department);
 
@@ -39,25 +38,39 @@ public interface UserRepository extends JpaRepository<User,Integer> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.office.department = :department")
     long countByDepartment(@Param("department") Department department);
-    
+
     @Query("SELECT COUNT(u) FROM User u WHERE (u.department = :department OR (u.office IS NOT NULL AND u.office.department = :department))")
     long countByDepartmentIncludingOffice(@Param("department") Department department);
 
     // User Activity Report methods
     List<User> findByDepartmentId(Integer departmentId);
-    
+
     @Query("SELECT u FROM User u WHERE u.department.id = :departmentId AND u.office.id = :officeId")
-    List<User> findByDepartmentIdAndOfficeId(@Param("departmentId") Integer departmentId, 
-                                           @Param("officeId") Integer officeId);
-    
+    List<User> findByDepartmentIdAndOfficeId(@Param("departmentId") Integer departmentId,
+            @Param("officeId") Integer officeId);
+
+    /**
+     * Find users whose office belongs to the given department.
+     * This is used for User Activity Reports where we need staff users
+     * whose office.department matches the storekeeper's department.
+     */
+    @Query("SELECT u FROM User u WHERE u.office.department.id = :departmentId")
+    List<User> findUsersByOfficeDepartment(@Param("departmentId") Integer departmentId);
+
     // Dashboard methods
     long countByRoleName(String roleName);
-    
+
     // Office staff count methods
     long countByOffice(Office office);
-    
+
     @Query("SELECT COUNT(u) FROM User u WHERE u.office.id = :officeId")
     long countByOfficeId(@Param("officeId") int officeId);
-    
 
+    /**
+     * Counts all users whose office belongs to the given department.
+     * This method directly maps to the `office.department` condition you specified.
+     */
+    long countByOffice_Department(Department department);
+
+    Optional<User> findByDepartmentAndRoleName(Department department, String storekeeperRole);
 }

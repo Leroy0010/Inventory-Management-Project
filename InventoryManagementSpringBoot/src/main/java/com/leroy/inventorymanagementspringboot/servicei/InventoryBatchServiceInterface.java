@@ -5,7 +5,13 @@ import com.leroy.inventorymanagementspringboot.dto.response.InventoryBatchRespon
 import com.leroy.inventorymanagementspringboot.entity.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.List;
+
 public interface InventoryBatchServiceInterface {
     InventoryBatchResponseDto addInventoryBatch(CreateBatchDto createBatchDto, UserDetails userDetails);
+
+    List<InventoryBatchResponseDto> getAllInventoryBatches(UserDetails userDetails);
+
+    InventoryBatchResponseDto getInventoryBatchById(long id);
 
 }

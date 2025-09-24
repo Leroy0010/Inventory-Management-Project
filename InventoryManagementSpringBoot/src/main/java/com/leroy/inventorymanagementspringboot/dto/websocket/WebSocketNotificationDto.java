@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @Data
 @AllArgsConstructor
 public class WebSocketNotificationDto {
-    private long id;
+    private Long id;
     private String title;
     private String message;
     private boolean isRead;

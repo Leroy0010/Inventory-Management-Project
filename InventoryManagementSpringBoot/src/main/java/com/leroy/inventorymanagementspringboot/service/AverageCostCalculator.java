@@ -1,4 +1,4 @@
-package com.leroy.inventorymanagementspringboot.service.report.calculator;
+package com.leroy.inventorymanagementspringboot.service;
 
 import com.leroy.inventorymanagementspringboot.entity.InventoryItem;
 import com.leroy.inventorymanagementspringboot.entity.Department;

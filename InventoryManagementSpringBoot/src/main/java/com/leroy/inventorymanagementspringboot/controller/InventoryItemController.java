@@ -1,7 +1,6 @@
 package com.leroy.inventorymanagementspringboot.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,43 +63,46 @@ public class InventoryItemController {
                 .body(inventoryItemService.addInventoryItemWithImage(inventoryItem, image, storekeeper));
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<InventoryItem> updateInventoryItem(@Valid @RequestBody UpdateInventoryItemDto inventoryItem, @AuthenticationPrincipal UserDetails storekeeper) {
-        return ResponseEntity.status(HttpStatus.OK).body(inventoryItemService.updateInventoryItem(inventoryItem, storekeeper));
+    public ResponseEntity<InventoryItem> updateInventoryItem(@Valid @RequestBody UpdateInventoryItemDto inventoryItem, @PathVariable long id, @AuthenticationPrincipal UserDetails storekeeper) {
+        return ResponseEntity.status(HttpStatus.OK).body(inventoryItemService.updateInventoryItem(id, inventoryItem, storekeeper));
     }
 
     @GetMapping("/get-all-department-names")
     @PreAuthorize("hasAnyAuthority('STOREKEEPER', 'STAFF')")
-    public ResponseEntity<Optional<List<String>>> getInventoryItemNamesByDepartment(@AuthenticationPrincipal UserDetails user
+    public ResponseEntity<List<String>> getInventoryItemNamesByDepartment(@AuthenticationPrincipal UserDetails user
     ) {
-        Optional<List<String>> itemNames = inventoryItemService.getItemsByDepartment(user)
-                .map(item  -> item.stream().map(InventoryItemResponseDto::getName).toList());
+        List<String> itemNames = inventoryItemService
+                .getItemsByDepartment(user)
+                .stream()
+                .map(InventoryItemResponseDto::getName).toList();
         return ResponseEntity.status(HttpStatus.OK).body(itemNames);
     }
 
     @GetMapping("/get-all-department")
     @PreAuthorize("hasAnyAuthority('STOREKEEPER', 'STAFF')")
-    public ResponseEntity<Optional<List<InventoryItemResponseDto>>> getInventoryItemsByDepartment(@AuthenticationPrincipal UserDetails user
+    public ResponseEntity<List<InventoryItemResponseDto>> getInventoryItemsByDepartment(@AuthenticationPrincipal UserDetails user
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(inventoryItemService.getItemsByDepartment(user));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<InventoryItemResponseDto> deleteInventoryItem(@Valid @RequestBody InventoryItemResponseDto inventoryItem, @AuthenticationPrincipal UserDetails storekeeper) {
-        return ResponseEntity.status(HttpStatus.OK).body(inventoryItemService.deleteInventoryItem(inventoryItem, storekeeper));
+    public ResponseEntity<String> deleteInventoryItem(@Valid @PathVariable long id ,@AuthenticationPrincipal UserDetails storekeeper) {
+        inventoryItemService.deleteInventoryItem(id, storekeeper);
+        return ResponseEntity.status(HttpStatus.OK).body("Item deleted");
     }
 
-    @GetMapping("/get-by-id/{id}")
+    @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('STOREKEEPER', 'STAFF')")
-    public ResponseEntity<InventoryItemResponseDto> getInventoryItemById(@Valid @PathVariable int id,  @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<InventoryItemResponseDto> getInventoryItemById(@Valid @PathVariable long id,  @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(inventoryItemService.getInventoryItemById(id, userDetails));
     }
 
     @GetMapping("/get-item-name-id")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<Optional<List<InventoryItemNameAndIdResponseDto>>> getInventoryItemNameAndId(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<InventoryItemNameAndIdResponseDto>> getInventoryItemNameAndId(@AuthenticationPrincipal UserDetails userDetails) {
         try {
             return ResponseEntity.ok(inventoryItemService.getInventoryItemNameAndId(userDetails));
         } catch (EntityNotFoundException exception){

@@ -5,7 +5,7 @@ import com.leroy.inventorymanagementspringboot.dto.report.InventorySummaryReport
 import com.leroy.inventorymanagementspringboot.entity.Department;
 import com.leroy.inventorymanagementspringboot.enums.CostFlowMethod;
 import com.leroy.inventorymanagementspringboot.enums.InventorySummaryType;
-import com.leroy.inventorymanagementspringboot.service.report.InventorySummaryReportService;
+import com.leroy.inventorymanagementspringboot.service.InventorySummaryReportService;
 import com.leroy.inventorymanagementspringboot.strategy.QuantitySummaryStrategy;
 import com.leroy.inventorymanagementspringboot.strategy.ValueSummaryStrategy;
 import com.leroy.inventorymanagementspringboot.util.DateRangeUtil;

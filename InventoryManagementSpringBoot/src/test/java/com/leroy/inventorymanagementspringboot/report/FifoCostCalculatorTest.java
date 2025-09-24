@@ -2,7 +2,7 @@ package com.leroy.inventorymanagementspringboot.report;
 
 import com.leroy.inventorymanagementspringboot.entity.Department;
 import com.leroy.inventorymanagementspringboot.entity.InventoryItem;
-import com.leroy.inventorymanagementspringboot.service.report.calculator.FifoCostCalculator;
+import com.leroy.inventorymanagementspringboot.service.FifoCostCalculator;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import org.junit.jupiter.api.Test;

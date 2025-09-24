@@ -1,11 +1,8 @@
 package com.leroy.inventorymanagementspringboot.config;
 
-import com.leroy.inventorymanagementspringboot.security.JwtAuthenticationFilter;
-import com.leroy.inventorymanagementspringboot.security.OAuth2AuthenticationSuccessHandler;
-import com.leroy.inventorymanagementspringboot.security.OAuth2AuthenticationFailureHandler;
-import com.leroy.inventorymanagementspringboot.service.CustomUserDetailService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
@@ -16,21 +13,24 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.csrf.CsrfTokenRepository;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import com.leroy.inventorymanagementspringboot.security.JwtAuthenticationFilter;
+import com.leroy.inventorymanagementspringboot.security.OAuth2AuthenticationFailureHandler;
+import com.leroy.inventorymanagementspringboot.security.OAuth2AuthenticationSuccessHandler;
+import com.leroy.inventorymanagementspringboot.service.CustomUserDetailService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -72,14 +72,6 @@ public class SecurityConfig {
         return new ProviderManager(authenticationProvider());
     }
 
-    @Bean
-    public CsrfTokenRepository csrfTokenRepository() {
-        CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        tokenRepository.setCookiePath("/");
-        tokenRepository.setCookieName("XSRF-TOKEN");
-        tokenRepository.setHeaderName("X-XSRF-TOKEN");
-        return tokenRepository;
-    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -102,11 +94,8 @@ public class SecurityConfig {
                 // CORS configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 
-                // CSRF protection with proper configuration
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(csrfTokenRepository())
-                        .ignoringRequestMatchers("/api/auth/login", "/api/auth/google", "/api/auth/refresh", "/api/auth/logout", "/oauth2/**", "/login/oauth2/**")
-                )
+                // CSRF protection disabled - using JWT tokens for authentication
+                .csrf(AbstractHttpConfigurer::disable)
                 
                 // OAuth2 configuration
                 .oauth2Login(oauth2 -> oauth2
@@ -117,12 +106,16 @@ public class SecurityConfig {
                 
                 // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/auth/**").permitAll()
+                        .requestMatchers("/api/csrf-token").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/login/oauth2/**").permitAll()
+                        .requestMatchers("/ws-notifications/**").permitAll() // Allow WebSocket connections
+                        .requestMatchers("/api/cart/**").hasAuthority("STAFF")
+                        .requestMatchers("/api/users/get-profile", "/api/users/update-profile", "/api/users/change-password").authenticated()
+                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "STOREKEEPER")
                         .requestMatchers("/api/departments/**").hasAnyAuthority("ADMIN", "STOREKEEPER")
                         .requestMatchers("/api/offices/**").hasAnyAuthority("ADMIN", "STOREKEEPER")
-                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "STOREKEEPER")
                         .requestMatchers("/api/reports/**").hasAnyAuthority("ADMIN", "STOREKEEPER")
                         .anyRequest().authenticated()
                 )
@@ -132,7 +125,7 @@ public class SecurityConfig {
                 
                 // Security headers
                 .headers(headers -> headers
-                        .frameOptions(frameOptions -> frameOptions.deny())
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
                         .contentTypeOptions(contentTypeOptions -> {})
                         .httpStrictTransportSecurity(hstsConfig -> hstsConfig
                                 .maxAgeInSeconds(31536000)
@@ -167,15 +160,5 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-    // New Bean for OAuth2 Authentication Failure Handler
-    @Bean
-    public AuthenticationFailureHandler oauth2AuthenticationFailureHandler() {
-        return (request, response, exception) -> {
-            logger.error("OAuth2 Login Failure: {}\n{}", exception.getMessage(), Arrays.toString(exception.getStackTrace()));
-            System.err.println("OAuth2 Login Failure: " + exception.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "OAuth2 Login Failed: " + exception.getMessage());
-        };
     }
 }

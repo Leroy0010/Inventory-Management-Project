@@ -4,8 +4,6 @@ import com.leroy.inventorymanagementspringboot.entity.*;
 import com.leroy.inventorymanagementspringboot.enums.CostFlowMethod;
 import com.leroy.inventorymanagementspringboot.enums.StockTransactionType;
 import com.leroy.inventorymanagementspringboot.repository.*;
-import com.leroy.inventorymanagementspringboot.service.report.calculator.AverageCostCalculator;
-import com.leroy.inventorymanagementspringboot.service.report.calculator.FifoCostCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +15,6 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;

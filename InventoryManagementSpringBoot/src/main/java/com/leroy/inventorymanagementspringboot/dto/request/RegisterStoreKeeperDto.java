@@ -3,11 +3,9 @@ package com.leroy.inventorymanagementspringboot.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class RegisterStoreKeeperDto { // For Admin to register ADMIN or STOREKEEPER
 
     @Email(message = "Invalid email format")

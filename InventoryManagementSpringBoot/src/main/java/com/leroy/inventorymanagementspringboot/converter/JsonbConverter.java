@@ -13,7 +13,12 @@ import java.util.Map;
 @Converter()
 public class JsonbConverter implements AttributeConverter<Map<String, Object>, Object> {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private  final ObjectMapper objectMapper;
+
+    public JsonbConverter(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
 
     @Override
     public Object convertToDatabaseColumn(Map<String, Object> attribute) {

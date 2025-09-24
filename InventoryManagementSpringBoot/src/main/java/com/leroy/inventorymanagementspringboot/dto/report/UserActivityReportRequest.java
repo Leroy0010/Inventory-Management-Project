@@ -9,28 +9,29 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class UserActivityReportRequest {
-    
+
     // Time period options
-    private Integer year;                    // Optional - for single year reports
-    private LocalDate startDate;             // Optional - for custom date range
-    private LocalDate endDate;               // Optional - for custom date range
-    
+    private Integer year; // Optional - for single year reports
+    private Integer month; // Optional - for specific month (1-12)
+    private LocalDate startDate; // Optional - for custom date range
+    private LocalDate endDate; // Optional - for custom date range
+
     // Filtering options
-    private Integer officeId;                // Optional - filter by specific office
-    private String search;                   // Optional - search by user name or email
-    private String sortBy;                   // Optional - sort field (name, requests, lastActivity, etc.)
-    private String sortOrder;                // Optional - sort direction (ASC, DESC)
-    
+    private Integer officeId; // Optional - filter by specific office
+    private Integer userId; // Optional - filter by specific user (staff/storekeeper)
+    private String sortBy; // Optional - sort field (name, requests, lastActivity, etc.)
+    private String sortOrder; // Optional - sort direction (ASC, DESC)
+
     // Activity type filters
-    private Boolean includeSubmissions;      // Optional - include request submissions
-    private Boolean includeApprovals;        // Optional - include request approvals
-    private Boolean includeRejections;       // Optional - include request rejections
-    private Boolean includeFulfillments;     // Optional - include request fulfillments
-    
+    private Boolean includeSubmissions; // Optional - include request submissions
+    private Boolean includeApprovals; // Optional - include request approvals
+    private Boolean includeRejections; // Optional - include request rejections
+    private Boolean includeFulfillments; // Optional - include request fulfillments
+
     // User status filters
-    private Boolean activeOnly;              // Optional - show only active users
-    private String roleFilter;               // Optional - filter by role (STAFF, STOREKEEPER, etc.)
-    
+    private Boolean activeOnly; // Optional - show only active users
+    private String roleFilter; // Optional - filter by role (STAFF, STOREKEEPER)
+
     public UserActivityReportRequest() {
         // Default values
         this.includeSubmissions = true;
@@ -39,13 +40,19 @@ public class UserActivityReportRequest {
         this.includeFulfillments = true;
         this.activeOnly = false;
     }
-    
+
     // Validation method
     public boolean isValid() {
-        // Must have either year or date range
+        // Must have either year (with optional month) or date range
         boolean hasYear = year != null && year > 0;
+        boolean hasMonth = month != null && month >= 1 && month <= 12;
         boolean hasDateRange = startDate != null && endDate != null && !startDate.isAfter(endDate);
-        
+
+        // If month is provided, year must also be provided
+        if (hasMonth && !hasYear) {
+            return false;
+        }
+
         return hasYear || hasDateRange;
     }
 }

@@ -37,6 +37,12 @@ public class InventoryBatch {
     @Column(name = "batch_date")
     private Timestamp batchDate;
 
+    @Column(name = "supplier_name")
+    private String supplierName;
+
+    @Column(name = "invoice_id")
+    private String invoiceId;
+
 
     public InventoryBatch(InventoryItem inventoryItem, int quantity, BigDecimal unitPrice) {
         this.inventoryItem = inventoryItem;

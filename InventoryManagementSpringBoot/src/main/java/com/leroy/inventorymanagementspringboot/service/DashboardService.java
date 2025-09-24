@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.leroy.inventorymanagementspringboot.entity.*;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,8 +45,9 @@ public class DashboardService implements DashboardServiceInterface {
 
 
     @Override
-    public AdminDashboardDto getAdminDashboard(User user) {
+    public AdminDashboardDto getAdminDashboard(UserDetails userDetails) {
         // Get basic counts
+        var user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         long totalDepartments = departmentRepository.count();
         long totalStorekeepers = userRepository.countByRoleName("STOREKEEPER");
         long unreadNotifications = notificationRepository.countByUserAndIsReadFalse(user);
@@ -134,12 +137,13 @@ public class DashboardService implements DashboardServiceInterface {
     }
 
     @Override
-    public StorekeeperDashboardDto getStorekeeperDashboard(User user) {
+    public StorekeeperDashboardDto getStorekeeperDashboard(UserDetails userDetails) {
         // Get real data from database
+        var user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         long unreadNotifications = notificationRepository.countByUserAndIsReadFalse(user);
         
         // Get department-specific data
-        Department department = user.getOffice() != null ? user.getOffice().getDepartment() : null;
+        Department department = user.getDepartment();
         long departmentInventoryItems = department != null ? inventoryItemRepository.countByDepartment(department) : 0;
         long lowStockItems = department != null ? inventoryItemRepository.countByDepartmentAndQuantityLessThanReorderLevel(department) : 0;
         
@@ -199,7 +203,7 @@ public class DashboardService implements DashboardServiceInterface {
                 .description("Add and manage inventory items")
                 .icon("Package")
                 .color("bg-blue-500")
-                .href("/inventory/add")
+                .href("/inventory-items/add")
                 .build(),
             QuickActionDto.builder()
                 .title("Manage Staff")
@@ -235,7 +239,7 @@ public class DashboardService implements DashboardServiceInterface {
         return StorekeeperDashboardDto.builder()
             .welcomeMessage("Welcome back, " + user.getFirstName() + "!")
             .role("Storekeeper")
-            .departmentName(department != null ? department.getName() : "Department")
+            .departmentName(department != null ? department.getName() : "No Department")
             .stats(stats)
             .quickActions(quickActions)
             .recentRequests(recentRequestsDto)
@@ -245,9 +249,10 @@ public class DashboardService implements DashboardServiceInterface {
     }
 
     @Override
-    public StaffDashboardDto getStaffDashboard(User user) {
+    public StaffDashboardDto getStaffDashboard(UserDetails userDetails) {
         // Get real data from database
-        long totalInventoryItems = inventoryItemRepository.count();
+        var user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        long totalInventoryItems = inventoryItemRepository.countByDepartmentAndQuantityEqualToZero(user.getOffice().getDepartment());
         long unreadNotifications = notificationRepository.countByUserAndIsReadFalse(user);
         
         // Get user's cart data

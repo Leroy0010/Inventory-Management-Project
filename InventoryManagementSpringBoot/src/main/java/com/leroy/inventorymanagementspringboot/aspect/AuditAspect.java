@@ -21,7 +21,7 @@ import java.util.Map;
 public class AuditAspect {
 
     private final AuditLogRepository auditLogRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private final RequestRepository requestRepository;
     private final InventoryItemRepository inventoryItemRepository;
     private final InventoryBatchRepository inventoryBatchRepository;
@@ -33,7 +33,7 @@ public class AuditAspect {
     private final StockTransactionRepository stockTransactionRepository;
 
     public AuditAspect(
-            AuditLogRepository auditLogRepository,
+            AuditLogRepository auditLogRepository, ObjectMapper objectMapper,
             RequestRepository requestRepository,
             InventoryItemRepository inventoryItemRepository,
             InventoryBatchRepository inventoryBatchRepository,
@@ -45,6 +45,7 @@ public class AuditAspect {
             StockTransactionRepository stockTransactionRepository
     ) {
         this.auditLogRepository = auditLogRepository;
+        this.objectMapper = objectMapper;
         this.requestRepository = requestRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.inventoryBatchRepository = inventoryBatchRepository;

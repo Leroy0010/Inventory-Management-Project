@@ -2,14 +2,14 @@ package com.leroy.inventorymanagementspringboot.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference; // Import this
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter @Setter
+@Data
 @Entity
 @Table(name = "requests")
 public class Request {

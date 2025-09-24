@@ -33,9 +33,10 @@ public class OfficeController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<Office> addOffice(@Valid @RequestBody CreateOfficeDto officeDto, @AuthenticationPrincipal UserDetails authenticatedUser) {
-        Office office = officeService.addOffice(officeDto, authenticatedUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(office);
+    public ResponseEntity<String> addOffice(@Valid @RequestBody CreateOfficeDto officeDto, @AuthenticationPrincipal UserDetails authenticatedUser) {
+        officeService.addOffice(officeDto, authenticatedUser);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Office created");
     }
 
     @GetMapping
@@ -55,20 +56,27 @@ public class OfficeController {
 
     @GetMapping("/names")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<?> getOfficeNames(@AuthenticationPrincipal UserDetails authenticatedUser) {
+    public ResponseEntity<List<String>> getOfficeNames(@AuthenticationPrincipal UserDetails authenticatedUser) {
         try {
-            User storeKeeper = userRepository.findByEmail(authenticatedUser.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not not found"));
-            Optional<List<String>> officeNames = Optional.of(officeService
-                    .getOfficesByDepartment(storeKeeper.getDepartment())
-                    .get()
-                    .stream()
-                    .map(OfficeResponseDto::getName).toList());
+            User storeKeeper = userRepository.findByEmail(authenticatedUser.getUsername())
+                    .orElseThrow(() -> new EntityNotFoundException("User not not found"));
+
+            Optional<List<OfficeResponseDto>> offices = officeService.getOfficesByDepartment(storeKeeper.getDepartment());
+
+            if (offices.isEmpty()) {
+                return ResponseEntity.ok(List.of()); // Return an empty list if no offices are found
+            }
+
+            List<String> officeNames = offices.get().stream()
+                    .map(OfficeResponseDto::getName)
+                    .toList();
+
             return ResponseEntity.status(HttpStatus.OK).body(officeNames);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            // You should handle this more gracefully, but for now, this works.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of());
         }
     }
-
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
     public ResponseEntity<OfficeResponseDto> getOfficeById(@PathVariable int id, @AuthenticationPrincipal UserDetails authenticatedUser) {

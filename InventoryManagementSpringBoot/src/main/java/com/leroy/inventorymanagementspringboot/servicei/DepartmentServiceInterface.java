@@ -1,13 +1,16 @@
 package com.leroy.inventorymanagementspringboot.servicei;
 
 import com.leroy.inventorymanagementspringboot.dto.request.CreateDepartmentDto;
-import com.leroy.inventorymanagementspringboot.entity.Department;
+import com.leroy.inventorymanagementspringboot.dto.response.DepartmentDto;
+import com.leroy.inventorymanagementspringboot.dto.response.DepartmentResponseDto;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
 public interface DepartmentServiceInterface {
-    Department addDepartment(CreateDepartmentDto departmentDto);
+    DepartmentDto addDepartment(CreateDepartmentDto departmentDto);
     String getCurrentUserDepartmentName(UserDetails userDetails);
-    List<Department> getAllDepartments();
+    List<DepartmentDto> getAllDepartments();
+
+    List<DepartmentResponseDto> fetchAllDepartments();
 }

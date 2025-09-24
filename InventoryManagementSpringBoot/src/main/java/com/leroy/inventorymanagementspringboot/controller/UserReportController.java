@@ -1,68 +1,52 @@
 package com.leroy.inventorymanagementspringboot.controller;
 
-import com.leroy.inventorymanagementspringboot.dto.report.UserReportItemDto;
-import com.leroy.inventorymanagementspringboot.dto.report.UserReportRequest;
-import com.leroy.inventorymanagementspringboot.dto.report.UserReportResponseDto;
-import com.leroy.inventorymanagementspringboot.entity.User;
-import com.leroy.inventorymanagementspringboot.repository.UserRepository;
-import com.leroy.inventorymanagementspringboot.service.report.UserReportService;
-import org.springframework.security.core.userdetails.UserDetails;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.leroy.inventorymanagementspringboot.dto.report.UserReportRequest;
+import com.leroy.inventorymanagementspringboot.dto.report.UserReportResponseDto;
+import com.leroy.inventorymanagementspringboot.service.UserReportService;
+import lombok.AllArgsConstructor;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/reports/user")
 public class UserReportController {
 
     private final UserReportService userReportService;
-    private final UserRepository userRepository;
 
-    public UserReportController(UserReportService userReportService, UserRepository userRepository) {
-        this.userReportService = userReportService;
-        this.userRepository = userRepository;
-    }
-
-    @PostMapping
+    @GetMapping
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<List<UserReportItemDto>> getUserReport(@Valid @RequestBody UserReportRequest request) {
-        return ResponseEntity.ok(userReportService.generateUserReport(request));
-    }
-
-    @GetMapping("/all")
-    @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<UserReportResponseDto> getAllUsersReport(
+    public ResponseEntity<UserReportResponseDto> getUserReport(
+            @RequestParam(required = false) Integer userId,
             @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String sortOrder,
-            UserDetails userDetails
-    ) {
-        // Get current user from database
-        User currentUser = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        
-        UserReportResponseDto response = userReportService.getAllUsersReport(
-                currentUser, year, search, sortBy, sortOrder
-        );
-        return ResponseEntity.ok(response);
+            @RequestParam(required = false) String sortOrder) {
+        // Validate that at least userId and either year or date range is provided
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID is required");
+        }
+
+        if (year == null && (startDate == null || endDate == null)) {
+            throw new IllegalArgumentException("Either year or date range (startDate and endDate) is required");
+        }
+
+        UserReportRequest request = new UserReportRequest();
+        request.setUserId(userId);
+        request.setYear(year);
+        if (startDate != null) {
+            request.setStartDate(java.time.LocalDate.parse(startDate));
+        }
+        if (endDate != null) {
+            request.setEndDate(java.time.LocalDate.parse(endDate));
+        }
+
+        return ResponseEntity.ok(userReportService.generateUserReport(request, sortBy, sortOrder));
     }
 
-    @GetMapping("/department/{departmentId}")
-    @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<UserReportResponseDto> getDepartmentUserReport(
-            @PathVariable Integer departmentId,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String sortOrder
-    ) {
-        UserReportResponseDto response = userReportService.getDepartmentUserReport(
-                departmentId, year, search, sortBy, sortOrder
-        );
-        return ResponseEntity.ok(response);
-    }
 }

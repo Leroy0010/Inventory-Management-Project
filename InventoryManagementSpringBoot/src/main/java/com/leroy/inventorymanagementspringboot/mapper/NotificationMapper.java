@@ -9,5 +9,6 @@ import org.mapstruct.Mapping;
 public interface NotificationMapper {
     @Mapping(target = "requestId", source = "request.id")
     @Mapping(target = "itemId", source = "inventoryItem.id")
+
     NotificationResponseDto toDto(Notification notification);
 }

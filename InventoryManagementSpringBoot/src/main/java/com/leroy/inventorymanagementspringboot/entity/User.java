@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.sql.Timestamp; // This should ideally be java.time.LocalDateTime for modern Java APIs
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +18,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id; // Consider changing to Long for consistency and future-proofing
+    private Integer id; // Consider changing to Long for consistency and future-proofing
 
     @Email
     @NotBlank
@@ -64,6 +65,9 @@ public class User {
 
     private String bio;
 
+    @Column(name = "created_at")
+    private LocalDate createdAt;
+
     public String getFullName() {
         return firstName + " " + lastName;
     }
@@ -78,6 +82,7 @@ public class User {
         this.role = role;
         this.office = office;
         this.active = true;
+        this.createdAt = LocalDate.now();
     }
 
     public User(String email, String password, String firstName, String lastName,
@@ -89,6 +94,7 @@ public class User {
         this.role = role;
         this.department = department;
         this.active = true;
+        this.createdAt = LocalDate.now();
     }
 
     @Override

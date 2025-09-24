@@ -1,6 +1,7 @@
 package com.leroy.inventorymanagementspringboot.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +21,7 @@ public class CartItem {
 
 
     @Column(nullable = false)
-    @Size(min = 1)
+    @Min(value = 1)
     private int quantity;
 
     @ManyToOne

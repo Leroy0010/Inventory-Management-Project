@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Service
 @Transactional
@@ -67,10 +68,25 @@ public class InventoryBatchService implements InventoryBatchServiceInterface {
         inventoryBatch.setUnitPrice(unitPrice);
         inventoryBatchRepository.save(inventoryBatch);
         InventoryBatchResponseDto inventoryBatchResponseDto = inventoryBatchMapper.toInventoryBatchResponseDto(inventoryBatch);
-        inventoryBatchResponseDto.setTotalPrice(createBatchDto.getTotalPrice());
         stockTransactionService
                 .recordTransaction(inventoryItem, StockTransactionType.IN, createBatchDto.getQuantity(), unitPrice, null, createBatchDto.getSupplierName(), createBatchDto.getInvoiceId(), inventoryBatch, storeKeeper);
 
         return inventoryBatchResponseDto;
     }
+
+    @Override
+    public List<InventoryBatchResponseDto> getAllInventoryBatches(UserDetails userDetails) {
+        var department = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found")).getDepartment();
+        if (department == null)
+            throw new ResourceNotFoundException("Department Not Found");
+
+        return inventoryBatchRepository.findAllByInventoryItem_Department(department).stream().map(inventoryBatchMapper::toInventoryBatchResponseDto).toList();
+    }
+
+    @Override
+    public InventoryBatchResponseDto getInventoryBatchById(long id) {
+        return inventoryBatchRepository.findById(id).map(inventoryBatchMapper::toInventoryBatchResponseDto).orElse(null);
+    }
+
+
 }

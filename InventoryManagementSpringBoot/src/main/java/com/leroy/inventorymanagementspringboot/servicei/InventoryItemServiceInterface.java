@@ -1,7 +1,6 @@
 package com.leroy.inventorymanagementspringboot.servicei;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,9 +15,11 @@ public interface InventoryItemServiceInterface {
 
     InventoryItem addInventoryItemWithImage(CreateInventoryItemDto createInventoryItemDto, MultipartFile image, UserDetails userDetails);
 
-    InventoryItem updateInventoryItem(UpdateInventoryItemDto inventoryItem, UserDetails userDetails);
+    InventoryItemResponseDto getInventoryItemById(long id, UserDetails userDetails);
 
-    Optional<List<InventoryItemResponseDto>> getItemsByDepartment(UserDetails userDetails);
+    InventoryItem updateInventoryItem(long id, UpdateInventoryItemDto inventoryItem, UserDetails userDetails);
 
-    InventoryItemResponseDto deleteInventoryItem(InventoryItemResponseDto inventoryItem, UserDetails userDetails);
+    List<InventoryItemResponseDto> getItemsByDepartment(UserDetails userDetails);
+
+    void deleteInventoryItem(long id, UserDetails userDetails);
 }

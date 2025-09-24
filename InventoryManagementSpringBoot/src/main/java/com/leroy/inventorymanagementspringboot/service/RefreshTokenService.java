@@ -112,11 +112,14 @@ public class RefreshTokenService {
             validTokens.sort((t1, t2) -> t1.getCreatedAt().compareTo(t2.getCreatedAt()));
             
             int tokensToRemove = validTokens.size() - maxTokensPerUser + 1;
-            for (int i = 0; i < tokensToRemove; i++) {
-                RefreshToken tokenToRemove = validTokens.get(i);
-                refreshTokenRepository.revokeTokenByValue(tokenToRemove.getToken());
-                logger.debug("Cleaned up old refresh token for user: {}", user.getEmail());
-            }
+            // Batch revoke tokens for better performance
+            List<String> tokensToRevoke = validTokens.stream()
+                .limit(tokensToRemove)
+                .map(RefreshToken::getToken)
+                .toList();
+            
+            refreshTokenRepository.revokeTokensByValues(tokensToRevoke);
+            logger.debug("Cleaned up {} old refresh tokens for user: {}", tokensToRevoke.size(), user.getEmail());
         }
     }
     

@@ -1,21 +1,10 @@
 package com.leroy.inventorymanagementspringboot.controller;
 
 
-import com.leroy.inventorymanagementspringboot.dto.request.AuthenticationRequest;
-import com.leroy.inventorymanagementspringboot.dto.request.PasswordChangeRequest;
-import com.leroy.inventorymanagementspringboot.dto.request.PasswordResetRequest;
-import com.leroy.inventorymanagementspringboot.entity.RefreshToken;
-import com.leroy.inventorymanagementspringboot.entity.User;
-import com.leroy.inventorymanagementspringboot.exception.InvalidTokenException;
-import com.leroy.inventorymanagementspringboot.mapper.UserMapper;
-import com.leroy.inventorymanagementspringboot.repository.UserRepository;
-import com.leroy.inventorymanagementspringboot.security.JwtUtil;
-import com.leroy.inventorymanagementspringboot.service.PasswordResetService;
-import com.leroy.inventorymanagementspringboot.service.RefreshTokenService;
-import com.leroy.inventorymanagementspringboot.util.CookieUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,8 +16,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.leroy.inventorymanagementspringboot.dto.request.AuthenticationRequest;
+import com.leroy.inventorymanagementspringboot.dto.request.PasswordChangeRequest;
+import com.leroy.inventorymanagementspringboot.dto.request.PasswordResetRequest;
+import com.leroy.inventorymanagementspringboot.entity.RefreshToken;
+import com.leroy.inventorymanagementspringboot.entity.User;
+import com.leroy.inventorymanagementspringboot.exception.InvalidTokenException;
+import com.leroy.inventorymanagementspringboot.exception.RateLimitExceededException;
+import com.leroy.inventorymanagementspringboot.mapper.UserMapper;
+import com.leroy.inventorymanagementspringboot.repository.UserRepository;
+import com.leroy.inventorymanagementspringboot.security.JwtUtil;
+import com.leroy.inventorymanagementspringboot.service.PasswordResetService;
+import com.leroy.inventorymanagementspringboot.service.RefreshTokenService;
+import com.leroy.inventorymanagementspringboot.util.CookieUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @RestController
 public class AuthController {
@@ -63,6 +67,7 @@ public class AuthController {
             final UserDetails userDetails = userDetailsService
                     .loadUserByUsername(request.getEmail());
             final String jwt = jwtUtil.generateToken(userDetails);
+
             var user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
             
             // Create refresh token
@@ -86,12 +91,15 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/forgot-password")
+    @PostMapping("/api/auth/forgot-password")
     public ResponseEntity<String> forgotPassword(@Valid @RequestBody PasswordResetRequest request) {
         try {
             passwordResetService.createPasswordResetTokenForUser(request.getEmail());
             // Return a generic success message to prevent email enumeration attacks
             return ResponseEntity.ok("If an account with that email exists, a password reset link has been sent.");
+        } catch (RateLimitExceededException e) {
+            // Handle rate limiting specifically
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(e.getMessage());
         } catch (RuntimeException e) { // Catch the generic exception for non-existent users
             return ResponseEntity.ok("If an account with that email exists, a password reset link has been sent.");
         } catch (Exception e) {
@@ -99,7 +107,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping("/api/auth/reset-password")
     public ResponseEntity<String> resetPassword(@Valid @RequestBody PasswordChangeRequest request) {
         try {
             passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
@@ -108,6 +116,20 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error resetting password: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/api/auth/clear-rate-limit")
+    public ResponseEntity<String> clearRateLimit(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Email is required");
+            }
+            passwordResetService.clearRateLimit(email);
+            return ResponseEntity.ok("Rate limit cleared for email: " + email);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error clearing rate limit: " + e.getMessage());
         }
     }
 

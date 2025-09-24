@@ -12,6 +12,7 @@ public interface InventoryBatchMapper {
     @Mapping(target = "unitPrice",  ignore = true)
     @Mapping(target = "remainingQuantity",   ignore = true)
     @Mapping(target = "inventoryItem",  ignore = true)
+    @Mapping(target = "batchDate", ignore = true)
     InventoryBatch toInventoryBatch(CreateBatchDto createBatchDto);
 
     @Mapping(target = "inventoryItemId", source = "inventoryItem.id")
