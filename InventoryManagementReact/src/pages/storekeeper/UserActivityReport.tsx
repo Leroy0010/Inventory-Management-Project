@@ -7,7 +7,7 @@ import {
     useGenerateUserActivityReport,
     useRefreshUserActivityData,
 } from '@/hooks/queries/useUserActivityReport';
-import { UserActivityReportForm } from '@/components/user-activity-report/UserActivityReportForm';
+import UserActivityReportFiltersComponent from '@/components/user-activity-report/UserActivityReportFilters';
 import { UserActivityReportHeader } from '@/components/user-activity-report/UserActivityReportHeader';
 import { UserActivityReportContent } from '@/components/user-activity-report/UserActivityReportContent';
 import { UserActivityReportMetadata } from '@/components/user-activity-report/UserActivityReportMetadata';
@@ -24,10 +24,6 @@ function UserActivityReport(): React.JSX.Element {
             type: 'year',
             year: new Date().getFullYear(),
         },
-        includeSubmissions: true,
-        includeApprovals: true,
-        includeRejections: true,
-        includeFulfillments: true,
         activeOnly: false,
     });
     const [reportData, setReportData] =
@@ -55,12 +51,7 @@ function UserActivityReport(): React.JSX.Element {
         officeId: filters.officeId,
         sortBy: filters.sortBy,
         sortOrder: filters.sortOrder,
-        includeSubmissions: filters.includeSubmissions,
-        includeApprovals: filters.includeApprovals,
-        includeRejections: filters.includeRejections,
-        includeFulfillments: filters.includeFulfillments,
         activeOnly: filters.activeOnly,
-        roleFilter: filters.roleFilter,
     };
 
     // Queries
@@ -92,12 +83,7 @@ function UserActivityReport(): React.JSX.Element {
             userId: newFilters.userId,
             sortBy: newFilters.sortBy,
             sortOrder: newFilters.sortOrder,
-            includeSubmissions: newFilters.includeSubmissions,
-            includeApprovals: newFilters.includeApprovals,
-            includeRejections: newFilters.includeRejections,
-            includeFulfillments: newFilters.includeFulfillments,
             activeOnly: newFilters.activeOnly,
-            roleFilter: newFilters.roleFilter,
         };
 
         try {
@@ -105,7 +91,6 @@ function UserActivityReport(): React.JSX.Element {
             const result = await generateReportMutation.mutateAsync(apiRequest);
             console.log('API response:', result); // Debug log
             setReportData(result);
-            setActiveTab('overview');
         } catch (error) {
             console.error('Failed to generate report:', error);
         }
@@ -123,6 +108,16 @@ function UserActivityReport(): React.JSX.Element {
         } catch (error) {
             // Failed to export report
         }
+    };
+
+    const handleClearFilters = () => {
+        setFilters({
+            timePeriod: {
+                type: 'year',
+                year: new Date().getFullYear(),
+            },
+            activeOnly: false,
+        });
     };
 
     const handleRefresh = () => {
@@ -176,16 +171,14 @@ function UserActivityReport(): React.JSX.Element {
                 </div>
             ) : null}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1">
-                    <UserActivityReportForm
-                        onGenerate={handleGenerateReport}
-                        onExport={canExport ? handleExport : undefined}
-                        isLoading={isLoading}
-                    />
-                </div>
+            <div className="space-y-6">
+                <UserActivityReportFiltersComponent
+                    onApplyFilters={handleGenerateReport}
+                    onClearFilters={handleClearFilters}
+                    isLoading={isLoading}
+                />
 
-                <div className="lg:col-span-2">
+                <div>
                     <UserActivityReportContent
                         reportData={reportData}
                         activeTab={activeTab}

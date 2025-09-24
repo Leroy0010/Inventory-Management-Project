@@ -1,10 +1,8 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
+import { DateRangePicker } from '@/components/ui/date-picker';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -12,12 +10,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { DateRangePicker } from '@/components/ui/date-picker';
-import { Filter, X, SortAsc, SortDesc } from 'lucide-react';
 import { useOffices } from '@/hooks/queries/useOffice';
 import { useUserEmailsAndIds } from '@/hooks/queries/useUser';
 import { useToast } from '@/hooks/useToast';
 import type { UserActivityReportFilters as UserActivityReportFiltersType } from '@/types/userActivityReport';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { X } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const filterSchema = z.object({
     year: z
@@ -64,12 +64,7 @@ const filterSchema = z.object({
         .optional(),
     sortBy: z.string().optional(),
     sortOrder: z.enum(['ASC', 'DESC']).optional(),
-    includeSubmissions: z.boolean().optional(),
-    includeApprovals: z.boolean().optional(),
-    includeRejections: z.boolean().optional(),
-    includeFulfillments: z.boolean().optional(),
     activeOnly: z.boolean().optional(),
-    roleFilter: z.enum(['STAFF', 'STOREKEEPER']).optional(),
 });
 
 type FilterFormData = {
@@ -81,16 +76,11 @@ type FilterFormData = {
     userId?: string | number;
     sortBy?: string;
     sortOrder?: 'ASC' | 'DESC';
-    includeSubmissions?: boolean;
-    includeApprovals?: boolean;
-    includeRejections?: boolean;
-    includeFulfillments?: boolean;
     activeOnly?: boolean;
-    roleFilter?: 'STAFF' | 'STOREKEEPER';
 };
 
 const SORT_OPTIONS = [
-    { value: 'fullName', label: 'Name' },
+    { value: 'userName', label: 'Name' },
     { value: 'totalRequestsSubmitted', label: 'Requests Submitted' },
     { value: 'totalRequestsApproved', label: 'Requests Approved' },
     { value: 'lastActivity', label: 'Last Activity' },
@@ -99,11 +89,6 @@ const SORT_OPTIONS = [
 const SORT_ORDER_OPTIONS = [
     { value: 'ASC', label: 'Ascending' },
     { value: 'DESC', label: 'Descending' },
-];
-
-const ROLE_OPTIONS = [
-    { value: 'STAFF', label: 'Staff' },
-    { value: 'STOREKEEPER', label: 'Storekeeper' },
 ];
 
 interface UserActivityReportFiltersProps {
@@ -137,14 +122,9 @@ export default function UserActivityReportFilters({
             endDate: undefined,
             officeId: undefined,
             userId: undefined,
-            sortBy: 'fullName',
+            sortBy: 'userName',
             sortOrder: 'ASC',
-            includeSubmissions: true,
-            includeApprovals: true,
-            includeRejections: true,
-            includeFulfillments: true,
             activeOnly: false,
-            roleFilter: undefined,
         },
     });
 
@@ -176,7 +156,6 @@ export default function UserActivityReportFilters({
     ];
 
     const handleApplyFilters = (data: FilterFormData) => {
-        console.log('Form data:', data); // Debug log
 
         // Validate that at least year or date range is provided
         if (!data.year && (!data.startDate || !data.endDate)) {
@@ -212,12 +191,7 @@ export default function UserActivityReportFilters({
                     : data.userId,
             sortBy: data.sortBy,
             sortOrder: data.sortOrder,
-            includeSubmissions: data.includeSubmissions ?? true,
-            includeApprovals: data.includeApprovals ?? true,
-            includeRejections: data.includeRejections ?? true,
-            includeFulfillments: data.includeFulfillments ?? true,
             activeOnly: data.activeOnly ?? false,
-            roleFilter: data.roleFilter,
         };
 
         // Remove undefined values
@@ -242,286 +216,256 @@ export default function UserActivityReportFilters({
     };
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Filter className="h-5 w-5" />
-                    Report Filters
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <form
-                    onSubmit={handleSubmit(handleApplyFilters)}
-                    className="space-y-4"
-                >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* Year Selection */}
-                        <div className="space-y-2">
-                            <Label htmlFor="year">Year</Label>
-                            <Select
-                                value={watchedValues.year?.toString() || ''}
-                                onValueChange={(value) =>
-                                    setValue('year', value || undefined)
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select year" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {years.map((year) => (
-                                        <SelectItem
-                                            key={year}
-                                            value={year.toString()}
-                                        >
-                                            {year}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.year && (
-                                <p className="text-sm text-red-600">
-                                    {errors.year.message}
-                                </p>
-                            )}
-                        </div>
+        <div className="w-full">
+            <form
+                onSubmit={handleSubmit(handleApplyFilters)}
+                className="space-y-6"
+            >
+                <div className="flex gap-10 flex-wrap">
+                    {/* Year Selection */}
+                    <div className="space-y-2">
+                        <Label htmlFor="year">Year</Label>
+                        <Select
+                            value={watchedValues.year?.toString() || ''}
+                            onValueChange={(value) =>
+                                setValue('year', value || undefined)
+                            }
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select year" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {years.map((year) => (
+                                    <SelectItem
+                                        key={year}
+                                        value={year.toString()}
+                                    >
+                                        {year}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.year && (
+                            <p className="text-sm text-red-600">
+                                {errors.year.message}
+                            </p>
+                        )}
+                    </div>
 
-                        {/* Month Selection */}
-                        <div className="space-y-2">
-                            <Label htmlFor="month">Month (Optional)</Label>
-                            <Select
-                                value={watchedValues.month?.toString() || ''}
-                                onValueChange={(value) =>
-                                    setValue('month', value || undefined)
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select month" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {months.map((month) => (
-                                        <SelectItem
-                                            key={month}
-                                            value={month.toString()}
-                                        >
-                                            {new Date(
-                                                2024,
-                                                month - 1,
-                                                1
-                                            ).toLocaleString('default', {
-                                                month: 'long',
-                                            })}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.month && (
-                                <p className="text-sm text-red-600">
-                                    {errors.month.message}
-                                </p>
-                            )}
-                        </div>
+                    {/* Month Selection */}
+                    <div className="space-y-2">
+                        <Label htmlFor="month">Month (Optional)</Label>
+                        <Select
+                            value={watchedValues.month?.toString() || ''}
+                            onValueChange={(value) =>
+                                setValue('month', value || undefined)
+                            }
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select month" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {months.map((month) => (
+                                    <SelectItem
+                                        key={month}
+                                        value={month.toString()}
+                                    >
+                                        {new Date(
+                                            2024,
+                                            month - 1,
+                                            1
+                                        ).toLocaleString('default', {
+                                            month: 'long',
+                                        })}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.month && (
+                            <p className="text-sm text-red-600">
+                                {errors.month.message}
+                            </p>
+                        )}
+                    </div>
 
-                        {/* Date Range Selection */}
-                        <div className="space-y-2">
-                            <Label>Date Range (Alternative to Year)</Label>
-                            <DateRangePicker
-                                startDate={
-                                    watchedValues.startDate
-                                        ? new Date(watchedValues.startDate)
-                                        : undefined
-                                }
-                                endDate={
+                    {/* Date Range Selection */}
+                    <div className="space-y-2">
+                        <Label>Date Range (Alternative to Year)</Label>
+                        <DateRangePicker
+                            startDate={
+                                watchedValues.startDate
+                                    ? new Date(watchedValues.startDate)
+                                    : undefined
+                            }
+                            endDate={
+                                watchedValues.endDate
+                                    ? new Date(watchedValues.endDate)
+                                    : undefined
+                            }
+                            onStartDateChange={(date) =>
+                                handleDateRangeChange(
+                                    date,
                                     watchedValues.endDate
                                         ? new Date(watchedValues.endDate)
                                         : undefined
-                                }
-                                onStartDateChange={(date) =>
-                                    handleDateRangeChange(
-                                        date,
-                                        watchedValues.endDate
-                                            ? new Date(watchedValues.endDate)
-                                            : undefined
-                                    )
-                                }
-                                onEndDateChange={(date) =>
-                                    handleDateRangeChange(
-                                        watchedValues.startDate
-                                            ? new Date(watchedValues.startDate)
-                                            : undefined,
-                                        date
-                                    )
-                                }
-                            />
-                            {errors.startDate && (
-                                <p className="text-sm text-red-600">
-                                    {errors.startDate.message}
-                                </p>
-                            )}
-                            {errors.endDate && (
-                                <p className="text-sm text-red-600">
-                                    {errors.endDate.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Office Selection */}
-                        <div className="space-y-2">
-                            <Label htmlFor="officeId">Office</Label>
-                            <Combobox
-                                options={officeOptions}
-                                value={watchedValues.officeId?.toString() || ''}
-                                onValueChange={(value) =>
-                                    setValue('officeId', value || undefined)
-                                }
-                                placeholder="Select office"
-                            />
-                            {errors.officeId && (
-                                <p className="text-sm text-red-600">
-                                    {errors.officeId.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* User Selection */}
-                        <div className="space-y-2">
-                            <Label htmlFor="userId">User</Label>
-                            <Combobox
-                                options={userOptions}
-                                value={watchedValues.userId?.toString() || ''}
-                                onValueChange={(value) =>
-                                    setValue('userId', value || undefined)
-                                }
-                                placeholder="Select user"
-                            />
-                            {errors.userId && (
-                                <p className="text-sm text-red-600">
-                                    {errors.userId.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Role Filter */}
-                        <div className="space-y-2">
-                            <Label htmlFor="roleFilter">Role</Label>
-                            <Select
-                                value={watchedValues.roleFilter || ''}
-                                onValueChange={(value) =>
-                                    setValue(
-                                        'roleFilter',
-                                        value as
-                                            | 'STAFF'
-                                            | 'STOREKEEPER'
-                                            | undefined
-                                    )
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="All roles" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="">All roles</SelectItem>
-                                    {ROLE_OPTIONS.map((role) => (
-                                        <SelectItem
-                                            key={role.value}
-                                            value={role.value}
-                                        >
-                                            {role.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.roleFilter && (
-                                <p className="text-sm text-red-600">
-                                    {errors.roleFilter.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Sort By */}
-                        <div className="space-y-2">
-                            <Label htmlFor="sortBy">Sort By</Label>
-                            <Select
-                                value={watchedValues.sortBy || ''}
-                                onValueChange={(value) =>
-                                    setValue('sortBy', value)
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select sort field" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {SORT_OPTIONS.map((option) => (
-                                        <SelectItem
-                                            key={option.value}
-                                            value={option.value}
-                                        >
-                                            {option.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.sortBy && (
-                                <p className="text-sm text-red-600">
-                                    {errors.sortBy.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Sort Order */}
-                        <div className="space-y-2">
-                            <Label htmlFor="sortOrder">Sort Order</Label>
-                            <Select
-                                value={watchedValues.sortOrder || ''}
-                                onValueChange={(value) =>
-                                    setValue(
-                                        'sortOrder',
-                                        value as 'ASC' | 'DESC'
-                                    )
-                                }
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select sort order" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {SORT_ORDER_OPTIONS.map((option) => (
-                                        <SelectItem
-                                            key={option.value}
-                                            value={option.value}
-                                        >
-                                            {option.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.sortOrder && (
-                                <p className="text-sm text-red-600">
-                                    {errors.sortOrder.message}
-                                </p>
-                            )}
-                        </div>
+                                )
+                            }
+                            onEndDateChange={(date) =>
+                                handleDateRangeChange(
+                                    watchedValues.startDate
+                                        ? new Date(watchedValues.startDate)
+                                        : undefined,
+                                    date
+                                )
+                            }
+                        />
+                        {errors.startDate && (
+                            <p className="text-sm text-red-600">
+                                {errors.startDate.message}
+                            </p>
+                        )}
+                        {errors.endDate && (
+                            <p className="text-sm text-red-600">
+                                {errors.endDate.message}
+                            </p>
+                        )}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-2 pt-4">
-                        <Button
-                            type="submit"
-                            disabled={isLoading}
-                            className="flex-1"
-                        >
-                            {isLoading ? 'Generating...' : 'Generate Report'}
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleClearFilters}
-                            disabled={isLoading}
-                        >
-                            <X className="h-4 w-4 mr-2" />
-                            Clear
-                        </Button>
+                    {/* Office Selection */}
+                    <div className="space-y-2">
+                        <Label htmlFor="officeId">Office</Label>
+                        <Combobox
+                            options={officeOptions}
+                            value={watchedValues.officeId?.toString() || ''}
+                            onValueChange={(value) =>
+                                setValue('officeId', value || undefined)
+                            }
+                            placeholder="Select office"
+                        />
+                        {errors.officeId && (
+                            <p className="text-sm text-red-600">
+                                {errors.officeId.message}
+                            </p>
+                        )}
                     </div>
-                </form>
-            </CardContent>
-        </Card>
+
+                    {/* User Selection */}
+                    <div className="space-y-2">
+                        <Label htmlFor="userId">User</Label>
+                        <Combobox
+                            options={userOptions}
+                            value={watchedValues.userId?.toString() || ''}
+                            onValueChange={(value) =>
+                                setValue('userId', value || undefined)
+                            }
+                            placeholder="Select user"
+                        />
+                        {errors.userId && (
+                            <p className="text-sm text-red-600">
+                                {errors.userId.message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Sort By */}
+                    <div className="space-y-2">
+                        <Label htmlFor="sortBy">Sort By</Label>
+                        <Select
+                            value={watchedValues.sortBy || ''}
+                            onValueChange={(value) => setValue('sortBy', value)}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select sort field" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {SORT_OPTIONS.map((option) => (
+                                    <SelectItem
+                                        key={option.value}
+                                        value={option.value}
+                                    >
+                                        {option.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.sortBy && (
+                            <p className="text-sm text-red-600">
+                                {errors.sortBy.message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Sort Order */}
+                    <div className="space-y-2">
+                        <Label htmlFor="sortOrder">Sort Order</Label>
+                        <Select
+                            value={watchedValues.sortOrder || ''}
+                            onValueChange={(value) =>
+                                setValue('sortOrder', value as 'ASC' | 'DESC')
+                            }
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select sort order" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {SORT_ORDER_OPTIONS.map((option) => (
+                                    <SelectItem
+                                        key={option.value}
+                                        value={option.value}
+                                    >
+                                        {option.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.sortOrder && (
+                            <p className="text-sm text-red-600">
+                                {errors.sortOrder.message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Active Only Filter */}
+                    <div className="space-y-2">
+                        <Label htmlFor="activeOnly">User Status</Label>
+                        <div className="flex items-center space-x-2">
+                            <Checkbox
+                                id="activeOnly"
+                                checked={watchedValues.activeOnly || false}
+                                onCheckedChange={(checked) =>
+                                    setValue('activeOnly', checked as boolean)
+                                }
+                            />
+                            <Label
+                                htmlFor="activeOnly"
+                                className="text-sm font-normal"
+                            >
+                                Show only active users
+                            </Label>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 pt-4">
+                    <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="flex-1"
+                    >
+                        {isLoading ? 'Generating...' : 'Generate Report'}
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleClearFilters}
+                        disabled={isLoading}
+                    >
+                        <X className="h-4 w-4 mr-2" />
+                        Clear
+                    </Button>
+                </div>
+            </form>
+        </div>
     );
 }

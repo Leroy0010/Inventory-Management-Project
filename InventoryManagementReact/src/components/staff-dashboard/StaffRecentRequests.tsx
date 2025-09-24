@@ -41,7 +41,7 @@ export default function StaffRecentRequests({
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate('/my-requests')}
+                        onClick={() => navigate('/requests')}
                     >
                         View All
                     </Button>
@@ -52,6 +52,7 @@ export default function StaffRecentRequests({
                     {recentRequests.map((request) => (
                         <div
                             key={request.id}
+                            onClick={() => navigate(`/requests/${request.id}`)}
                             className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
                         >
                             <div className="flex items-center gap-3">

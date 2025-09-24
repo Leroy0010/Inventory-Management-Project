@@ -90,8 +90,12 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
             "statusHistory.changedBy"
     })
     @Query("SELECT r FROM Request r JOIN r.user u WHERE " +
-            "(u.department = :department OR (u.office IS NOT NULL AND u.office.department = :department))")
+            "(u.department = :department OR (u.office IS NOT NULL AND u.office.department = :department)) ORDER BY r.submittedAt DESC")
     List<Request> findRequestsForDepartment(Department department);
+
+    @Query("SELECT r FROM Request r JOIN r.user u WHERE " +
+            "(u.department = :department OR (u.office IS NOT NULL AND u.office.department = :department)) ORDER BY r.submittedAt DESC LIMIT 5")
+    List<Request> findRecentRequestsForDepartment(Department department);
 
     // Dashboard methods
     @Query("SELECT r FROM Request r ORDER BY r.submittedAt DESC LIMIT 5")

@@ -24,18 +24,18 @@ import {
     OfficeDetails,
     Profile,
     RequestDetails,
+    Requests,
     SendMessage,
     Settings,
     Staff,
     StaffCart,
     StaffDetails,
-    StaffRequests,
-    StorekeeperRequests,
     TransactionReport,
     Unauthorized,
     UserActivityReport,
     UserReport,
 } from './lazyLoadPages.ts';
+
 
 // Loading component
 const PageLoader = () => (
@@ -146,18 +146,7 @@ const router = createBrowserRouter([
                     </Suspense>
                 ),
             },
-            {
-                path: 'staff-requests',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <ProtectedRoute
-                            requiredPermissions={[Permission.VIEW_REQUESTS]}
-                        >
-                            <StaffRequests />
-                        </ProtectedRoute>
-                    </Suspense>
-                ),
-            },
+           
 
             // Storekeeper routes
             {
@@ -297,9 +286,9 @@ const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute
-                            requiredPermissions={[Permission.MANAGE_REQUESTS]}
+                            requiredPermissions={[Permission.VIEW_REQUESTS]}
                         >
-                            <StorekeeperRequests />
+                            <Requests />
                         </ProtectedRoute>
                     </Suspense>
                 ),

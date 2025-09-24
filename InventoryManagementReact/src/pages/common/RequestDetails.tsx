@@ -84,11 +84,16 @@ export default function RequestDetails() {
     const [rejectionReason, setRejectionReason] = useState('');
 
     // Use API hooks
-    const { getRequestByIdQuery, approveOrRejectRequestMutation } = useRequestQueries();
-    
+    const { getRequestByIdQuery, approveOrRejectRequestMutation } =
+        useRequestQueries();
+
     // Get request data
     const requestIdNum = requestId ? parseInt(requestId, 10) : 0;
-    const { data: request, isLoading: loading, error } = getRequestByIdQuery(requestIdNum);
+    const {
+        data: request,
+        isLoading: loading,
+        error,
+    } = getRequestByIdQuery(requestIdNum);
 
     // Error handling
     if (error) {
@@ -99,7 +104,9 @@ export default function RequestDetails() {
                         Error Loading Request
                     </h2>
                     <p className="text-muted-foreground">
-                        {error instanceof Error ? error.message : 'An error occurred while loading the request.'}
+                        {error instanceof Error
+                            ? error.message
+                            : 'An error occurred while loading the request.'}
                     </p>
                     <Button
                         onClick={() => navigate('/requests')}
@@ -160,26 +167,26 @@ export default function RequestDetails() {
 
     const handleApprove = () => {
         if (!request) return;
-        
+
         approveOrRejectRequestMutation.mutate({
             id: request.id,
             status: 'APPROVED',
             approve: true,
         });
-        
+
         setIsApprovalDialogOpen(false);
         setApprovalNotes('');
     };
 
     const handleReject = () => {
         if (!request) return;
-        
+
         approveOrRejectRequestMutation.mutate({
             id: request.id,
             status: 'REJECTED',
             approve: false,
         });
-        
+
         setIsRejectionDialogOpen(false);
         setRejectionReason('');
     };
@@ -230,7 +237,8 @@ export default function RequestDetails() {
                         Request #{request.id}
                     </h1>
                     <p className="text-muted-foreground">
-                        Submitted on {new Date(request.submittedAt).toLocaleDateString()}
+                        Submitted on{' '}
+                        {new Date(request.submittedAt).toLocaleDateString()}
                     </p>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -316,7 +324,8 @@ export default function RequestDetails() {
                                         Approver
                                     </Label>
                                     <p className="text-lg">
-                                        {request.approver.firstName} {request.approver.lastName}
+                                        {request.approver.firstName}{' '}
+                                        {request.approver.lastName}
                                     </p>
                                 </div>
                             )}
@@ -327,7 +336,8 @@ export default function RequestDetails() {
                                         Fulfilled By
                                     </Label>
                                     <p className="text-lg">
-                                        {request.fulfiller.firstName} {request.fulfiller.lastName}
+                                        {request.fulfiller.firstName}{' '}
+                                        {request.fulfiller.lastName}
                                     </p>
                                 </div>
                             )}
@@ -587,25 +597,41 @@ export default function RequestDetails() {
                         </CardHeader>
                         <CardContent className="space-y-3">
                             {/* Show status history if available */}
-                            {request.statusHistory && request.statusHistory.length > 0 ? (
+                            {request.statusHistory &&
+                            request.statusHistory.length > 0 ? (
                                 request.statusHistory.map((history, index) => (
-                                    <div key={history.id || index} className="flex items-center space-x-3">
-                                        <div className={`w-2 h-2 rounded-full ${
-                                            history.statusName === 'PENDING' ? 'bg-yellow-500' :
-                                            history.statusName === 'APPROVED' ? 'bg-green-500' :
-                                            history.statusName === 'FULFILLED' ? 'bg-blue-500' :
-                                            history.statusName === 'REJECTED' ? 'bg-red-500' :
-                                            'bg-gray-500'
-                                        }`}></div>
+                                    <div
+                                        key={history.id || index}
+                                        className="flex items-center space-x-3"
+                                    >
+                                        <div
+                                            className={`w-2 h-2 rounded-full ${
+                                                history.statusName === 'PENDING'
+                                                    ? 'bg-yellow-500'
+                                                    : history.statusName ===
+                                                        'APPROVED'
+                                                      ? 'bg-green-500'
+                                                      : history.statusName ===
+                                                          'FULFILLED'
+                                                        ? 'bg-blue-500'
+                                                        : history.statusName ===
+                                                            'REJECTED'
+                                                          ? 'bg-red-500'
+                                                          : 'bg-gray-500'
+                                            }`}
+                                        ></div>
                                         <div>
                                             <p className="text-sm font-medium">
                                                 {history.statusName}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
-                                                {new Date(history.timestamp).toLocaleString()}
+                                                {new Date(
+                                                    history.timestamp
+                                                ).toLocaleString()}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
-                                                by {history.changedBy.firstName} {history.changedBy.lastName}
+                                                by {history.changedBy.firstName}{' '}
+                                                {history.changedBy.lastName}
                                             </p>
                                         </div>
                                     </div>
@@ -620,38 +646,46 @@ export default function RequestDetails() {
                                                 Request Submitted
                                             </p>
                                             <p className="text-xs text-muted-foreground">
-                                                {new Date(request.submittedAt).toLocaleString()}
+                                                {new Date(
+                                                    request.submittedAt
+                                                ).toLocaleString()}
                                             </p>
                                         </div>
                                     </div>
 
-                                    {request.status === 'APPROVED' && request.approvedAt && (
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                            <div>
-                                                <p className="text-sm font-medium">
-                                                    Request Approved
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {new Date(request.approvedAt).toLocaleString()}
-                                                </p>
+                                    {request.status === 'APPROVED' &&
+                                        request.approvedAt && (
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                <div>
+                                                    <p className="text-sm font-medium">
+                                                        Request Approved
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {new Date(
+                                                            request.approvedAt
+                                                        ).toLocaleString()}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {request.status === 'FULFILLED' && request.fulfilledAt && (
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                            <div>
-                                                <p className="text-sm font-medium">
-                                                    Request Fulfilled
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {new Date(request.fulfilledAt).toLocaleString()}
-                                                </p>
+                                    {request.status === 'FULFILLED' &&
+                                        request.fulfilledAt && (
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                <div>
+                                                    <p className="text-sm font-medium">
+                                                        Request Fulfilled
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {new Date(
+                                                            request.fulfilledAt
+                                                        ).toLocaleString()}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
                                     {request.status === 'REJECTED' && (
                                         <div className="flex items-center space-x-3">

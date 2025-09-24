@@ -36,9 +36,9 @@ export const Permission = {
 
     // Requests
     VIEW_REQUESTS: 'VIEW_REQUESTS',
+    MANAGE_REQUESTS: 'MANAGE_REQUESTS',
     APPROVE_REQUESTS: 'APPROVE_REQUESTS',
     REJECT_REQUESTS: 'REJECT_REQUESTS',
-    MANAGE_REQUESTS: 'MANAGE_REQUESTS',
     FULFIL_REQUESTS: 'FULFIL_REQUESTS',
 
     // Cart (Staff specific)
@@ -106,6 +106,10 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
         Permission.SEND_MESSAGES,
         Permission.VIEW_SETTINGS,
 
+        // Request management
+        Permission.VIEW_REQUESTS,
+        Permission.FULFIL_REQUESTS,
+
         // Staff-specific permissions
         Permission.VIEW_INVENTORY,
         Permission.VIEW_INVENTORY_ITEM_DETAILS,
@@ -113,7 +117,6 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
         Permission.ADD_TO_CART,
         Permission.REMOVE_FROM_CART,
         Permission.CHECKOUT_CART,
-        Permission.VIEW_REQUESTS,
         Permission.VIEW_REQUEST_DETAILS,
     ],
     STOREKEEPER: [
@@ -151,8 +154,8 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
         // Request management
         Permission.APPROVE_REQUESTS,
         Permission.REJECT_REQUESTS,
-        Permission.MANAGE_REQUESTS,
-        Permission.FULFIL_REQUESTS,
+        Permission.VIEW_REQUESTS,
+
         Permission.VIEW_REQUEST_DETAILS,
 
         // Reports

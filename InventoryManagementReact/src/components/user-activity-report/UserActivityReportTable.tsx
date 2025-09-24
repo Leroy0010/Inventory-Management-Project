@@ -25,9 +25,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import {
-    ArrowUpDown,
-    ArrowUp,
-    ArrowDown,
     Search,
     User,
     Mail,
@@ -49,14 +46,6 @@ interface UserActivityReportTableProps {
     className?: string;
 }
 
-type SortField =
-    | 'name'
-    | 'requests'
-    | 'lastActivity'
-    | 'approvalRate'
-    | 'officeName';
-type SortOrder = 'ASC' | 'DESC';
-
 const ROLE_COLORS: Record<UserRole, string> = {
     ADMIN: 'bg-red-100 text-red-800',
     STOREKEEPER: 'bg-blue-100 text-blue-800',
@@ -73,14 +62,12 @@ export function UserActivityReportTable({
     isLoading = false,
     className,
 }: UserActivityReportTableProps) {
-    const [sortField, setSortField] = useState<SortField>('name');
-    const [sortOrder, setSortOrder] = useState<SortOrder>('ASC');
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
-    // Filter and sort data
-    const filteredAndSortedData = useMemo(() => {
+    // Filter data (backend handles sorting)
+    const filteredData = useMemo(() => {
         let filtered = data;
 
         // Apply search filter
@@ -94,75 +81,13 @@ export function UserActivityReportTable({
             );
         }
 
-        // Apply sorting
-        filtered.sort((a, b) => {
-            let aValue: any, bValue: any;
-
-            switch (sortField) {
-                case 'name':
-                    aValue = a.fullName.toLowerCase();
-                    bValue = b.fullName.toLowerCase();
-                    break;
-                case 'requests':
-                    aValue = a.totalRequestsSubmitted;
-                    bValue = b.totalRequestsSubmitted;
-                    break;
-                case 'lastActivity':
-                    aValue = a.lastActivity
-                        ? new Date(a.lastActivity).getTime()
-                        : 0;
-                    bValue = b.lastActivity
-                        ? new Date(b.lastActivity).getTime()
-                        : 0;
-                    break;
-                case 'approvalRate':
-                    aValue = a.approvalRate;
-                    bValue = b.approvalRate;
-                    break;
-                case 'officeName':
-                    aValue = a.officeName.toLowerCase();
-                    bValue = b.officeName.toLowerCase();
-                    break;
-                default:
-                    return 0;
-            }
-
-            if (aValue < bValue) return sortOrder === 'ASC' ? -1 : 1;
-            if (aValue > bValue) return sortOrder === 'ASC' ? 1 : -1;
-            return 0;
-        });
-
         return filtered;
-    }, [data, searchTerm, sortField, sortOrder]);
+    }, [data, searchTerm]);
 
     // Pagination
-    const totalPages = Math.ceil(filteredAndSortedData.length / pageSize);
+    const totalPages = Math.ceil(filteredData.length / pageSize);
     const startIndex = (page - 1) * pageSize;
-    const paginatedData = filteredAndSortedData.slice(
-        startIndex,
-        startIndex + pageSize
-    );
-
-    const handleSort = (field: SortField) => {
-        if (sortField === field) {
-            setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
-        } else {
-            setSortField(field);
-            setSortOrder('ASC');
-        }
-        setPage(1); // Reset to first page when sorting
-    };
-
-    const getSortIcon = (field: SortField) => {
-        if (sortField !== field) {
-            return <ArrowUpDown className="h-4 w-4" />;
-        }
-        return sortOrder === 'ASC' ? (
-            <ArrowUp className="h-4 w-4" />
-        ) : (
-            <ArrowDown className="h-4 w-4" />
-        );
-    };
+    const paginatedData = filteredData.slice(startIndex, startIndex + pageSize);
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return 'N/A';
@@ -254,60 +179,21 @@ export function UserActivityReportTable({
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-12"></TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        onClick={() => handleSort('name')}
-                                        className="h-auto p-0 font-semibold"
-                                    >
-                                        User
-                                        {getSortIcon('name')}
-                                    </Button>
+                                <TableHead className="font-semibold">
+                                    User
                                 </TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        onClick={() => handleSort('officeName')}
-                                        className="h-auto p-0 font-semibold"
-                                    >
-                                        Office
-                                        {getSortIcon('officeName')}
-                                    </Button>
+                                <TableHead className="font-semibold">
+                                    Office
                                 </TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        onClick={() => handleSort('requests')}
-                                        className="h-auto p-0 font-semibold"
-                                    >
-                                        Requests
-                                        {getSortIcon('requests')}
-                                    </Button>
+                                <TableHead className="font-semibold">
+                                    Requests
                                 </TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        onClick={() =>
-                                            handleSort('approvalRate')
-                                        }
-                                        className="h-auto p-0 font-semibold"
-                                    >
-                                        Approval Rate
-                                        {getSortIcon('approvalRate')}
-                                    </Button>
+                                <TableHead className="font-semibold">
+                                    Approval Rate
                                 </TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        onClick={() =>
-                                            handleSort('lastActivity')
-                                        }
-                                        className="h-auto p-0 font-semibold"
-                                    >
-                                        Last Activity
-                                        {getSortIcon('lastActivity')}
-                                    </Button>
+                                <TableHead className="font-semibold">
+                                    Last Activity
                                 </TableHead>
                             </TableRow>
                         </TableHeader>
@@ -432,9 +318,9 @@ export function UserActivityReportTable({
                             Showing {startIndex + 1} to{' '}
                             {Math.min(
                                 startIndex + pageSize,
-                                filteredAndSortedData.length
+                                filteredData.length
                             )}{' '}
-                            of {filteredAndSortedData.length} users
+                            of {filteredData.length} users
                         </div>
                         <div className="flex gap-2">
                             <Button

@@ -44,30 +44,8 @@ export class UserActivityReportApi {
                 params.append('sortBy', request.sortBy);
             if (request.sortOrder !== undefined && request.sortOrder !== null)
                 params.append('sortOrder', request.sortOrder);
-            if (request.includeSubmissions !== undefined)
-                params.append(
-                    'includeSubmissions',
-                    request.includeSubmissions.toString()
-                );
-            if (request.includeApprovals !== undefined)
-                params.append(
-                    'includeApprovals',
-                    request.includeApprovals.toString()
-                );
-            if (request.includeRejections !== undefined)
-                params.append(
-                    'includeRejections',
-                    request.includeRejections.toString()
-                );
-            if (request.includeFulfillments !== undefined)
-                params.append(
-                    'includeFulfillments',
-                    request.includeFulfillments.toString()
-                );
             if (request.activeOnly !== undefined)
                 params.append('activeOnly', request.activeOnly.toString());
-            if (request.roleFilter !== undefined && request.roleFilter !== null)
-                params.append('roleFilter', request.roleFilter);
 
             const queryString = params.toString();
             const url = queryString

@@ -1,13 +1,14 @@
 package com.leroy.inventorymanagementspringboot.repository;
 
-import com.leroy.inventorymanagementspringboot.entity.Department;
-import com.leroy.inventorymanagementspringboot.entity.InventoryItem;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-import java.util.Optional;
+import com.leroy.inventorymanagementspringboot.entity.Department;
+import com.leroy.inventorymanagementspringboot.entity.InventoryItem;
 
 public interface InventoryItemRepository extends JpaRepository<InventoryItem, Integer> {
     boolean existsByNameAndDepartment(String itemName, Department department);
@@ -33,26 +34,26 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, In
     // remainingQuantity
     // against the reorderLevel.
     @Query("""
-       SELECT COUNT(i)
-       FROM InventoryItem i
-       WHERE i.department = :department
-         AND i.reorderLevel > 0
-         AND (SELECT COALESCE(SUM(b.remainingQuantity), 0)
-              FROM InventoryBatch b
-              WHERE b.inventoryItem = i) < i.reorderLevel
-       """)
+            SELECT COUNT(i)
+            FROM InventoryItem i
+            WHERE i.department = :department
+              AND i.reorderLevel > 0
+              AND (SELECT COALESCE(SUM(b.remainingQuantity), 0)
+                   FROM InventoryBatch b
+                   WHERE b.inventoryItem = i) < i.reorderLevel
+            """)
     Long countByDepartmentAndQuantityLessThanReorderLevel(@Param("department") Department department);
 
     @Query("""
-       SELECT COUNT(i)
-       FROM InventoryItem i
-       WHERE i.department = :department
-         AND i.reorderLevel > 0
-         AND (SELECT COALESCE(SUM(b.remainingQuantity), 0)
-              FROM InventoryBatch b
-              WHERE b.inventoryItem = i) = 0
-       """)
-    Long countByDepartmentAndQuantityEqualToZero(@Param("department") Department department);
+            SELECT COUNT(i)
+            FROM InventoryItem i
+            WHERE i.department = :department
+              AND i.reorderLevel > 0
+              AND (SELECT COALESCE(SUM(b.remainingQuantity), 0)
+                   FROM InventoryBatch b
+                   WHERE b.inventoryItem = i) != 0
+            """)
+    Long countByDepartmentAndQuantityNotEqualToZero(@Param("department") Department department);
 
     List<InventoryItem> id(int id);
 }

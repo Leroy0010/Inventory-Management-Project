@@ -22,22 +22,11 @@ public class UserActivityReportRequest {
     private String sortBy; // Optional - sort field (name, requests, lastActivity, etc.)
     private String sortOrder; // Optional - sort direction (ASC, DESC)
 
-    // Activity type filters
-    private Boolean includeSubmissions; // Optional - include request submissions
-    private Boolean includeApprovals; // Optional - include request approvals
-    private Boolean includeRejections; // Optional - include request rejections
-    private Boolean includeFulfillments; // Optional - include request fulfillments
-
     // User status filters
     private Boolean activeOnly; // Optional - show only active users
-    private String roleFilter; // Optional - filter by role (STAFF, STOREKEEPER)
 
     public UserActivityReportRequest() {
         // Default values
-        this.includeSubmissions = true;
-        this.includeApprovals = true;
-        this.includeRejections = true;
-        this.includeFulfillments = true;
         this.activeOnly = false;
     }
 

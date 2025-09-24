@@ -12,10 +12,10 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    @Query("SELECT n FROM Notification n WHERE n.user = :user AND n.isRead = FALSE")
+    @Query("SELECT n FROM Notification n WHERE n.user = :user AND n.isRead = FALSE ORDER BY n.createdAt DESC")
     List<Notification> findByUserAndReadIsFalse(User user);
     
-    List<Notification> findByUser(User user);
+    List<Notification> findByUserOrderByCreatedAtDesc(User user);
     @Query("SELECT COUNT(n) FROM Notification n WHERE n.user = :user AND n.isRead = FALSE")
     Long countNotificationsByUserAndIsReadIsFalse(User user);
 
@@ -27,7 +27,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
                 WHERE n.user = :user\s
                   AND n.inventoryItem = :item\s
                   AND n.type = :type\s
-                  AND n.createdAt >= :since
+                  AND n.createdAt >= :since\s
+                ORDER BY n.createdAt DESC
                                  \s""")
     List<Notification> findRecentByUserAndItemAndType(
             @Param("user") User user,

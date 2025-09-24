@@ -146,16 +146,11 @@ const navGroups: NavGroup[] = [
         items: [
             {
                 to: '/requests',
-                label: 'Manage Requests',
+                label: 'Requests',
                 icon: FileText,
-                permissions: [Permission.MANAGE_REQUESTS],
+                permissions: [Permission.VIEW_REQUESTS],
             },
-            {
-                to: '/staff-requests',
-                label: 'My Requests',
-                icon: FileText,
-                permissions: ['VIEW_REQUESTS'],
-            },
+           
         ],
     },
     {

@@ -48,6 +48,7 @@ export default function StorekeeperRecentRequests({ getStatusIcon, recentRequest
                     {recentRequests.map((request) => (
                         <div
                             key={request.id}
+                            onClick={() => navigate(`/requests/${request.id}`)}
                             className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
                         >
                             <div className="flex items-center gap-3">

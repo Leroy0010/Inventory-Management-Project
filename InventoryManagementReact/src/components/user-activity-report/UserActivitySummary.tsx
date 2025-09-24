@@ -258,6 +258,7 @@ export function UserActivitySummary({
                                         Storekeeper Users
                                     </span>
                                 </div>
+                                <Badge variant="secondary">1</Badge>
                             </div>
 
                             <div className="flex items-center justify-between">

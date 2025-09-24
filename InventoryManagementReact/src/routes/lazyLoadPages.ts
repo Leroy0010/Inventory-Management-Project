@@ -25,6 +25,7 @@ export const SendMessage = React.lazy(() => import('@/pages/SendMessage'));
 export const Settings = React.lazy(() => import('@/pages/Settings'));
 export const Notifications = React.lazy(() => import('@/pages/Notifications'));
 export const Dashboard = React.lazy(() => import('@/pages/common/Dashboard'));
+export const Requests = React.lazy(() => import('@/pages/common/Requests'));
 
 // Admin pages
 
@@ -40,9 +41,7 @@ export const AddDepartment = React.lazy(
 
 // Staff pages
 export const StaffCart = React.lazy(() => import('@/pages/staff/Cart'));
-export const StaffRequests = React.lazy(
-    () => import('@/pages/staff/MyRequests')
-);
+
 
 // Storekeeper pages
 
@@ -73,9 +72,7 @@ export const InventoryItems = React.lazy(
 export const InventoryItemDetails = React.lazy(
     () => import('@/pages/common/InventoryItemDetails')
 );
-export const StorekeeperRequests = React.lazy(
-    () => import('@/pages/storekeeper/ManageRequests')
-);
+
 export const TransactionReport = React.lazy(
     () => import('@/pages/storekeeper/TransactionReport')
 );

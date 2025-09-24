@@ -1,16 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { memo } from 'react';
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-} from '@/components/ui/dialog';
-import {
-    CheckCircle,
-    XCircle,
-    Clock,
-    Package,
-} from 'lucide-react';
+import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
+import { CheckCircle, XCircle, Clock, Package } from 'lucide-react';
 import type { RequestResponseDto, RequestStatus } from '@/types/request';
 import StatusHistory from './request-details-modal/StatusHistory';
 import RequestedItems from './request-details-modal/RequestedItems';
@@ -87,7 +78,6 @@ const RequestDetailsModal = memo(function RequestDetailsModal({
         });
     };
 
-
     const handleViewFullScreen = () => {
         // Close the modal first
         onClose();
@@ -108,7 +98,7 @@ const RequestDetailsModal = memo(function RequestDetailsModal({
                         getStatusBadgeVariant={getStatusBadgeVariant}
                         getStatusIcon={getStatusIcon}
                     />
-                    
+
                     {/* Approval Information */}
                     {request.approvedAt && request.approver && (
                         <ApprovalInformation

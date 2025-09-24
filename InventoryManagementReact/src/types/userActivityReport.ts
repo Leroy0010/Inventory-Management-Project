@@ -21,15 +21,8 @@ export interface UserActivityReportRequest {
     sortBy?: string; // Optional - sort field (name, requests, lastActivity, etc.)
     sortOrder?: 'ASC' | 'DESC'; // Optional - sort direction
 
-    // Activity type filters
-    includeSubmissions?: boolean; // Optional - include request submissions
-    includeApprovals?: boolean; // Optional - include request approvals
-    includeRejections?: boolean; // Optional - include request rejections
-    includeFulfillments?: boolean; // Optional - include request fulfillments
-
     // User status filters
     activeOnly?: boolean; // Optional - show only active users
-    roleFilter?: UserRole; // Optional - filter by role (STAFF, STOREKEEPER)
 }
 
 // Response DTOs matching backend
@@ -156,15 +149,8 @@ export interface UserActivityReportFilters {
     sortBy?: string;
     sortOrder?: 'ASC' | 'DESC';
 
-    // Activity type filters
-    includeSubmissions: boolean;
-    includeApprovals: boolean;
-    includeRejections: boolean;
-    includeFulfillments: boolean;
-
     // User status filters
     activeOnly: boolean;
-    roleFilter?: UserRole;
 }
 
 // Report generation state

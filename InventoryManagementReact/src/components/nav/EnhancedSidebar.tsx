@@ -21,6 +21,7 @@ import {
 import { EnhancedSidebarHeader } from './EnhancedSidebarHeader';
 import { EnhancedSidebarNavigation } from './EnhancedSidebarNavigation';
 import { EnhancedSidebarUserInfo } from './EnhancedSidebarUserInfo';
+import { useAuthQueries } from '@/hooks/queries/useAuth';
 
 interface NavItem {
     to: string;
@@ -169,14 +170,7 @@ const navGroups: NavGroup[] = [
         items: [
             {
                 to: '/requests',
-                label: 'Manage Requests',
-                icon: FileText,
-                permissions: [Permission.MANAGE_REQUESTS],
-                description: 'Review and approve requests',
-            },
-            {
-                to: '/staff-requests',
-                label: 'My Requests',
+                label: 'Requests',
                 icon: FileText,
                 permissions: [Permission.VIEW_REQUESTS],
                 description: 'View your requests',
@@ -288,17 +282,26 @@ export function EnhancedSidebar({
     const { logout } = useAuthStore();
     const { canAccess } = usePermissionCheck();
     const { isMobile } = useResponsive();
+    const {logoutMutation} = useAuthQueries();
     const navigate = useNavigate();
     const [expandedGroups, setExpandedGroups] = useState<string[]>([
         'Dashboard',
     ]);
 
-    const handleLogout = () => {
-        logout();
+
+
+    const handleLogout = async () => {
+        try {
+            await logoutMutation.mutateAsync();
+            logout();
         navigate('/login');
         if (isMobile) {
             toggleSidebar();
         }
+        } catch (error) {
+            // 
+        }
+        
     };
 
     const toggleGroup = (groupLabel: string) => {

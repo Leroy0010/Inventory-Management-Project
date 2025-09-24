@@ -35,12 +35,7 @@ public class UserActivityReportController {
             @RequestParam(required = false) Integer userId,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortOrder,
-            @RequestParam(required = false) Boolean includeSubmissions,
-            @RequestParam(required = false) Boolean includeApprovals,
-            @RequestParam(required = false) Boolean includeRejections,
-            @RequestParam(required = false) Boolean includeFulfillments,
             @RequestParam(required = false) Boolean activeOnly,
-            @RequestParam(required = false) String roleFilter,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         // Get current user from database
@@ -61,12 +56,7 @@ public class UserActivityReportController {
         request.setUserId(userId);
         request.setSortBy(sortBy);
         request.setSortOrder(sortOrder);
-        request.setIncludeSubmissions(includeSubmissions);
-        request.setIncludeApprovals(includeApprovals);
-        request.setIncludeRejections(includeRejections);
-        request.setIncludeFulfillments(includeFulfillments);
         request.setActiveOnly(activeOnly);
-        request.setRoleFilter(roleFilter);
 
         UserActivityReportResponseDto response = userActivityReportService
                 .generateUserActivityReport(request, currentUser);

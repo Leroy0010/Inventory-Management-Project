@@ -8,8 +8,6 @@ import com.leroy.inventorymanagementspringboot.servicei.UserActivityReportServic
 import lombok.Data;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +16,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @Service
 @Transactional(readOnly = true)
@@ -114,49 +117,178 @@ public class UserActivityReportService implements UserActivityReportServiceInter
             UserActivityReportRequest request,
             Integer officeId,
             User currentUser) {
-        // Get users based on the relationship: staff.getOffice().getDepartment() ==
-        // storekeeper.getDepartment()
-        // This includes staff users whose office belongs to the storekeeper's
-        // department
-        List<User> users = userRepository.findUsersByOfficeDepartment(departmentId);
 
-        // Exclude the current user (storekeeper) who is generating the report
-        if (currentUser != null) {
-            users = users.stream()
-                    .filter(user -> !user.getId().equals(currentUser.getId()))
-                    .collect(Collectors.toList());
+        // Check if we can sort at database level
+        boolean canSortInDatabase = canSortInDatabase(request.getSortBy());
+
+        Sort sort = null;
+        Pageable pageable = null;
+
+        if (canSortInDatabase) {
+            // Create sorting configuration for database
+            sort = createSortFromRequest(request);
+            pageable = PageRequest.of(0, 1000, sort);
+            System.out.println("DEBUG SORTING: Using database sorting - Sort=" + sort);
+        } else {
+            // Use simple pagination without sorting
+            pageable = PageRequest.of(0, 1000);
+            System.out.println("DEBUG SORTING: Using Java stream sorting for calculated fields");
         }
 
-        // Filter by office if specified
-        if (officeId != null) {
-            users = users.stream()
-                    .filter(user -> user.getOffice() != null && user.getOffice().getId() == officeId)
-                    .collect(Collectors.toList());
-        }
+        System.out.println("DEBUG SORTING: sortBy=" + request.getSortBy() + ", sortOrder=" + request.getSortOrder());
 
-        // Apply additional filters
-        if (request.getUserId() != null) {
-            users = users.stream()
-                    .filter(user -> user.getId().equals(request.getUserId()))
-                    .collect(Collectors.toList());
-        }
+        // Get users with pagination from database
+        Page<User> userPage = userRepository.findUsersByOfficeDepartment(departmentId, pageable);
+        List<User> users = userPage.getContent();
 
-        if (request.getActiveOnly() != null && request.getActiveOnly()) {
-            users = users.stream()
-                    .filter(User::isActive)
-                    .collect(Collectors.toList());
-        }
+        System.out.println("DEBUG SORTING: Retrieved " + users.size() + " users from database");
 
-        if (request.getRoleFilter() != null && !request.getRoleFilter().trim().isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getRole() != null &&
-                            user.getRole().getName().equals(request.getRoleFilter()))
-                    .collect(Collectors.toList());
-        }
+        // Apply additional filters that can't be done in the database query
+        users = users.stream()
+                .filter(user -> {
+                    // Exclude the current user (storekeeper) who is generating the report
+                    if (currentUser != null && user.getId().equals(currentUser.getId())) {
+                        return false;
+                    }
+
+                    // Filter by office if specified
+                    if (officeId != null && (user.getOffice() == null || !(user.getOffice().getId() == officeId))) {
+                        return false;
+                    }
+
+                    // Filter by specific user if specified
+                    if (request.getUserId() != null && !user.getId().equals(request.getUserId())) {
+                        return false;
+                    }
+
+                    // Filter by active status if specified
+                    if (request.getActiveOnly() != null && request.getActiveOnly() && !user.isActive()) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                .collect(Collectors.toList());
+
+        System.out.println("DEBUG SORTING: After filtering - " + users.size() + " users remain");
 
         // Convert to DTOs
-        return users.stream()
+        List<UserActivityItemDto> userActivities = users.stream()
                 .map(user -> buildUserActivityItem(user, request))
+                .collect(Collectors.toList());
+
+        // Apply Java stream sorting if we couldn't sort in database
+        if (!canSortInDatabase && request.getSortBy() != null && !request.getSortBy().trim().isEmpty()) {
+            userActivities = applyJavaStreamSorting(userActivities, request);
+        }
+
+        System.out.println("DEBUG SORTING: Final userActivities count=" + userActivities.size());
+        for (int i = 0; i < userActivities.size(); i++) {
+            UserActivityItemDto item = userActivities.get(i);
+            System.out.println("DEBUG SORTING: [" + i + "] " + item.getFullName() +
+                    " - submitted=" + item.getTotalRequestsSubmitted() +
+                    " - approved=" + item.getTotalRequestsApproved());
+        }
+
+        return userActivities;
+    }
+
+    private Sort createSortFromRequest(UserActivityReportRequest request) {
+        if (request.getSortBy() == null || request.getSortBy().trim().isEmpty()) {
+            // Default sort by first name
+            return Sort.by(Sort.Direction.ASC, "firstName");
+        }
+
+        String sortBy = request.getSortBy();
+        Sort.Direction direction = Sort.Direction.ASC;
+
+        if (request.getSortOrder() != null && "DESC".equalsIgnoreCase(request.getSortOrder())) {
+            direction = Sort.Direction.DESC;
+        }
+
+        // Map frontend sort fields to database entity fields
+        String databaseField = mapSortFieldToDatabaseField(sortBy);
+
+        return Sort.by(direction, databaseField);
+    }
+
+    private boolean canSortInDatabase(String sortBy) {
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            return true; // Default sorting can be done in database
+        }
+
+        switch (sortBy.toLowerCase()) {
+            case "fullname":
+            case "name":
+            case "officename":
+            case "office":
+                return true; // These can be sorted in database
+            case "totalrequestssubmitted":
+            case "requests":
+            case "totalrequestsapproved":
+            case "approved":
+            case "lastactivity":
+            case "approvalrate":
+                return false; // These are calculated fields, need Java stream sorting
+            default:
+                return true; // Default to database sorting
+        }
+    }
+
+    private String mapSortFieldToDatabaseField(String frontendField) {
+        switch (frontendField.toLowerCase()) {
+            case "fullname":
+            case "name":
+                return "firstName"; // Use firstName for sorting since fullName is computed
+            case "officename":
+            case "office":
+                return "office.name";
+            default:
+                return "firstName";
+        }
+    }
+
+    private List<UserActivityItemDto> applyJavaStreamSorting(List<UserActivityItemDto> userActivities,
+            UserActivityReportRequest request) {
+        String sortBy = request.getSortBy();
+        boolean ascending = request.getSortOrder() == null || "ASC".equalsIgnoreCase(request.getSortOrder());
+
+        System.out.println("DEBUG SORTING: Applying Java stream sorting for " + sortBy + " in "
+                + (ascending ? "ASC" : "DESC") + " order");
+
+        return userActivities.stream()
+                .sorted((a, b) -> {
+                    int comparison = 0;
+                    switch (sortBy.toLowerCase()) {
+                        case "totalrequestssubmitted":
+                        case "requests":
+                            comparison = Integer.compare(a.getTotalRequestsSubmitted(), b.getTotalRequestsSubmitted());
+                            break;
+                        case "totalrequestsapproved":
+                        case "approved":
+                            comparison = Integer.compare(a.getTotalRequestsApproved(), b.getTotalRequestsApproved());
+                            break;
+                        case "lastactivity":
+                            if (a.getLastActivity() == null && b.getLastActivity() == null) {
+                                comparison = 0;
+                            } else if (a.getLastActivity() == null) {
+                                comparison = 1; // nulls last
+                            } else if (b.getLastActivity() == null) {
+                                comparison = -1; // nulls last
+                            } else {
+                                comparison = a.getLastActivity().compareTo(b.getLastActivity());
+                            }
+                            break;
+                        case "approvalrate":
+                            comparison = Double.compare(a.getApprovalRate(), b.getApprovalRate());
+                            break;
+                        default:
+                            // Fall back to full name comparison
+                            comparison = a.getFullName().compareToIgnoreCase(b.getFullName());
+                            break;
+                    }
+                    return ascending ? comparison : -comparison;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -272,12 +404,14 @@ public class UserActivityReportService implements UserActivityReportServiceInter
             for (Object[] result : lastActivities) {
                 String status = (String) result[0];
                 java.sql.Timestamp timestamp = (java.sql.Timestamp) result[1];
-                LocalDateTime localDateTime = timestamp.toLocalDateTime();
-                switch (status) {
-                    case "SUBMITTED" -> stats.setLastSubmitted(localDateTime);
-                    case "APPROVED" -> stats.setLastApproved(localDateTime);
-                    case "REJECTED" -> stats.setLastRejected(localDateTime);
-                    case "FULFILLED" -> stats.setLastFulfilled(localDateTime);
+                if (timestamp != null) {
+                    LocalDateTime localDateTime = timestamp.toLocalDateTime();
+                    switch (status) {
+                        case "SUBMITTED" -> stats.setLastSubmitted(localDateTime);
+                        case "APPROVED" -> stats.setLastApproved(localDateTime);
+                        case "REJECTED" -> stats.setLastRejected(localDateTime);
+                        case "FULFILLED" -> stats.setLastFulfilled(localDateTime);
+                    }
                 }
             }
 

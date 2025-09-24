@@ -96,6 +96,7 @@ export function useAuthQueries() {
         mutationFn: authApi.logout,
         onSuccess: () => {
             clearUser()
+            logout()
             queryClient.clear();
         },
         onError: () => {

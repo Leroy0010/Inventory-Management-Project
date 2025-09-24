@@ -96,16 +96,6 @@ const applicationData: SearchResult[] = [
         keywords: ['cart', 'shopping', 'basket', 'requests', 'items'],
         permissions: ['VIEW_CART'],
     },
-    {
-        id: 'staff-requests',
-        title: 'My Requests',
-        description: 'View and manage your personal requests',
-        category: 'page',
-        path: '/staff-requests',
-        icon: 'FileText',
-        keywords: ['requests', 'my', 'personal', 'manage', 'staff'],
-        permissions: ['VIEW_REQUESTS'],
-    },
 
     // Storekeeper Pages
     {
@@ -213,20 +203,9 @@ const applicationData: SearchResult[] = [
         category: 'page',
         path: '/requests',
         icon: 'FileText',
-        keywords: ['requests', 'management', 'process', 'approve', 'reject'],
-        permissions: ['MANAGE_REQUESTS'],
-    },
-    {
-        id: 'staff-requests',
-        title: 'My Requests',
-        description: 'View and manage your personal requests',
-        category: 'page',
-        path: '/staff-requests',
-        icon: 'FileText',
-        keywords: ['requests', 'my', 'personal', 'manage', 'staff'],
+        keywords: ['requests', 'management', 'process', 'approve', 'reject', 'fulfill'],
         permissions: ['VIEW_REQUESTS'],
     },
-
     // Reports
     {
         id: 'transaction-reports',

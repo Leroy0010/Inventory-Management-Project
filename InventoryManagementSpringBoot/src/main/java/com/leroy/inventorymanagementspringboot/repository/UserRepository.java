@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -56,6 +58,15 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      */
     @Query("SELECT u FROM User u WHERE u.office.department.id = :departmentId")
     List<User> findUsersByOfficeDepartment(@Param("departmentId") Integer departmentId);
+
+    /**
+     * Find users whose office.department matches the given departmentId with
+     * pagination and sorting.
+     * This includes staff users whose office belongs to the storekeeper's
+     * department.
+     */
+    @Query("SELECT u FROM User u WHERE u.office.department.id = :departmentId")
+    Page<User> findUsersByOfficeDepartment(@Param("departmentId") Integer departmentId, Pageable pageable);
 
     // Dashboard methods
     long countByRoleName(String roleName);
