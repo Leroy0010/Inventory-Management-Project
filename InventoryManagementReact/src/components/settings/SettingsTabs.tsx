@@ -54,28 +54,71 @@ export function SettingsTabs({
     availableTabs,
 }: SettingsTabsProps) {
     return (
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {availableTabs.map((tab) => {
-                const config = tabConfig[tab];
-                const Icon = config.icon;
+        <>
+            {/* Desktop Vertical Layout */}
+            <div className="hidden xl:block space-y-1">
+                {availableTabs.map((tab) => {
+                    const config = tabConfig[tab];
+                    const Icon = config.icon;
+                    const isActive = activeTab === tab;
 
-                return (
-                    <TabsTrigger
-                        key={tab}
-                        value={tab}
-                        className="flex flex-col items-center gap-2 p-4 h-auto"
-                        onClick={() => onTabChange(tab)}
-                    >
-                        <Icon className="h-5 w-5" />
-                        <div className="text-center">
-                            <div className="font-medium">{config.label}</div>
-                            <div className="text-xs text-muted-foreground hidden lg:block">
-                                {config.description}
+                    return (
+                        <button
+                            key={tab}
+                            onClick={() => onTabChange(tab)}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg transition-colors ${
+                                isActive
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                            }`}
+                        >
+                            <Icon className="h-4 w-4 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm">
+                                    {config.label}
+                                </div>
+                                <div
+                                    className={`text-xs ${
+                                        isActive
+                                            ? 'text-primary-foreground/70'
+                                            : 'text-muted-foreground'
+                                    }`}
+                                >
+                                    {config.description}
+                                </div>
                             </div>
-                        </div>
-                    </TabsTrigger>
-                );
-            })}
-        </TabsList>
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Mobile Horizontal Layout */}
+            <div className="xl:hidden">
+                <div className="flex space-x-1 overflow-x-auto pb-2">
+                    {availableTabs.map((tab) => {
+                        const config = tabConfig[tab];
+                        const Icon = config.icon;
+                        const isActive = activeTab === tab;
+
+                        return (
+                            <button
+                                key={tab}
+                                onClick={() => onTabChange(tab)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
+                                    isActive
+                                        ? 'bg-primary text-primary-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                                }`}
+                            >
+                                <Icon className="h-4 w-4" />
+                                <span className="text-sm font-medium">
+                                    {config.label}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+        </>
     );
 }

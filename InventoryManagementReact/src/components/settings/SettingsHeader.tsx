@@ -1,4 +1,5 @@
 import { Clock, User } from 'lucide-react';
+import { formatDate } from '@/utils/dateUtils';
 
 interface SettingsHeaderProps {
     title: string;
@@ -22,7 +23,14 @@ export function SettingsHeader({
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     <span>
-                        Last updated: {new Date(lastUpdated).toLocaleString()}
+                        Last updated:{' '}
+                        {formatDate(lastUpdated, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        })}
                     </span>
                 </div>
             )}

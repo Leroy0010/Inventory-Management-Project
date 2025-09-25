@@ -1,23 +1,18 @@
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
-import { DateRangePicker } from '@/components/ui/date-picker';
-import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { useOffices } from '@/hooks/queries/useOffice';
 import { useUserEmailsAndIds } from '@/hooks/queries/useUser';
 import { useToast } from '@/hooks/useToast';
 import type { UserActivityReportFilters as UserActivityReportFiltersType } from '@/types/userActivityReport';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import FilterActionButtons from './FilterActionButtons';
+import StatusFilter from './StatusFilter';
+import { YearMonthFilters } from './YearMonthFilters';
+import { DateRangeFilters } from './DateRangeFilters';
+import { UserOfficeFilters } from './UserOfficeFilters';
+import { SortFilters } from './SortFilters';
+import { formatDateForAPI } from '@/utils/dateUtils';
+import type { ComboboxOption } from '@/components/ui/combobox';
 
 const filterSchema = z.object({
     year: z
@@ -79,18 +74,6 @@ type FilterFormData = {
     activeOnly?: boolean;
 };
 
-const SORT_OPTIONS = [
-    { value: 'userName', label: 'Name' },
-    { value: 'totalRequestsSubmitted', label: 'Requests Submitted' },
-    { value: 'totalRequestsApproved', label: 'Requests Approved' },
-    { value: 'lastActivity', label: 'Last Activity' },
-];
-
-const SORT_ORDER_OPTIONS = [
-    { value: 'ASC', label: 'Ascending' },
-    { value: 'DESC', label: 'Descending' },
-];
-
 interface UserActivityReportFiltersProps {
     onApplyFilters: (filters: UserActivityReportFiltersType) => void;
     onClearFilters: () => void;
@@ -130,13 +113,6 @@ export default function UserActivityReportFilters({
 
     const watchedValues = watch();
 
-    // Generate years (current year - 10)
-    const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: 11 }, (_, i) => currentYear - 10 + i);
-
-    // Generate months
-    const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
     // Convert offices to combobox options
     const officeOptions: ComboboxOption[] = [
         { value: '', label: 'All Offices' },
@@ -156,7 +132,6 @@ export default function UserActivityReportFilters({
     ];
 
     const handleApplyFilters = (data: FilterFormData) => {
-
         // Validate that at least year or date range is provided
         if (!data.year && (!data.startDate || !data.endDate)) {
             toast({
@@ -211,8 +186,14 @@ export default function UserActivityReportFilters({
         startDate: Date | undefined,
         endDate: Date | undefined
     ) => {
-        setValue('startDate', startDate?.toISOString().split('T')[0]);
-        setValue('endDate', endDate?.toISOString().split('T')[0]);
+        setValue(
+            'startDate',
+            startDate ? formatDateForAPI(startDate.toISOString()) : ''
+        );
+        setValue(
+            'endDate',
+            endDate ? formatDateForAPI(endDate.toISOString()) : ''
+        );
     };
 
     return (
@@ -222,249 +203,92 @@ export default function UserActivityReportFilters({
                 className="space-y-6"
             >
                 <div className="flex gap-10 flex-wrap">
-                    {/* Year Selection */}
-                    <div className="space-y-2">
-                        <Label htmlFor="year">Year</Label>
-                        <Select
-                            value={watchedValues.year?.toString() || ''}
-                            onValueChange={(value) =>
-                                setValue('year', value || undefined)
-                            }
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select year" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {years.map((year) => (
-                                    <SelectItem
-                                        key={year}
-                                        value={year.toString()}
-                                    >
-                                        {year}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {errors.year && (
-                            <p className="text-sm text-red-600">
-                                {errors.year.message}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Month Selection */}
-                    <div className="space-y-2">
-                        <Label htmlFor="month">Month (Optional)</Label>
-                        <Select
-                            value={watchedValues.month?.toString() || ''}
-                            onValueChange={(value) =>
-                                setValue('month', value || undefined)
-                            }
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select month" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {months.map((month) => (
-                                    <SelectItem
-                                        key={month}
-                                        value={month.toString()}
-                                    >
-                                        {new Date(
-                                            2024,
-                                            month - 1,
-                                            1
-                                        ).toLocaleString('default', {
-                                            month: 'long',
-                                        })}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {errors.month && (
-                            <p className="text-sm text-red-600">
-                                {errors.month.message}
-                            </p>
-                        )}
-                    </div>
+                    {/* Year and Month Selection */}
+                    <YearMonthFilters
+                        year={watchedValues.year?.toString() || ''}
+                        month={watchedValues.month?.toString() || ''}
+                        onYearChange={(value) =>
+                            setValue('year', value || undefined)
+                        }
+                        onMonthChange={(value) =>
+                            setValue('month', value || undefined)
+                        }
+                        yearError={errors.year?.message}
+                        monthError={errors.month?.message}
+                    />
 
                     {/* Date Range Selection */}
-                    <div className="space-y-2">
-                        <Label>Date Range (Alternative to Year)</Label>
-                        <DateRangePicker
-                            startDate={
-                                watchedValues.startDate
-                                    ? new Date(watchedValues.startDate)
-                                    : undefined
-                            }
-                            endDate={
+                    <DateRangeFilters
+                        startDate={
+                            watchedValues.startDate
+                                ? new Date(watchedValues.startDate)
+                                : undefined
+                        }
+                        endDate={
+                            watchedValues.endDate
+                                ? new Date(watchedValues.endDate)
+                                : undefined
+                        }
+                        onStartDateChange={(date) =>
+                            handleDateRangeChange(
+                                date,
                                 watchedValues.endDate
                                     ? new Date(watchedValues.endDate)
                                     : undefined
-                            }
-                            onStartDateChange={(date) =>
-                                handleDateRangeChange(
-                                    date,
-                                    watchedValues.endDate
-                                        ? new Date(watchedValues.endDate)
-                                        : undefined
-                                )
-                            }
-                            onEndDateChange={(date) =>
-                                handleDateRangeChange(
-                                    watchedValues.startDate
-                                        ? new Date(watchedValues.startDate)
-                                        : undefined,
-                                    date
-                                )
-                            }
-                        />
-                        {errors.startDate && (
-                            <p className="text-sm text-red-600">
-                                {errors.startDate.message}
-                            </p>
-                        )}
-                        {errors.endDate && (
-                            <p className="text-sm text-red-600">
-                                {errors.endDate.message}
-                            </p>
-                        )}
-                    </div>
+                            )
+                        }
+                        onEndDateChange={(date) =>
+                            handleDateRangeChange(
+                                watchedValues.startDate
+                                    ? new Date(watchedValues.startDate)
+                                    : undefined,
+                                date
+                            )
+                        }
+                        startDateError={errors.startDate?.message}
+                        endDateError={errors.endDate?.message}
+                    />
 
-                    {/* Office Selection */}
-                    <div className="space-y-2">
-                        <Label htmlFor="officeId">Office</Label>
-                        <Combobox
-                            options={officeOptions}
-                            value={watchedValues.officeId?.toString() || ''}
-                            onValueChange={(value) =>
-                                setValue('officeId', value || undefined)
-                            }
-                            placeholder="Select office"
-                        />
-                        {errors.officeId && (
-                            <p className="text-sm text-red-600">
-                                {errors.officeId.message}
-                            </p>
-                        )}
-                    </div>
+                    {/* Office and User Selection */}
+                    <UserOfficeFilters
+                        officeId={watchedValues.officeId?.toString() || ''}
+                        userId={watchedValues.userId?.toString() || ''}
+                        onOfficeChange={(value) =>
+                            setValue('officeId', value || undefined)
+                        }
+                        onUserChange={(value) =>
+                            setValue('userId', value || undefined)
+                        }
+                        officeOptions={officeOptions}
+                        userOptions={userOptions}
+                        officeError={errors.officeId?.message}
+                        userError={errors.userId?.message}
+                    />
 
-                    {/* User Selection */}
-                    <div className="space-y-2">
-                        <Label htmlFor="userId">User</Label>
-                        <Combobox
-                            options={userOptions}
-                            value={watchedValues.userId?.toString() || ''}
-                            onValueChange={(value) =>
-                                setValue('userId', value || undefined)
-                            }
-                            placeholder="Select user"
-                        />
-                        {errors.userId && (
-                            <p className="text-sm text-red-600">
-                                {errors.userId.message}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Sort By */}
-                    <div className="space-y-2">
-                        <Label htmlFor="sortBy">Sort By</Label>
-                        <Select
-                            value={watchedValues.sortBy || ''}
-                            onValueChange={(value) => setValue('sortBy', value)}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select sort field" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {SORT_OPTIONS.map((option) => (
-                                    <SelectItem
-                                        key={option.value}
-                                        value={option.value}
-                                    >
-                                        {option.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {errors.sortBy && (
-                            <p className="text-sm text-red-600">
-                                {errors.sortBy.message}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Sort Order */}
-                    <div className="space-y-2">
-                        <Label htmlFor="sortOrder">Sort Order</Label>
-                        <Select
-                            value={watchedValues.sortOrder || ''}
-                            onValueChange={(value) =>
-                                setValue('sortOrder', value as 'ASC' | 'DESC')
-                            }
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select sort order" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {SORT_ORDER_OPTIONS.map((option) => (
-                                    <SelectItem
-                                        key={option.value}
-                                        value={option.value}
-                                    >
-                                        {option.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {errors.sortOrder && (
-                            <p className="text-sm text-red-600">
-                                {errors.sortOrder.message}
-                            </p>
-                        )}
-                    </div>
+                    {/* Sort Options */}
+                    <SortFilters
+                        sortBy={watchedValues.sortBy || ''}
+                        sortOrder={watchedValues.sortOrder || ''}
+                        onSortByChange={(value) => setValue('sortBy', value)}
+                        onSortOrderChange={(value) =>
+                            setValue('sortOrder', value as 'ASC' | 'DESC')
+                        }
+                        sortByError={errors.sortBy?.message}
+                        sortOrderError={errors.sortOrder?.message}
+                    />
 
                     {/* Active Only Filter */}
-                    <div className="space-y-2">
-                        <Label htmlFor="activeOnly">User Status</Label>
-                        <div className="flex items-center space-x-2">
-                            <Checkbox
-                                id="activeOnly"
-                                checked={watchedValues.activeOnly || false}
-                                onCheckedChange={(checked) =>
-                                    setValue('activeOnly', checked as boolean)
-                                }
-                            />
-                            <Label
-                                htmlFor="activeOnly"
-                                className="text-sm font-normal"
-                            >
-                                Show only active users
-                            </Label>
-                        </div>
-                    </div>
+                    <StatusFilter
+                        watchedValues={watchedValues}
+                        setValue={setValue}
+                    />
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2 pt-4">
-                    <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className="flex-1"
-                    >
-                        {isLoading ? 'Generating...' : 'Generate Report'}
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleClearFilters}
-                        disabled={isLoading}
-                    >
-                        <X className="h-4 w-4 mr-2" />
-                        Clear
-                    </Button>
-                </div>
+                <FilterActionButtons
+                    isLoading={isLoading}
+                    handleClearFilters={handleClearFilters}
+                />
             </form>
         </div>
     );

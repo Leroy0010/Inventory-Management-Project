@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 interface StatusHistoryProps {
     request: RequestResponseDto;
     getStatusBadgeVariant: (status: RequestStatus) => StatusBadgeVariant;
-    formatDate: (date: Date) => string;
+    formatDate: (dateString: string) => string;
 }
 
 export default function StatusHistory({

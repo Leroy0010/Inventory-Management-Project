@@ -1,4 +1,5 @@
 import { api, handleApiError } from './client';
+import { formatShortDate, formatDate } from '@/utils/dateUtils';
 import type {
     TransactionReportRequest,
     TransactionReport,
@@ -47,7 +48,7 @@ export const transactionReportApi = {
             headers.join(','),
             ...report.transactions.map((transaction) =>
                 [
-                    new Date(transaction.date).toLocaleDateString(),
+                    formatShortDate(transaction.date),
                     transaction.transactionType,
                     transaction.quantity,
                     transaction.balance,
@@ -68,7 +69,7 @@ export const transactionReportApi = {
         link.setAttribute(
             'download',
             filename ||
-                `transaction-report-${report.itemName.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`
+                `transaction-report-${report.itemName.replace(/\s+/g, '-').toLowerCase()}-${formatShortDate(new Date().toISOString())}.csv`
         );
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
@@ -95,7 +96,7 @@ export const transactionReportApi = {
             `Transaction Report for ${report.itemName}`,
             `Item ID: ${report.itemId}`,
             `Unit: ${report.unitOfMeasurement}`,
-            `Generated: ${new Date().toLocaleDateString()}`,
+            `Generated: ${formatShortDate(new Date().toISOString())}`,
             '',
             // Summary section
             'SUMMARY',
@@ -108,7 +109,7 @@ export const transactionReportApi = {
             'Date,Transaction Type,Quantity,Balance,Supplier,Invoice ID,Receiver',
             ...report.transactions.map((transaction) =>
                 [
-                    new Date(transaction.date).toLocaleDateString(),
+                    formatShortDate(transaction.date),
                     transaction.transactionType,
                     transaction.quantity,
                     transaction.balance,
@@ -129,7 +130,7 @@ export const transactionReportApi = {
         link.setAttribute(
             'download',
             filename ||
-                `detailed-transaction-report-${report.itemName.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`
+                `detailed-transaction-report-${report.itemName.replace(/\s+/g, '-').toLowerCase()}-${formatShortDate(new Date().toISOString())}.csv`
         );
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
@@ -204,7 +205,7 @@ export const transactionReportApi = {
         link.setAttribute(
             'download',
             filename ||
-                `transaction-report-${report.itemName.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`
+                `transaction-report-${report.itemName.replace(/\s+/g, '-').toLowerCase()}-${formatShortDate(new Date().toISOString())}.json`
         );
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
@@ -220,8 +221,14 @@ export const transactionReportApi = {
     formatTransactionForDisplay: (transaction: TransactionDto) => {
         return {
             ...transaction,
-            formattedDate: new Date(transaction.date).toLocaleDateString(),
-            formattedDateTime: new Date(transaction.date).toLocaleString(),
+            formattedDate: formatShortDate(transaction.date),
+            formattedDateTime: formatDate(transaction.date, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            }),
             formattedQuantity: transaction.quantity.toLocaleString(),
             formattedBalance: transaction.balance.toLocaleString(),
         };

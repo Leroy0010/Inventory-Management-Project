@@ -1,4 +1,5 @@
 import { api, handleApiError } from './client';
+import { formatShortDate } from '@/utils/dateUtils';
 import type {
     UserActivityReportRequest,
     UserActivityReportResponseDto,
@@ -138,7 +139,7 @@ export class UserActivityReportApi {
                     item.totalItemsFulfilled,
                     (item.approvalRate * 100).toFixed(1),
                     item.lastActivity
-                        ? new Date(item.lastActivity).toLocaleDateString()
+                        ? formatShortDate(item.lastActivity)
                         : 'N/A',
                 ].join(',')
             ),
@@ -154,7 +155,7 @@ export class UserActivityReportApi {
         link.setAttribute(
             'download',
             filename ||
-                `user-activity-report-${new Date().toISOString().split('T')[0]}.csv`
+                `user-activity-report-${formatShortDate(new Date().toISOString())}.csv`
         );
         link.style.visibility = 'hidden';
         document.body.appendChild(link);

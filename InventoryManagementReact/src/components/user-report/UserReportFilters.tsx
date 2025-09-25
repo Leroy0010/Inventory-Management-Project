@@ -16,6 +16,7 @@ import { DateRangePicker } from '@/components/ui/date-picker';
 import { Filter, X, SortAsc, SortDesc } from 'lucide-react';
 import { useUserEmailsAndIds } from '@/hooks/queries/useUser';
 import { useToast } from '@/hooks/useToast';
+import { formatDateForAPI } from '@/utils/dateUtils';
 import type { UserReportFilters } from '@/types/userReport';
 
 const filterSchema = z.object({
@@ -133,8 +134,14 @@ export default function UserReportFilters({
         startDate: Date | undefined,
         endDate: Date | undefined
     ) => {
-        setValue('startDate', startDate?.toISOString().split('T')[0]);
-        setValue('endDate', endDate?.toISOString().split('T')[0]);
+        setValue(
+            'startDate',
+            startDate ? formatDateForAPI(startDate.toISOString()) : ''
+        );
+        setValue(
+            'endDate',
+            endDate ? formatDateForAPI(endDate.toISOString()) : ''
+        );
     };
 
     return (

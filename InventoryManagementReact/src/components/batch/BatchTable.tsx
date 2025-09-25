@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Package, Calendar, DollarSign, Hash } from 'lucide-react';
+import { formatDate } from '@/utils/dateUtils';
 import type { InventoryBatch } from '@/types/inventoryBatch';
 
 interface BatchTableProps {
@@ -16,15 +17,7 @@ interface BatchTableProps {
     isLoading: boolean;
 }
 
-const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-};
+// Using the utility function from dateUtils
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -158,7 +151,13 @@ export default function BatchTable({ batches, isLoading }: BatchTableProps) {
                                     <div className="flex items-center space-x-1">
                                         <Calendar className="h-3 w-3 text-muted-foreground" />
                                         <span className="text-sm">
-                                            {formatDate(batch.batchDate)}
+                                            {formatDate(batch.batchDate, {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
                                         </span>
                                     </div>
                                 </TableCell>

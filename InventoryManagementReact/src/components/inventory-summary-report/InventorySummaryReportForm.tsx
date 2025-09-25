@@ -1,38 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form';
-import { DatePicker, DateRangePicker } from '@/components/ui/date-picker';
-import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
-import { Filter, Download } from 'lucide-react';
+import { Form } from '@/components/ui/form';
+import { Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useQuery } from '@tanstack/react-query';
-import { officeApi } from '@/api/office';
-import type {
-    InventorySummaryReportFilters,
-    InventorySummaryType,
-    CostFlowMethod,
-} from '@/types/inventorySummaryReport';
+import type { InventorySummaryReportFilters } from '@/types/inventorySummaryReport';
 import { useOffices } from '@/hooks/queries/useOffice';
+import { ReportTypeSelector } from './ReportTypeSelector';
+import { OfficeFilter } from './OfficeFilter';
+import { CostFlowMethodSelector } from './CostFlowMethodSelector';
+import { DateRangeTypeSelector } from './DateRangeTypeSelector';
+import { SingleYearSelector } from './SingleYearSelector';
+import { YearRangeSelector } from './YearRangeSelector';
+import { CustomDateRangeSelector } from './CustomDateRangeSelector';
+import { ReportActionButtons } from './ReportActionButtons';
+import type { ComboboxOption } from '@/components/ui/combobox';
 
 // Form validation schema
 const reportFormSchema = z
@@ -187,293 +171,43 @@ export default function InventorySummaryReportForm({
                         className="space-y-6"
                     >
                         <div className="flex space-x-20">
-                            {/* Report Type */}
-                            <FormField
-                                control={form.control}
-                                name="inventorySummaryType"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Report Type</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select report type" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="BY_QUANTITY">
-                                                    By Quantity
-                                                </SelectItem>
-                                                <SelectItem value="BY_VALUE">
-                                                    By Value
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Office Filter */}
-                            <FormField
-                                control={form.control}
-                                name="officeId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Office Filter</FormLabel>
-                                        <FormControl>
-                                            <Combobox
-                                                options={officeOptions}
-                                                value={
-                                                    field.value?.toString() ||
-                                                    'all'
-                                                }
-                                                onValueChange={(value) => {
-                                                    field.onChange(
-                                                        value === 'all'
-                                                            ? undefined
-                                                            : parseInt(value)
-                                                    );
-                                                }}
-                                                placeholder="Select office..."
-                                                searchPlaceholder="Search offices..."
-                                                emptyText="No offices found."
-                                                disabled={officesLoading}
-                                                width="w-full"
-                                                className="w-max-md w-min-sm"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
+                            <ReportTypeSelector form={form} />
+                            <OfficeFilter
+                                form={form}
+                                officeOptions={officeOptions}
+                                isLoading={officesLoading}
                             />
                         </div>
 
-                        {/* Cost Flow Method (only for value reports) */}
-                        {watchInventorySummaryType === 'BY_VALUE' && (
-                            <FormField
-                                control={form.control}
-                                name="costFlowMethod"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Cost Flow Method</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select cost flow method" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="FIFO">
-                                                    FIFO (First-In, First-Out)
-                                                </SelectItem>
-                                                <SelectItem value="AVG">
-                                                    Average Weighted
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        )}
-
-                        {/* Date Range Type */}
-                        <FormField
-                            control={form.control}
-                            name="dateRange.type"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Date Range Type</FormLabel>
-                                    <Select
-                                        onValueChange={(value) => {
-                                            field.onChange(value);
-                                            setDateRangeType(
-                                                value as
-                                                    | 'year'
-                                                    | 'yearRange'
-                                                    | 'custom'
-                                            );
-                                        }}
-                                        defaultValue={field.value}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select date range type" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="year">
-                                                Single Year
-                                            </SelectItem>
-                                            <SelectItem value="yearRange">
-                                                Year Range
-                                            </SelectItem>
-                                            <SelectItem value="custom">
-                                                Custom Date Range
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                        <CostFlowMethodSelector
+                            form={form}
+                            show={watchInventorySummaryType === 'BY_VALUE'}
                         />
 
-                        {/* Single Year */}
-                        {watchDateRangeType === 'year' && (
-                            <FormField
-                                control={form.control}
-                                name="dateRange.year"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Year</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="number"
-                                                placeholder="2024"
-                                                min="2000"
-                                                max="2100"
-                                                {...field}
-                                                onChange={(e) =>
-                                                    field.onChange(
-                                                        parseInt(
-                                                            e.target.value
-                                                        ) || undefined
-                                                    )
-                                                }
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        )}
+                        <DateRangeTypeSelector
+                            form={form}
+                            onTypeChange={setDateRangeType}
+                        />
 
-                        {/* Year Range */}
-                        {watchDateRangeType === 'yearRange' && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="dateRange.startYear"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Start Year</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    placeholder="2023"
-                                                    min="2000"
-                                                    max="2100"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            parseInt(
-                                                                e.target.value
-                                                            ) || undefined
-                                                        )
-                                                    }
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="dateRange.endYear"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>End Year</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    placeholder="2024"
-                                                    min="2000"
-                                                    max="2100"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            parseInt(
-                                                                e.target.value
-                                                            ) || undefined
-                                                        )
-                                                    }
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                        )}
+                        <SingleYearSelector
+                            form={form}
+                            show={watchDateRangeType === 'year'}
+                        />
 
-                        {/* Custom Date Range */}
-                        {watchDateRangeType === 'custom' && (
-                            <FormField
-                                control={form.control}
-                                name="dateRange"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Date Range</FormLabel>
-                                        <FormControl>
-                                            <DateRangePicker
-                                                startDate={
-                                                    field.value?.startDate
-                                                }
-                                                endDate={field.value?.endDate}
-                                                onStartDateChange={(date) => {
-                                                    field.onChange({
-                                                        ...field.value,
-                                                        startDate: date,
-                                                    });
-                                                }}
-                                                onEndDateChange={(date) => {
-                                                    field.onChange({
-                                                        ...field.value,
-                                                        endDate: date,
-                                                    });
-                                                }}
-                                                startPlaceholder="Pick start date"
-                                                endPlaceholder="Pick end date"
-                                                className="w-full"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        )}
+                        <YearRangeSelector
+                            form={form}
+                            show={watchDateRangeType === 'yearRange'}
+                        />
 
-                        {/* Action Buttons */}
-                        <div className="flex items-center space-x-4 pt-4">
-                            <Button
-                                type="submit"
-                                disabled={isLoading}
-                                className="flex-1"
-                            >
-                                {isLoading
-                                    ? 'Generating...'
-                                    : 'Generate Report'}
-                            </Button>
-                            {onExport && (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleExport}
-                                    disabled={isLoading}
-                                    className="flex items-center space-x-2"
-                                >
-                                    <Download className="h-4 w-4" />
-                                    <span>Export</span>
-                                </Button>
-                            )}
-                        </div>
+                        <CustomDateRangeSelector
+                            form={form}
+                            show={watchDateRangeType === 'custom'}
+                        />
+
+                        <ReportActionButtons
+                            isLoading={isLoading}
+                            onExport={onExport ? handleExport : undefined}
+                        />
                     </form>
                 </Form>
             </CardContent>

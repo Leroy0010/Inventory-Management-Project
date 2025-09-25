@@ -3,6 +3,7 @@ import { memo } from 'react';
 import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
 import { CheckCircle, XCircle, Clock, Package } from 'lucide-react';
 import type { RequestResponseDto, RequestStatus } from '@/types/request';
+import { formatDate } from '@/utils/dateUtils';
 import StatusHistory from './request-details-modal/StatusHistory';
 import RequestedItems from './request-details-modal/RequestedItems';
 import FulfillmentInformation from './request-details-modal/FulFillmentInformation';
@@ -68,8 +69,9 @@ const RequestDetailsModal = memo(function RequestDetailsModal({
 
     if (!request) return null;
 
-    const formatDate = (date: Date) => {
-        return new Date(date).toLocaleDateString('en-US', {
+    // Use the utility function for consistent date formatting
+    const formatDateForDisplay = (dateString: string) => {
+        return formatDate(dateString, {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -94,7 +96,7 @@ const RequestDetailsModal = memo(function RequestDetailsModal({
                     {/* Request Summary */}
                     <RequestSummary
                         request={request}
-                        formatDate={formatDate}
+                        formatDate={formatDateForDisplay}
                         getStatusBadgeVariant={getStatusBadgeVariant}
                         getStatusIcon={getStatusIcon}
                     />
@@ -103,14 +105,14 @@ const RequestDetailsModal = memo(function RequestDetailsModal({
                     {request.approvedAt && request.approver && (
                         <ApprovalInformation
                             request={request}
-                            formatDate={formatDate}
+                            formatDate={formatDateForDisplay}
                         />
                     )}
 
                     {/* Fulfillment Information */}
                     {request.fulfilledAt && request.fulfiller && (
                         <FulfillmentInformation
-                            formatDate={formatDate}
+                            formatDate={formatDateForDisplay}
                             request={request}
                         />
                     )}
@@ -124,7 +126,7 @@ const RequestDetailsModal = memo(function RequestDetailsModal({
                             <StatusHistory
                                 request={request}
                                 getStatusBadgeVariant={getStatusBadgeVariant}
-                                formatDate={formatDate}
+                                formatDate={formatDateForDisplay}
                             />
                         )}
                 </div>

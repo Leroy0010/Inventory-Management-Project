@@ -1,15 +1,15 @@
-import type { RequestStatus } from "@/types/request";
+import type { RequestStatus } from '@/types/request';
+import { formatDate as formatDateUtil } from '@/utils/dateUtils';
 
-export const formatDate = (date: Date) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
-
+export const formatDate = (dateString: string) => {
+    return formatDateUtil(dateString, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
 
 export const getStatusBadgeVariant = (status: RequestStatus) => {
     switch (status) {
@@ -25,5 +25,3 @@ export const getStatusBadgeVariant = (status: RequestStatus) => {
             return 'secondary';
     }
 };
-
-

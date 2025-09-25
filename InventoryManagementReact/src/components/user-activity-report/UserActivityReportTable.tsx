@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { formatShortDate } from '@/utils/dateUtils';
 import {
     Table,
     TableBody,
@@ -89,10 +90,7 @@ export function UserActivityReportTable({
     const startIndex = (page - 1) * pageSize;
     const paginatedData = filteredData.slice(startIndex, startIndex + pageSize);
 
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleDateString();
-    };
+    // Using the utility function from dateUtils
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-US', {
@@ -301,7 +299,9 @@ export function UserActivityReportTable({
                                         <TableCell>
                                             <div className="flex items-center gap-1 text-sm">
                                                 <Clock className="h-3 w-3 text-muted-foreground" />
-                                                {formatDate(user.lastActivity)}
+                                                {formatShortDate(
+                                                    user.lastActivity || ''
+                                                )}
                                             </div>
                                         </TableCell>
                                     </TableRow>

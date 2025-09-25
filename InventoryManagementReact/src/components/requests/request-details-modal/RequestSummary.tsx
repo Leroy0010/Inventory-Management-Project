@@ -2,11 +2,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { RequestResponseDto, RequestStatus } from '@/types/request';
 import type { StatusBadgeVariant } from '../RequestDetailsModal';
-import type { ReactNode,  } from 'react';
+import type { ReactNode } from 'react';
 
 interface RequestSummaryProps {
     request: RequestResponseDto;
-    formatDate: (date: Date) => string;
+    formatDate: (dateString: string) => string;
     getStatusBadgeVariant: (status: RequestStatus) => StatusBadgeVariant;
     getStatusIcon: (status: RequestStatus) => JSX.Element;
 }

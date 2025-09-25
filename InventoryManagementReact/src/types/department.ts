@@ -10,7 +10,7 @@ export interface DepartmentResponseDto {
     headOfDepartment?: string;
     description?: string;
     staffCount: number;
-    createdAt: string; // Backend returns LocalDate as string
+    createdAt: string; // ISO string from LocalDateTime
     active: boolean;
-    updatedAt: string; // Backend returns LocalDate as string
+    updatedAt: string; // ISO string from LocalDateTime
 }

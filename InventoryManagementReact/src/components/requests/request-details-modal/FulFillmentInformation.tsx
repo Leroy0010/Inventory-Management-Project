@@ -1,12 +1,15 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { RequestResponseDto } from "@/types/request";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { RequestResponseDto } from '@/types/request';
 
 interface FulfillmentInformationProps {
     request: RequestResponseDto;
-    formatDate: (date: Date) => string;
+    formatDate: (dateString: string) => string;
 }
 
-export default function FulfillmentInformation({request, formatDate}: FulfillmentInformationProps) {
+export default function FulfillmentInformation({
+    request,
+    formatDate,
+}: FulfillmentInformationProps) {
     return (
         <Card>
             <CardHeader>
@@ -28,7 +31,7 @@ export default function FulfillmentInformation({request, formatDate}: Fulfillmen
                             Fulfilled At
                         </label>
                         <p className="text-sm">
-                            {formatDate(request.fulfilledAt as Date)}
+                            {formatDate(request.fulfilledAt!)}
                         </p>
                     </div>
                 </div>

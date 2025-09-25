@@ -1,5 +1,5 @@
-import type { RequestStatusHistoryDto } from "./requestStatusHistory";
-import type { UserResponseDto } from "./user";
+import type { RequestStatusHistoryDto } from './requestStatusHistory';
+import type { UserResponseDto } from './user';
 
 export interface RequestItemResponseDto {
     id: number;
@@ -9,12 +9,12 @@ export interface RequestItemResponseDto {
 
 export interface RequestResponseDto {
     id: number;
-    user_id: number;   // ID of requester
+    user_id: number; // ID of requester
     items: RequestItemResponseDto[];
     status: RequestStatus;
-    submittedAt: Date;
-    approvedAt?: Date;
-    fulfilledAt?: Date;
+    submittedAt: string; // ISO string from LocalDateTime
+    approvedAt?: string; // ISO string from LocalDateTime
+    fulfilledAt?: string; // ISO string from LocalDateTime
     approver?: UserResponseDto;
     fulfiller?: UserResponseDto;
     statusHistory: RequestStatusHistoryDto[];

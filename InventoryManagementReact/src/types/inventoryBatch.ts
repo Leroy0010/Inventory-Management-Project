@@ -15,5 +15,5 @@ export interface InventoryBatch {
     remainingQuantity: number;
     inventoryItemName: string;
     inventoryItemId: number;
-    batchDate: Date;
+    batchDate: string; // ISO string from LocalDateTime
 }

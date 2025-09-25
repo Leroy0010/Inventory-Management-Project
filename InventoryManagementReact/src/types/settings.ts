@@ -1,4 +1,5 @@
 // Settings Types for User Preferences and Configuration
+import { getCurrentDateISO } from '../utils/dateUtils';
 
 export type Theme = 'light' | 'dark' | 'system';
 export type Language = 'en' | 'es' | 'fr' | 'de';
@@ -232,6 +233,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
         cacheTimeout: 15,
         experimentalFeatures: false,
     },
-    lastUpdated: new Date().toISOString(),
+    lastUpdated: getCurrentDateISO(),
     version: '1.0.0',
 };

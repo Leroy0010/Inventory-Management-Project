@@ -1,4 +1,5 @@
 import { api, handleApiError } from './client';
+import { formatShortDate } from '@/utils/dateUtils';
 import type {
     InventorySummaryReportRequest,
     InventorySummaryItemDto,
@@ -178,7 +179,7 @@ export class InventorySummaryReportApi {
         link.setAttribute(
             'download',
             filename ||
-                `inventory-summary-report-${new Date().toISOString().split('T')[0]}.csv`
+                `inventory-summary-report-${formatShortDate(new Date().toISOString())}.csv`
         );
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
