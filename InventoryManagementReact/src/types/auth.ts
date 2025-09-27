@@ -36,3 +36,10 @@ export interface RefreshResponse {
         lastName: string;
         role: Role;
 }
+
+export interface TwoFactorAuthResponse {
+    success: boolean;
+    message: string;
+    requiresTwoFactor: boolean;
+    token?: string;
+}

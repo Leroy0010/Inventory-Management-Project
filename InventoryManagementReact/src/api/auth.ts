@@ -2,6 +2,7 @@ import { userProfileToUser } from '@/lib/auth-utils';
 import { api, handleApiError } from './client';
 import type { LoginRequest, User } from '@/types/auth';
 import type { UserProfile } from '@/types/profile';
+import type { TwoFactorAuthResponse } from '@/types/auth';
 
 // Response type from backend for login/google/refresh
 // (note: no accessToken anymore, only user)
@@ -13,13 +14,7 @@ interface BackendAuthResponse {
     lastName: string;
 }
 
-// 2FA response type
-interface TwoFactorAuthResponse {
-    success: boolean;
-    message: string;
-    requiresTwoFactor: boolean;
-    token?: string;
-}
+
 
 // Auth API functions
 export const authApi = {

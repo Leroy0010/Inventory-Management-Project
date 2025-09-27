@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useRequestQueries } from '@/hooks/queries/useRequests';
-import type { RequestResponseDto } from '@/types/request';
 import { RequestDetailsHeader } from '@/components/requests/RequestDetailsHeader';
 import { RequestDetailsInfo } from '@/components/requests/RequestDetailsInfo';
 import { RequestItemsTable } from '@/components/requests/RequestItemsTable';
@@ -54,7 +53,7 @@ export default function RequestDetails() {
     const { hasPermission } = usePermissions();
 
     // Use API hooks
-    const { getRequestByIdQuery, approveOrRejectRequestMutation } =
+    const { getRequestByIdQuery, approveOrRejectRequestMutation, fulfillRequestMutation } =
         useRequestQueries();
 
     // Get request data
@@ -85,6 +84,15 @@ export default function RequestDetails() {
         });
     };
 
+    const handleFulfill = () => {
+        if (!request) return;
+        fulfillRequestMutation.mutate({
+            requestId: request.id,
+            status: 'FULFILLED',
+            fulfilled: true,
+        });
+    };
+
     // Error handling
     if (error) return <RequestErrorState error={error} onBack={handleBack} />;
 
@@ -111,7 +119,9 @@ export default function RequestDetails() {
                         request={request}
                         onApprove={handleApprove}
                         onReject={handleReject}
-                        isUpdating={approveOrRejectRequestMutation.isPending}
+                        onFulFill={handleFulfill}
+                        isUpdating={approveOrRejectRequestMutation.isPending || fulfillRequestMutation.isPending}
+                        hasFulfillmentPermission={hasPermission('FULFIL_REQUESTS')}
                         hasPermission={hasPermission('APPROVE_REQUESTS')}
                     />
                     <RequestStatusHistory request={request} />
