@@ -435,7 +435,7 @@ public class UserActivityReportService implements UserActivityReportServiceInter
 
     private LocalDate getStartDate(UserActivityReportRequest request) {
         if (request.getStartDate() != null) {
-            return request.getStartDate();
+            return request.getStartDate().toLocalDate();
         } else if (request.getYear() != null) {
             if (request.getMonth() != null) {
                 return LocalDate.of(request.getYear(), request.getMonth(), 1);
@@ -449,7 +449,7 @@ public class UserActivityReportService implements UserActivityReportServiceInter
 
     private LocalDate getEndDate(UserActivityReportRequest request) {
         if (request.getEndDate() != null) {
-            return request.getEndDate();
+            return request.getEndDate().toLocalDate();
         } else if (request.getYear() != null) {
             if (request.getMonth() != null) {
                 return LocalDate.of(request.getYear(), request.getMonth(),

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "inventory_balances", uniqueConstraints = {
@@ -16,40 +16,49 @@ import java.sql.Date;
 })
 
 public class InventoryBalance {
-    @Getter @Setter
+    @Getter
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     @ManyToOne
     @JoinColumn(name = "item_id")
     private InventoryItem inventoryItem;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     @Column(name = "snapshot_date", nullable = false)
-    private Date snapshotDate;
+    private LocalDateTime snapshotDate;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     @Column(nullable = false)
     private int quantity;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     @Column(name = "total_value", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalValue;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     @Column(nullable = false)
     private CostFlowMethod method;
 
-    public InventoryBalance() {}
+    public InventoryBalance() {
+    }
 
-    public InventoryBalance(InventoryItem inventoryItem, Department department,  Date snapshotDate, int quantity, BigDecimal totalValue, CostFlowMethod method) {
+    public InventoryBalance(InventoryItem inventoryItem, Department department, LocalDateTime snapshotDate,
+            int quantity, BigDecimal totalValue, CostFlowMethod method) {
         this.inventoryItem = inventoryItem;
         this.department = department;
         this.snapshotDate = snapshotDate;
@@ -58,8 +67,7 @@ public class InventoryBalance {
         this.method = method;
     }
 
-
-    public InventoryBalance(InventoryItem item, Department dept, int i, BigDecimal bigDecimal, Date date) {
+    public InventoryBalance(InventoryItem item, Department dept, int i, BigDecimal bigDecimal, LocalDateTime date) {
         this.inventoryItem = item;
         this.department = dept;
         this.quantity = i;

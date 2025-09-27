@@ -47,8 +47,8 @@ public class UserReportService implements UserReportServiceInterface {
         } else {
             items = stockTransactionRepository.getUserReportItemsByDateRange(
                     request.getUserId(),
-                    request.getStartDate(),
-                    request.getEndDate(),
+                    request.getStartDate().toLocalDate(),
+                    request.getEndDate().toLocalDate(),
                     sortBy,
                     sortOrder);
         }

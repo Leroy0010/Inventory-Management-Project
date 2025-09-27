@@ -8,16 +8,18 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
 @Table(name = "audit_log")
 public class AuditLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -49,7 +51,12 @@ public class AuditLog {
     @Column(name = "new_data", columnDefinition = "jsonb")
     private Map<String, Object> newData;
 
-    public AuditLog() {}
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    public AuditLog() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     @Override
     public String toString() {

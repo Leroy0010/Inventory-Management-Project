@@ -27,9 +27,9 @@ public class TransactionReportService implements TransactionReportServiceInterfa
     private final UserRepository userRepository;
 
     public TransactionReportService(StockTransactionRepository stockTransactionRepository,
-                                    InventoryItemRepository inventoryItemRepository,
-                                    InventoryBalanceRepository inventoryBalanceRepository,
-                                    TransactionMapper transactionMapper, UserRepository userRepository) {
+            InventoryItemRepository inventoryItemRepository,
+            InventoryBalanceRepository inventoryBalanceRepository,
+            TransactionMapper transactionMapper, UserRepository userRepository) {
         this.stockTransactionRepository = stockTransactionRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.inventoryBalanceRepository = inventoryBalanceRepository;
@@ -39,7 +39,8 @@ public class TransactionReportService implements TransactionReportServiceInterfa
 
     @Override
     public TransactionReportDto generateReport(TransactionReportRequest request, UserDetails userDetails) {
-        User storekeeper = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new UsernameNotFoundException("Username not found."));
+        User storekeeper = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found."));
         // Validate request
         validateRequest(request);
 
@@ -54,31 +55,24 @@ public class TransactionReportService implements TransactionReportServiceInterfa
         LocalDateTime endDateTime;
 
         if (request.getStartDate() != null) {
-            startDateTime = request.getStartDate().atStartOfDay();
-            endDateTime = request.getEndDate().atTime(23, 59, 59);
+            startDateTime = request.getStartDate();
+            endDateTime = request.getEndDate();
         } else {
 
-            LocalDate start = request.getMonth() == null ?
-                    LocalDate.of(request.getYear(), 1, 1) :
-                    LocalDate.of(request.getYear(), request.getMonth(), 1);
-            LocalDate end = request.getMonth() == null ?
-                    start.withMonth(12).withDayOfMonth(31) :
-                    start.withDayOfMonth(start.lengthOfMonth());
+            LocalDate start = request.getMonth() == null ? LocalDate.of(request.getYear(), 1, 1)
+                    : LocalDate.of(request.getYear(), request.getMonth(), 1);
+            LocalDate end = request.getMonth() == null ? start.withMonth(12).withDayOfMonth(31)
+                    : start.withDayOfMonth(start.lengthOfMonth());
             startDateTime = start.atStartOfDay();
             endDateTime = end.atTime(23, 59, 59);
         }
-
-
-
-
 
         // Get transactions (already sorted by date)
         List<StockTransaction> transactions = stockTransactionRepository
                 .findByInventoryItemAndTransactionDateBetweenOrderByTransactionDateAsc(
                         item,
                         java.sql.Timestamp.valueOf(startDateTime),
-                        java.sql.Timestamp.valueOf(endDateTime)
-                );
+                        java.sql.Timestamp.valueOf(endDateTime));
 
         // Filter by transaction type if specified
         if (request.getTransactionType() != null) {
@@ -132,9 +126,10 @@ public class TransactionReportService implements TransactionReportServiceInterfa
         }
         if (request.getYear() == null && request.getStartDate() == null) {
             throw new IllegalArgumentException("Year or Start Date is required");
-        } else if(request.getStartDate() != null && request.getEndDate() == null) {
+        } else if (request.getStartDate() != null && request.getEndDate() == null) {
             throw new IllegalArgumentException("End Date is required");
-        } else if ((request.getYear() != null && request.getStartDate() == null) && (request.getYear() < 2000 || request.getYear() > 2100)) {
+        } else if ((request.getYear() != null && request.getStartDate() == null)
+                && (request.getYear() < 2000 || request.getYear() > 2100)) {
             throw new IllegalArgumentException("Invalid year: " + request.getYear());
         } else if (request.getMonth() != null && (request.getMonth() < 1 || request.getMonth() > 12)) {
             throw new IllegalArgumentException("Invalid month: " + request.getMonth());
@@ -143,10 +138,11 @@ public class TransactionReportService implements TransactionReportServiceInterfa
     }
 
     private int getBalanceBefore(InventoryItem item, Department department, LocalDate startDate) {
-        return inventoryBalanceRepository.findTopByInventoryItemAndDepartmentAndSnapshotDateBeforeOrderBySnapshotDateDesc(
-                item,
-                department,
-                java.sql.Date.valueOf(startDate)
-        ).map(InventoryBalance::getQuantity).orElse(0);
+        return inventoryBalanceRepository
+                .findTopByInventoryItemAndDepartmentAndSnapshotDateBeforeOrderBySnapshotDateDesc(
+                        item,
+                        department,
+                        java.sql.Date.valueOf(startDate))
+                .map(InventoryBalance::getQuantity).orElse(0);
     }
 }

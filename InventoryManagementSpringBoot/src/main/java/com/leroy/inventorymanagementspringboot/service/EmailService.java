@@ -35,12 +35,12 @@ public class EmailService {
         this.templateEngine = templateEngine;
     }
 
-
     @Async
     public void sendAccountCreatedNotification(String toEmail, String userName, String token) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
             String secureLink = frontendBaseUrl + "/forgot-password?token=" + token;
 
@@ -66,7 +66,8 @@ public class EmailService {
     public void sendPasswordResetEmail(String toEmail, String userName, String token) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
             String resetLink = frontendBaseUrl + "/forgot-password?token=" + token;
             Context context = new Context();
@@ -84,15 +85,18 @@ public class EmailService {
         } catch (MailException e) {
             logger.error("Async: Failed to send password reset email to {}: {}", toEmail, e.getMessage());
         } catch (Exception e) {
-            logger.error("Async: Error preparing or sending password reset email to {}: {}", toEmail, e.getMessage(), e);
+            logger.error("Async: Error preparing or sending password reset email to {}: {}", toEmail, e.getMessage(),
+                    e);
         }
     }
 
     @Async
-    public void sendGeneralNotificationEmail(String toEmail, String subject, String messageContent, String recipientName) {
+    public void sendGeneralNotificationEmail(String toEmail, String subject, String messageContent,
+            String recipientName) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
 
             Context context = new Context();
             context.setVariable("recipientName", recipientName);
@@ -110,7 +114,34 @@ public class EmailService {
         } catch (MailException e) {
             logger.error("Async: Failed to send general notification email to {}: {}", toEmail, e.getMessage());
         } catch (Exception e) {
-            logger.error("Async: Error preparing or sending general notification email to {}: {}", toEmail, e.getMessage(), e);
+            logger.error("Async: Error preparing or sending general notification email to {}: {}", toEmail,
+                    e.getMessage(), e);
+        }
+    }
+
+    @Async
+    public void sendTwoFactorOtpEmail(String toEmail, String userName, String otpCode) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+
+            Context context = new Context();
+            context.setVariable("userName", userName);
+            context.setVariable("otpCode", otpCode);
+            String htmlContent = templateEngine.process("email/two-factor-verification", context);
+
+            helper.setTo(toEmail);
+            helper.setFrom(senderEmail);
+            helper.setSubject("Your 2FA Verification Code");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+            logger.info("Async: 2FA OTP email sent successfully to {}", toEmail);
+        } catch (MailException e) {
+            logger.error("Async: Failed to send 2FA OTP email to {}: {}", toEmail, e.getMessage());
+        } catch (Exception e) {
+            logger.error("Async: Error preparing or sending 2FA OTP email to {}: {}", toEmail, e.getMessage(), e);
         }
     }
 }

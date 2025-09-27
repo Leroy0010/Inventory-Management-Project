@@ -12,8 +12,8 @@ public class DateRangeUtil {
 
         if (request.getStartDate() != null && request.getEndDate() != null) {
             // Custom date range
-            startDate = request.getStartDate();
-            endDate = request.getEndDate();
+            startDate = request.getStartDate().toLocalDate();
+            endDate = request.getEndDate().toLocalDate();
         } else if (request.getYear() != null) {
             // Single year
             startDate = LocalDate.of(request.getYear(), 1, 1);
@@ -33,4 +33,3 @@ public class DateRangeUtil {
         return new LocalDate[] { startDate, endDate };
     }
 }
-

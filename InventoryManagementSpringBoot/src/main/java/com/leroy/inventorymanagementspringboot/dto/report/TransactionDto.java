@@ -4,12 +4,12 @@ import com.leroy.inventorymanagementspringboot.enums.StockTransactionType;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 public class TransactionDto {
-    private Timestamp date;
+    private LocalDateTime date;
     private StockTransactionType transactionType;
     private int quantity;
     private String supplier;

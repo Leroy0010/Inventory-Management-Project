@@ -42,7 +42,7 @@ public class PasswordResetService {
             });
 
     public PasswordResetService(UserRepository userRepository, EmailService emailService,
-                                PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
@@ -57,9 +57,10 @@ public class PasswordResetService {
             Integer requestCount = resetRequestCache.get(userEmail);
             if (requestCount > 0) {
                 logger.warn("Rate limit exceeded for password reset request from email: {}", userEmail);
-                throw new RateLimitExceededException("Too many password reset requests. Please wait 1 minute before trying again.");
+                throw new RateLimitExceededException(
+                        "Too many password reset requests. Please wait 1 minute before trying again.");
             }
-            
+
             // Increment the request count for this email
             resetRequestCache.put(userEmail, 1);
             logger.info("Password reset request allowed for email: {}", userEmail);
@@ -87,7 +88,7 @@ public class PasswordResetService {
                 .orElseThrow(() -> new RuntimeException("No user found with that email address."));
 
         String newToken = UUID.randomUUID().toString();
-        Timestamp expiryTime = Timestamp.from(LocalDateTime.now().plusMinutes(15).toInstant(ZoneOffset.UTC));
+        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(15);
 
         user.setPasswordResetToken(newToken);
         user.setResetPasswordExpiresAt(expiryTime);
@@ -103,7 +104,7 @@ public class PasswordResetService {
     public void createPasswordResetTokenForUser(String userEmail) {
         var map = generateTokenForUser(userEmail);
         User user = (User) map.get("user");
-        String newToken =  (String) map.get("token");
+        String newToken = (String) map.get("token");
         // Send email with the token link
         emailService.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), newToken);
         logger.info("Password reset token generated and email sent for user: {}", userEmail);
@@ -114,8 +115,8 @@ public class PasswordResetService {
         User user = userRepository.findByPasswordResetToken(token) // Find user by token
                 .orElseThrow(() -> new InvalidTokenException("Invalid or expired password reset token."));
 
-        // Convert Timestamp to LocalDateTime for comparison
-        LocalDateTime expiresAt = user.getResetPasswordExpiresAt().toLocalDateTime();
+        // Get LocalDateTime for comparison
+        LocalDateTime expiresAt = user.getResetPasswordExpiresAt();
 
         if (expiresAt == null || LocalDateTime.now().isAfter(expiresAt)) {
             // Token is expired, clear it
@@ -168,12 +169,13 @@ public class PasswordResetService {
         }
     }
 
-//    // Scheduled task to clean up expired tokens periodically
-//    @Scheduled(cron = "0 */30 * * * ?") // Every 30 minutes
-//    @Transactional
-//    public void cleanupExpiredTokens() {
-//        Timestamp now = Timestamp.from(LocalDateTime.now().toInstant(ZoneOffset.UTC));
-//        userRepository.clearExpiredPasswordResetTokens(now); // New custom method
-//        logger.info("Cleaned up expired password reset tokens older than: {}", now);
-//    }
+    // // Scheduled task to clean up expired tokens periodically
+    // @Scheduled(cron = "0 */30 * * * ?") // Every 30 minutes
+    // @Transactional
+    // public void cleanupExpiredTokens() {
+    // Timestamp now =
+    // Timestamp.from(LocalDateTime.now().toInstant(ZoneOffset.UTC));
+    // userRepository.clearExpiredPasswordResetTokens(now); // New custom method
+    // logger.info("Cleaned up expired password reset tokens older than: {}", now);
+    // }
 }

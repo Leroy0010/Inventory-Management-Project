@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors; // Added import
@@ -45,10 +46,12 @@ public class UserService implements UserServiceInterface {
     private static final int PASSWORD_LENGTH = 12;
     private static final SecureRandom random = new SecureRandom();
     private final PasswordResetService passwordResetService;
+    private final UserSettingsService userSettingsService;
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository,
-                       OfficeRepository officeRepository, DepartmentRepository departmentRepository,
-                       UserMapper userMapper, PasswordEncoder passwordEncoder, EmailService emailService, PasswordResetService passwordResetService) {
+            OfficeRepository officeRepository, DepartmentRepository departmentRepository,
+            UserMapper userMapper, PasswordEncoder passwordEncoder, EmailService emailService,
+            PasswordResetService passwordResetService, UserSettingsService userSettingsService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.officeRepository = officeRepository;
@@ -57,10 +60,12 @@ public class UserService implements UserServiceInterface {
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.passwordResetService = passwordResetService;
+        this.userSettingsService = userSettingsService;
     }
 
     /**
      * Generates a random, secure password.
+     * 
      * @return A randomly generated password string.
      */
     private String generateRandomPassword() {
@@ -71,10 +76,7 @@ public class UserService implements UserServiceInterface {
 
     @Override
     @Transactional
-    @Auditable(
-            action = AuditAction.CREATE,
-            entityClass = User.class
-    )
+    @Auditable(action = AuditAction.CREATE, entityClass = User.class)
     public UserResponseDto registerAdminOrStoreKeeperByAdmin(RegisterStoreKeeperDto registrationDto) {
 
         // 1. Fetch target Role for the new user
@@ -95,7 +97,8 @@ public class UserService implements UserServiceInterface {
                     throw new IllegalArgumentException("Storekeeper must be assigned to a department.");
                 }
                 department = departmentRepository.findByName(registrationDto.getDepartmentName())
-                        .orElseThrow(() -> new ResourceNotFoundException("Department not found: " + registrationDto.getDepartmentName()));
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Department not found: " + registrationDto.getDepartmentName()));
 
                 boolean hasStorekeeper = userRepository.findByDepartmentAndRole(department, targetRole).isPresent();
                 if (hasStorekeeper) {
@@ -104,7 +107,7 @@ public class UserService implements UserServiceInterface {
             }
             case "STAFF" -> throw new IllegalArgumentException("Staff registration is meant for only Storekeepers.");
             case null, default ->
-                    throw new IllegalArgumentException("Invalid role specified: " + registrationDto.getRoleName());
+                throw new IllegalArgumentException("Invalid role specified: " + registrationDto.getRoleName());
         }
 
         String generatedPassword = generateRandomPassword(); // Generate random password
@@ -114,15 +117,23 @@ public class UserService implements UserServiceInterface {
         user.setOffice(null);
         user.setActive(true);
         user.setPassword(passwordEncoder.encode(generatedPassword)); // Encode and set the generated password
-        user.setCreatedAt(LocalDate.now());
+        user.setCreatedAt(LocalDateTime.now());
         User savedUser = userRepository.save(user);
+
+        // Auto-create default user settings
+        try {
+            userSettingsService.resetToDefaults(savedUser.getId());
+        } catch (Exception e) {
+            // Log error but don't fail user creation
+            System.err.println("Failed to create default settings for user " + savedUser.getId() + ": " + e.getMessage());
+        }
 
         var map = passwordResetService.generateTokenForNewUser(savedUser.getEmail());
 
+        String newToken = (String) map.get("token");
 
-        String newToken =  (String) map.get("token");
-
-        // Send a notification that the account is created and they need to use change password
+        // Send a notification that the account is created and they need to use change
+        // password
         emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName(), newToken);
 
         return userMapper.toUserResponseDto(savedUser);
@@ -130,13 +141,11 @@ public class UserService implements UserServiceInterface {
 
     @Override
     @Transactional
-    @Auditable(
-            action = AuditAction.CREATE,
-            entityClass = User.class
-    )
+    @Auditable(action = AuditAction.CREATE, entityClass = User.class)
     public UserResponseDto registerStaffByStoreKeeper(RegisterStaffDto registrationDto, UserDetails userDetails) {
         // Authorization: Ensure the calling user (storekeeper) is indeed a STOREKEEPER
-        User storekeeper = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User storekeeper = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (!"STOREKEEPER".equals(storekeeper.getRole().getName())) {
             throw new IllegalStateException("Only a STOREKEEPER can register staff.");
@@ -151,10 +160,10 @@ public class UserService implements UserServiceInterface {
 
         // Fetch the target office, ensuring it belongs to the storekeeper's department
         Office targetOffice = officeRepository.findByNameAndDepartment(
-                        registrationDto.getOfficeName(), storekeeper.getDepartment())
+                registrationDto.getOfficeName(), storekeeper.getDepartment())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Office '" + registrationDto.getOfficeName() + "' not found within your department '" + storekeeper.getDepartment().getName() + "'"
-                ));
+                        "Office '" + registrationDto.getOfficeName() + "' not found within your department '"
+                                + storekeeper.getDepartment().getName() + "'"));
 
         String generatedPassword = generateRandomPassword(); // Generate random password
         User user = userMapper.toStaffUser(registrationDto); // Use mapper for basic field mapping
@@ -163,13 +172,22 @@ public class UserService implements UserServiceInterface {
         user.setDepartment(null); // Explicitly null for Staff
         user.setActive(true);
         user.setPassword(passwordEncoder.encode(generatedPassword)); // Encode and set the generated password
-        user.setCreatedAt(LocalDate.now());
+        user.setCreatedAt(LocalDateTime.now());
         User savedUser = userRepository.save(user);
 
-        var map = passwordResetService.generateTokenForNewUser(savedUser.getEmail());
-        String newToken =  (String) map.get("token");
+        // Auto-create default user settings
+        try {
+            userSettingsService.resetToDefaults(savedUser.getId());
+        } catch (Exception e) {
+            // Log error but don't fail user creation
+            System.err.println("Failed to create default settings for user " + savedUser.getId() + ": " + e.getMessage());
+        }
 
-        // Send a notification that the account is created and they need to use change password
+        var map = passwordResetService.generateTokenForNewUser(savedUser.getEmail());
+        String newToken = (String) map.get("token");
+
+        // Send a notification that the account is created and they need to use change
+        // password
         emailService.sendAccountCreatedNotification(savedUser.getEmail(), savedUser.getFirstName(), newToken);
 
         return userMapper.toUserResponseDto(savedUser);
@@ -182,10 +200,7 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    @Auditable(
-            action = AuditAction.UPDATE,
-            entityClass = User.class
-    )
+    @Auditable(action = AuditAction.UPDATE, entityClass = User.class)
     public void setStaffStatus(UserResponseDto staff) {
         if (staff == null) {
             throw new IllegalArgumentException("Staff cannot be null.");
@@ -200,22 +215,25 @@ public class UserService implements UserServiceInterface {
     }
 
     public Optional<List<String>> fetchGeneralNotificationServiceUsersEmails(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (user.getRole().getName().equals("ADMIN")) {
             return userRepository.findAllByIdNot(user.getId())
                     .map(users -> users.stream().map(User::getEmail).collect(Collectors.toList())); // Use toList()
-        } else if (user.getRole().getName().equals("STOREKEEPER")){
+        } else if (user.getRole().getName().equals("STOREKEEPER")) {
             return userRepository.findAllByOffice_DepartmentAndIdNot(user.getDepartment(), user.getId())
                     .map(users -> users.stream().map(User::getEmail).collect(Collectors.toList())); // Use toList()
-        } else throw new SecurityException("Only ADMIN or STOREKEEPER roles can be found.");
+        } else
+            throw new SecurityException("Only ADMIN or STOREKEEPER roles can be found.");
     }
 
     @Override
     public UserResponseDto fetchUserDetails(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         var dto = userMapper.toUserResponseDto(user);
-        String roleName =  user.getRole().getName();
+        String roleName = user.getRole().getName();
         if (roleName.equals("STAFF")) {
             dto.setDepartmentName(user.getOffice().getDepartment().getName());
         } else if (roleName.equals("STOREKEEPER")) {
@@ -226,31 +244,33 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public void changePassword(UpdatePasswordRequest updatePasswordRequest, UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         // Validate old password
         if (!passwordEncoder.matches(updatePasswordRequest.getOldPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Current password is incorrect");
         }
-        
+
         // Validate new password and confirmation match
         if (!updatePasswordRequest.getNewPassword().equals(updatePasswordRequest.getConfirmPassword())) {
             throw new IllegalArgumentException("New password and confirmation do not match");
         }
-        
+
         // Validate new password is different from old password
         if (passwordEncoder.matches(updatePasswordRequest.getNewPassword(), user.getPassword())) {
             throw new IllegalArgumentException("New password must be different from current password");
         }
-        
+
         user.setPassword(passwordEncoder.encode(updatePasswordRequest.getNewPassword()));
         userRepository.save(user);
     }
-    
+
     @Override
     public UserResponseDto updateProfile(UpdateProfileRequest updateProfileRequest, UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         // Check if email is being changed and if it's already taken by another user
         if (!user.getEmail().equals(updateProfileRequest.getEmail())) {
             Optional<User> existingUser = userRepository.findByEmail(updateProfileRequest.getEmail());
@@ -258,20 +278,21 @@ public class UserService implements UserServiceInterface {
                 throw new IllegalArgumentException("Email is already taken by another user");
             }
         }
-        
+
         // Update user fields
         user.setFirstName(updateProfileRequest.getFirstName());
         user.setLastName(updateProfileRequest.getLastName());
         user.setEmail(updateProfileRequest.getEmail());
         user.setPhone(updateProfileRequest.getPhone());
         user.setBio(updateProfileRequest.getBio());
-        
+
         User savedUser = userRepository.save(user);
         return userMapper.toUserResponseDto(savedUser);
     }
 
     public List<UserEmailAndIdDto> getEmailsAndIds(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         if (!user.getRole().getName().equals("STOREKEEPER"))
             throw new IllegalStateException("Only storekeepers are allowed.");
 
@@ -289,12 +310,11 @@ public class UserService implements UserServiceInterface {
     }
 
     public List<StaffResponseDto> getDepartmentStaff(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (!user.getRole().getName().equals("STOREKEEPER"))
             throw new IllegalStateException("Only storekeepers are allowed.");
-
-        
 
         Department department = user.getDepartment();
 

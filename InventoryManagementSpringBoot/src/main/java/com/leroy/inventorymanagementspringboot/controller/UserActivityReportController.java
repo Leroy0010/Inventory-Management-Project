@@ -47,10 +47,10 @@ public class UserActivityReportController {
         request.setYear(year);
         request.setMonth(month);
         if (startDate != null) {
-            request.setStartDate(java.time.LocalDate.parse(startDate));
+            request.setStartDate(java.time.LocalDate.parse(startDate).atStartOfDay());
         }
         if (endDate != null) {
-            request.setEndDate(java.time.LocalDate.parse(endDate));
+            request.setEndDate(java.time.LocalDate.parse(endDate).atTime(23, 59, 59));
         }
         request.setOfficeId(officeId);
         request.setUserId(userId);

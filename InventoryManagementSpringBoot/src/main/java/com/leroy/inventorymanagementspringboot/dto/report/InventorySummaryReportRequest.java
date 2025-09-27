@@ -5,7 +5,7 @@ import com.leroy.inventorymanagementspringboot.enums.InventorySummaryType;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter @Setter
 public class InventorySummaryReportRequest {
@@ -13,8 +13,8 @@ public class InventorySummaryReportRequest {
     private Integer year;               // Optional
     private Integer startYear;          // Optional (for year range)
     private Integer endYear;            // Optional (for year range)
-    private LocalDate startDate;        // Optional
-    private LocalDate endDate;          // Optional
+    private LocalDateTime startDate;        // Optional
+    private LocalDateTime endDate;          // Optional
 
     // Required
     private InventorySummaryType inventorySummaryType;      // QUANTITY or VALUE

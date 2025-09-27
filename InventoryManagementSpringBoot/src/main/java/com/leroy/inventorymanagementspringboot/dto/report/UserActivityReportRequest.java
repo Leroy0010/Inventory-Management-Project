@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,8 +13,8 @@ public class UserActivityReportRequest {
     // Time period options
     private Integer year; // Optional - for single year reports
     private Integer month; // Optional - for specific month (1-12)
-    private LocalDate startDate; // Optional - for custom date range
-    private LocalDate endDate; // Optional - for custom date range
+    private LocalDateTime startDate; // Optional - for custom date range
+    private LocalDateTime endDate; // Optional - for custom date range
 
     // Filtering options
     private Integer officeId; // Optional - filter by specific office

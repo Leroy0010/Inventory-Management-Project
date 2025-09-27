@@ -4,7 +4,7 @@ import com.leroy.inventorymanagementspringboot.enums.NotificationType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -16,5 +16,5 @@ public class WebSocketNotificationDto {
     private NotificationType type;
     private Long requestId;
     private Integer itemId;
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 }

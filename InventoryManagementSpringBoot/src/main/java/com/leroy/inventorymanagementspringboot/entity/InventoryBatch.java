@@ -6,9 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-@Setter @Getter
+@Setter
+@Getter
 @Entity
 @Table(name = "inventory_batches")
 public class InventoryBatch {
@@ -17,12 +18,10 @@ public class InventoryBatch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "item_id")
     private InventoryItem inventoryItem;
-
 
     @Column(nullable = false)
     private int quantity;
@@ -30,12 +29,11 @@ public class InventoryBatch {
     @Column(nullable = false, name = "remaining_quantity")
     private int remainingQuantity;
 
-
     @Column(name = "unit_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal unitPrice;
 
     @Column(name = "batch_date")
-    private Timestamp batchDate;
+    private LocalDateTime batchDate;
 
     @Column(name = "supplier_name")
     private String supplierName;
@@ -43,15 +41,15 @@ public class InventoryBatch {
     @Column(name = "invoice_id")
     private String invoiceId;
 
-
     public InventoryBatch(InventoryItem inventoryItem, int quantity, BigDecimal unitPrice) {
         this.inventoryItem = inventoryItem;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
-        this.batchDate = new Timestamp(System.currentTimeMillis());
+        this.batchDate = LocalDateTime.now();
     }
 
-    public InventoryBatch() {}
+    public InventoryBatch() {
+    }
 
     @Override
     public String toString() {

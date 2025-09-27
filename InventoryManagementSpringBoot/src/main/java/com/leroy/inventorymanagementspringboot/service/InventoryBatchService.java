@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.List;
@@ -31,10 +32,12 @@ public class InventoryBatchService implements InventoryBatchServiceInterface {
     private final InventoryBatchMapper inventoryBatchMapper;
     private final InventoryBatchRepository inventoryBatchRepository;
     private final InventoryItemRepository inventoryItemRepository;
-    private final StockTransactionService  stockTransactionService;
+    private final StockTransactionService stockTransactionService;
     private final UserRepository userRepository;
 
-    public InventoryBatchService(InventoryBatchMapper inventoryBatchMapper, InventoryBatchRepository inventoryBatchRepository, InventoryItemRepository inventoryItemRepository, StockTransactionService stockTransactionService, UserRepository userRepository) {
+    public InventoryBatchService(InventoryBatchMapper inventoryBatchMapper,
+            InventoryBatchRepository inventoryBatchRepository, InventoryItemRepository inventoryItemRepository,
+            StockTransactionService stockTransactionService, UserRepository userRepository) {
         this.inventoryBatchMapper = inventoryBatchMapper;
         this.inventoryBatchRepository = inventoryBatchRepository;
         this.inventoryItemRepository = inventoryItemRepository;
@@ -43,16 +46,11 @@ public class InventoryBatchService implements InventoryBatchServiceInterface {
     }
 
     @Override
-    @Auditable(
-            action = AuditAction.RESTOCK,
-            entityClass = InventoryBatch.class
-    )
-    @Auditable(
-            action = AuditAction.CREATE,
-            entityClass = StockTransaction.class
-    )
+    @Auditable(action = AuditAction.RESTOCK, entityClass = InventoryBatch.class)
+    @Auditable(action = AuditAction.CREATE, entityClass = StockTransaction.class)
     public InventoryBatchResponseDto addInventoryBatch(CreateBatchDto createBatchDto, UserDetails userDetails) {
-        User storeKeeper = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User storeKeeper = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         InventoryItem inventoryItem = inventoryItemRepository.findByName(createBatchDto.getItemName())
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory Item Not Found"));
 
@@ -61,32 +59,37 @@ public class InventoryBatchService implements InventoryBatchServiceInterface {
 
         InventoryBatch inventoryBatch = inventoryBatchMapper.toInventoryBatch(createBatchDto);
         inventoryBatch.setInventoryItem(inventoryItem);
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        inventoryBatch.setBatchDate(timestamp);
+        inventoryBatch.setBatchDate(LocalDateTime.now());
         inventoryBatch.setRemainingQuantity(createBatchDto.getQuantity());
-        BigDecimal unitPrice = createBatchDto.getTotalPrice().divide(BigDecimal.valueOf(createBatchDto.getQuantity()) , 2 , RoundingMode.HALF_UP);
+        BigDecimal unitPrice = createBatchDto.getTotalPrice().divide(BigDecimal.valueOf(createBatchDto.getQuantity()),
+                2, RoundingMode.HALF_UP);
         inventoryBatch.setUnitPrice(unitPrice);
         inventoryBatchRepository.save(inventoryBatch);
-        InventoryBatchResponseDto inventoryBatchResponseDto = inventoryBatchMapper.toInventoryBatchResponseDto(inventoryBatch);
+        InventoryBatchResponseDto inventoryBatchResponseDto = inventoryBatchMapper
+                .toInventoryBatchResponseDto(inventoryBatch);
         stockTransactionService
-                .recordTransaction(inventoryItem, StockTransactionType.IN, createBatchDto.getQuantity(), unitPrice, null, createBatchDto.getSupplierName(), createBatchDto.getInvoiceId(), inventoryBatch, storeKeeper);
+                .recordTransaction(inventoryItem, StockTransactionType.IN, createBatchDto.getQuantity(), unitPrice,
+                        null, createBatchDto.getSupplierName(), createBatchDto.getInvoiceId(), inventoryBatch,
+                        storeKeeper);
 
         return inventoryBatchResponseDto;
     }
 
     @Override
     public List<InventoryBatchResponseDto> getAllInventoryBatches(UserDetails userDetails) {
-        var department = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found")).getDepartment();
+        var department = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found")).getDepartment();
         if (department == null)
             throw new ResourceNotFoundException("Department Not Found");
 
-        return inventoryBatchRepository.findAllByInventoryItem_Department(department).stream().map(inventoryBatchMapper::toInventoryBatchResponseDto).toList();
+        return inventoryBatchRepository.findAllByInventoryItem_Department(department).stream()
+                .map(inventoryBatchMapper::toInventoryBatchResponseDto).toList();
     }
 
     @Override
     public InventoryBatchResponseDto getInventoryBatchById(long id) {
-        return inventoryBatchRepository.findById(id).map(inventoryBatchMapper::toInventoryBatchResponseDto).orElse(null);
+        return inventoryBatchRepository.findById(id).map(inventoryBatchMapper::toInventoryBatchResponseDto)
+                .orElse(null);
     }
-
 
 }

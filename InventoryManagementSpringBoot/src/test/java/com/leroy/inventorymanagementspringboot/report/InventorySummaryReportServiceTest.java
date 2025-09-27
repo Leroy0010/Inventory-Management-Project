@@ -73,20 +73,21 @@ class InventorySummaryReportServiceTest {
         // Arrange
         InventorySummaryReportRequest request = new InventorySummaryReportRequest();
         request.setInventorySummaryType(InventorySummaryType.BY_QUANTITY);
-        request.setStartDate(startDate);
-        request.setEndDate(endDate);
+        request.setStartDate(startDate.atStartOfDay());
+        request.setEndDate(endDate.atTime(23, 59, 59));
 
         // Mock DateRangeUtil to return our test dates
         try (MockedStatic<DateRangeUtil> mockedStatic = Mockito.mockStatic(DateRangeUtil.class)) {
             mockedStatic.when(() -> DateRangeUtil.resolveDateRange(request))
-                    .thenReturn(new LocalDate[]{startDate, endDate});
+                    .thenReturn(new LocalDate[] { startDate, endDate });
 
             // Mock the strategy response
             when(quantityStrategy.generateReport(eq(startDate), eq(endDate), eq(department), isNull()))
                     .thenReturn(mockResults);
 
             // Act
-            List<InventorySummaryItemDto> result = reportService.generateReport(request, department, CostFlowMethod.FIFO);
+            List<InventorySummaryItemDto> result = reportService.generateReport(request, department,
+                    CostFlowMethod.FIFO);
 
             // Assert
             assertEquals(mockResults, result);
@@ -102,24 +103,26 @@ class InventorySummaryReportServiceTest {
         InventorySummaryReportRequest request = new InventorySummaryReportRequest();
         request.setInventorySummaryType(InventorySummaryType.BY_VALUE);
         request.setCostFlowMethod(CostFlowMethod.FIFO);
-        request.setStartDate(startDate);
-        request.setEndDate(endDate);
+        request.setStartDate(startDate.atStartOfDay());
+        request.setEndDate(endDate.atTime(23, 59, 59));
 
         // Mock DateRangeUtil to return our test dates
         try (MockedStatic<DateRangeUtil> mockedStatic = Mockito.mockStatic(DateRangeUtil.class)) {
             mockedStatic.when(() -> DateRangeUtil.resolveDateRange(request))
-                    .thenReturn(new LocalDate[]{startDate, endDate});
+                    .thenReturn(new LocalDate[] { startDate, endDate });
 
             // Mock the strategy response
             when(valueStrategy.generateReport(eq(startDate), eq(endDate), eq(department), eq(CostFlowMethod.FIFO)))
                     .thenReturn(mockResults);
 
             // Act
-            List<InventorySummaryItemDto> result = reportService.generateReport(request, department, CostFlowMethod.FIFO);
+            List<InventorySummaryItemDto> result = reportService.generateReport(request, department,
+                    CostFlowMethod.FIFO);
 
             // Assert
             assertEquals(mockResults, result);
-            verify(valueStrategy, times(1)).generateReport(eq(startDate), eq(endDate), eq(department), eq(CostFlowMethod.FIFO));
+            verify(valueStrategy, times(1)).generateReport(eq(startDate), eq(endDate), eq(department),
+                    eq(CostFlowMethod.FIFO));
             verify(quantityStrategy, times(0)).generateReport(any(), any(), any(), any());
         }
     }
@@ -131,24 +134,26 @@ class InventorySummaryReportServiceTest {
         InventorySummaryReportRequest request = new InventorySummaryReportRequest();
         request.setInventorySummaryType(InventorySummaryType.BY_VALUE);
         request.setCostFlowMethod(CostFlowMethod.AVG);
-        request.setStartDate(startDate);
-        request.setEndDate(endDate);
+        request.setStartDate(startDate.atStartOfDay());
+        request.setEndDate(endDate.atTime(23, 59, 59));
 
         // Mock DateRangeUtil to return our test dates
         try (MockedStatic<DateRangeUtil> mockedStatic = Mockito.mockStatic(DateRangeUtil.class)) {
             mockedStatic.when(() -> DateRangeUtil.resolveDateRange(request))
-                    .thenReturn(new LocalDate[]{startDate, endDate});
+                    .thenReturn(new LocalDate[] { startDate, endDate });
 
             // Mock the strategy response
             when(valueStrategy.generateReport(eq(startDate), eq(endDate), eq(department), eq(CostFlowMethod.AVG)))
                     .thenReturn(mockResults);
 
             // Act
-            List<InventorySummaryItemDto> result = reportService.generateReport(request, department, CostFlowMethod.AVG);
+            List<InventorySummaryItemDto> result = reportService.generateReport(request, department,
+                    CostFlowMethod.AVG);
 
             // Assert
             assertEquals(mockResults, result);
-            verify(valueStrategy, times(1)).generateReport(eq(startDate), eq(endDate), eq(department), eq(CostFlowMethod.AVG));
+            verify(valueStrategy, times(1)).generateReport(eq(startDate), eq(endDate), eq(department),
+                    eq(CostFlowMethod.AVG));
             verify(quantityStrategy, times(0)).generateReport(any(), any(), any(), any());
         }
     }
@@ -165,14 +170,16 @@ class InventorySummaryReportServiceTest {
         // Mock DateRangeUtil to throw an exception
         try (MockedStatic<DateRangeUtil> mockedStatic = Mockito.mockStatic(DateRangeUtil.class)) {
             mockedStatic.when(() -> DateRangeUtil.resolveDateRange(request))
-                    .thenThrow(new IllegalArgumentException("You must provide either a year, a year range, or a custom date range."));
+                    .thenThrow(new IllegalArgumentException(
+                            "You must provide either a year, a year range, or a custom date range."));
 
             // Act & Assert
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
                 reportService.generateReport(request, department, CostFlowMethod.FIFO);
             });
 
-            assertEquals("You must provide either a year, a year range, or a custom date range.", exception.getMessage());
+            assertEquals("You must provide either a year, a year range, or a custom date range.",
+                    exception.getMessage());
 
             // Verify that neither strategy was called
             verify(valueStrategy, times(0)).generateReport(any(), any(), any(), any());

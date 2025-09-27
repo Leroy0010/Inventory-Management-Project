@@ -8,19 +8,19 @@ import com.leroy.inventorymanagementspringboot.repository.RequestStatusHistoryRe
 import com.leroy.inventorymanagementspringboot.servicei.RequestStatusHistoryServiceInterface;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import lombok.AllArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
+@AllArgsConstructor
 @Service
 @Transactional
 public class RequestStatusHistoryService implements RequestStatusHistoryServiceInterface {
     private final RequestStatusHistoryRepository repository;
 
-    public RequestStatusHistoryService(RequestStatusHistoryRepository repository) {
-        this.repository = repository;
-    }
 
-    public void saveStatusChange(Request request, RequestStatus status, User user, Timestamp timestamp) {
+    @Override
+    public void saveStatusChange(Request request, RequestStatus status, User user, LocalDateTime timestamp) {
         RequestStatusHistory history = new RequestStatusHistory(request, status, user, timestamp);
         repository.save(history);
     }

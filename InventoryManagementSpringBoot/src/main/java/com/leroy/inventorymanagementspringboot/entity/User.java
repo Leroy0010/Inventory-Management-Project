@@ -6,8 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.sql.Timestamp; // This should ideally be java.time.LocalDateTime for modern Java APIs
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -52,7 +51,7 @@ public class User {
     private String passwordResetToken;
 
     @Column(name = "reset_password_expires_at")
-    private Timestamp resetPasswordExpiresAt; // Still recommend LocalDateTime
+    private LocalDateTime resetPasswordExpiresAt;
 
     @ManyToOne
     @JoinColumn(name = "department_id")
@@ -66,15 +65,14 @@ public class User {
     private String bio;
 
     @Column(name = "created_at")
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     public String getFullName() {
         return firstName + " " + lastName;
     }
 
-
     public User(String email, String password, String firstName, String lastName,
-                Role role, Office office) {
+            Role role, Office office) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
@@ -82,11 +80,11 @@ public class User {
         this.role = role;
         this.office = office;
         this.active = true;
-        this.createdAt = LocalDate.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     public User(String email, String password, String firstName, String lastName,
-                Role role, Department department ) {
+            Role role, Department department) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
@@ -94,7 +92,7 @@ public class User {
         this.role = role;
         this.department = department;
         this.active = true;
-        this.createdAt = LocalDate.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     @Override

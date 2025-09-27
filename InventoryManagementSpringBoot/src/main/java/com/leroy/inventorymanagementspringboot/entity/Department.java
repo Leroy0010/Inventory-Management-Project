@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -17,26 +17,29 @@ public class Department {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(nullable=false, unique=true)
+    @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private boolean active;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
-    @Column(name = "updated_at",  nullable = false)
-    private LocalDate updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     private String description;
 
-
-    public Department(String name) {this.name = name; createdAt = LocalDate.now(); active = true; updatedAt = LocalDate.now();}
-
+    public Department(String name) {
+        this.name = name;
+        createdAt = LocalDateTime.now();
+        active = true;
+        updatedAt = LocalDateTime.now();
+    }
 
     @Override
     public String toString() {
-        return  "Department{" + "id=" + id + ", name=" + name + '}';
+        return "Department{" + "id=" + id + ", name=" + name + '}';
     }
 }

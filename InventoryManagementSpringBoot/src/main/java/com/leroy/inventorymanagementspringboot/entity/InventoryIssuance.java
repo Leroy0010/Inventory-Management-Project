@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -14,7 +14,7 @@ public class InventoryIssuance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "requested_item_id")
@@ -28,15 +28,16 @@ public class InventoryIssuance {
     private int quantity;
 
     @Column(name = "issued_at")
-    private Timestamp issuedAt;
+    private LocalDateTime issuedAt;
 
-    public InventoryIssuance() {}
+    public InventoryIssuance() {
+    }
 
     public InventoryIssuance(RequestItem requestedItem, InventoryBatch batch, int quantity) {
         this.requestedItem = requestedItem;
         this.batch = batch;
         this.quantity = quantity;
-        this.issuedAt = new Timestamp(System.currentTimeMillis());
+        this.issuedAt = LocalDateTime.now();
     }
 
     @Override

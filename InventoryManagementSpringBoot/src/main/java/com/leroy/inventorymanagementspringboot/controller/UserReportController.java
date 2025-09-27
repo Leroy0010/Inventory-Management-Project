@@ -40,10 +40,10 @@ public class UserReportController {
         request.setUserId(userId);
         request.setYear(year);
         if (startDate != null) {
-            request.setStartDate(java.time.LocalDate.parse(startDate));
+            request.setStartDate(java.time.LocalDate.parse(startDate).atStartOfDay());
         }
         if (endDate != null) {
-            request.setEndDate(java.time.LocalDate.parse(endDate));
+            request.setEndDate(java.time.LocalDate.parse(endDate).atTime(23, 59, 59));
         }
 
         return ResponseEntity.ok(userReportService.generateUserReport(request, sortBy, sortOrder));

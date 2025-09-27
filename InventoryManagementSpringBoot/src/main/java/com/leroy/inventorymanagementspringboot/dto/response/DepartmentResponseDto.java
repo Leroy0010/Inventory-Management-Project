@@ -1,10 +1,10 @@
 package com.leroy.inventorymanagementspringboot.dto.response;
 
+import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
-import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -14,8 +14,8 @@ public class DepartmentResponseDto {
     private String name;
     private String headOfDepartment;
     private Integer staffCount;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private boolean active;
     private String description;
 }

@@ -7,9 +7,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-@Setter @Getter
+@Setter
+@Getter
 @Entity
 @Table(name = "stock_transactions")
 public class StockTransaction {
@@ -22,39 +23,31 @@ public class StockTransaction {
     @JoinColumn(name = "item_id")
     private InventoryItem inventoryItem;
 
-
     @Enumerated(EnumType.STRING)
     private StockTransactionType transactionType;
-
 
     @Column(nullable = false)
     private int quantity;
 
-
     @Column(nullable = false, name = "unit_price")
     private BigDecimal unitPrice;
 
-
     @Column(nullable = false, name = "transaction_date")
-    private Timestamp transactionDate;
+    private LocalDateTime transactionDate;
 
     @ManyToOne
     @JoinColumn(name = "related_request_id")
     private Request request;
 
-
     private String supplier;
-
 
     @Size(min = 1, max = 20)
     @Column(name = "invoice_id")
     private String invoiceId;
 
-
     @ManyToOne
     @JoinColumn(name = "created_by")
     private User createdBy;
-
 
     @ManyToOne
     @JoinColumn(name = "batch_id")
@@ -64,31 +57,35 @@ public class StockTransaction {
     @JoinColumn(name = "department_id")
     private Department department;
 
-    public StockTransaction() {}
+    public StockTransaction() {
+    }
 
-    public StockTransaction(InventoryItem item, StockTransactionType transactionType, int quantity, BigDecimal unitPrice, Request request,  String supplier, String invoiceId, InventoryBatch batch, User createdBy) {
+    public StockTransaction(InventoryItem item, StockTransactionType transactionType, int quantity,
+            BigDecimal unitPrice, Request request, String supplier, String invoiceId, InventoryBatch batch,
+            User createdBy) {
         inventoryItem = item;
         this.transactionType = transactionType;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
-        transactionDate = new Timestamp(System.currentTimeMillis());
+        transactionDate = LocalDateTime.now();
         this.request = request;
         this.supplier = supplier;
         this.invoiceId = invoiceId;
         this.batch = batch;
         this.createdBy = createdBy;
-        department = createdBy.getRole().getName().equals("STOREKEEPER") ? createdBy.getDepartment() : createdBy.getOffice().getDepartment();
+        department = createdBy.getRole().getName().equals("STOREKEEPER") ? createdBy.getDepartment()
+                : createdBy.getOffice().getDepartment();
 
     }
 
-    public StockTransaction(InventoryItem item, StockTransactionType type, int qty, BigDecimal unitPrice, Timestamp date) {
+    public StockTransaction(InventoryItem item, StockTransactionType type, int qty, BigDecimal unitPrice,
+            LocalDateTime date) {
         this.inventoryItem = item;
         this.transactionType = type;
         this.quantity = qty;
         this.unitPrice = unitPrice;
         this.transactionDate = date;
     }
-
 
     @Override
     public String toString() {

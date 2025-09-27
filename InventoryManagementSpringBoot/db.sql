@@ -1,6 +1,10 @@
 CREATE TABLE departments (
                              id SERIAL PRIMARY KEY,
-                             name TEXT NOT NULL UNIQUE
+                             name TEXT NOT NULL UNIQUE,
+                             active BOOLEAN DEFAULT true,
+                             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                             description TEXT
 );
 
 
@@ -29,9 +33,8 @@ CREATE TABLE users (
                        office_id INT REFERENCES offices(id),
                        department_id INT REFERENCES departments(id),
                        password_reset_token TEXT,
-                       reset_password_expires_at TIMESTAMP
---                        created_by INT REFERENCES users(id), -- Track who created this user
---                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                       reset_password_expires_at TIMESTAMP,
+                       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -79,7 +82,9 @@ CREATE TABLE requests (
                           status_id INT REFERENCES request_status(id),
                           submitted_at TIMESTAMP,
                           approved_by INT REFERENCES users(id),
-                          approved_at TIMESTAMP
+                          approved_at TIMESTAMP,
+                          fulfilled_at TIMESTAMP,
+                          fulfilled_by INT REFERENCES users(id)
                           );
 
 
@@ -147,7 +152,7 @@ CREATE TABLE cart_items (
 CREATE TABLE inventory_balances (
                                     id SERIAL PRIMARY KEY,
                                     item_id INT REFERENCES inventory_items(id),
-                                    snapshot_date DATE NOT NULL, -- e.g., '2024-12-31'
+                                    snapshot_date TIMESTAMP NOT NULL, -- e.g., '2024-12-31'
                                     quantity INT NOT NULL,       -- total quantity as of this date
                                     total_value NUMERIC(12,2) NOT NULL, -- total value as of this date
                                     department_id INT REFERENCES departments(id),
@@ -167,7 +172,7 @@ CREATE TABLE audit_log (
                            context TEXT, -- optional description/context of the change
                            ip_address TEXT,
                            user_agent TEXT,
-                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 

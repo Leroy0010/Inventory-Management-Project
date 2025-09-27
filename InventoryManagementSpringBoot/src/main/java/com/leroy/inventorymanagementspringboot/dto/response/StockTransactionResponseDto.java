@@ -5,9 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter
+@Setter
 public class StockTransactionResponseDto {
     private long id;
     private int itemId;
@@ -15,7 +16,7 @@ public class StockTransactionResponseDto {
     private StockTransactionType transactionType;
     private int quantity;
     private BigDecimal unitPrice;
-    private Timestamp transactionDate;
+    private LocalDateTime transactionDate;
     private Long requestId;
     private String supplier;
     private String invoiceId;

@@ -4,9 +4,10 @@ import com.leroy.inventorymanagementspringboot.enums.NotificationType;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter
+@Setter
 public class NotificationResponseDto {
     private long id;
     private String title;
@@ -15,5 +16,5 @@ public class NotificationResponseDto {
     private NotificationType type;
     private Long requestId;
     private Integer itemId;
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 }

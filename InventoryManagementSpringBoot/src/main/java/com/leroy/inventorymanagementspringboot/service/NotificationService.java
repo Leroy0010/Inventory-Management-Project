@@ -18,7 +18,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +33,6 @@ public class NotificationService implements NotificationServiceInterface {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final EmailService emailService;
-    
 
     private void broadcast(Notification notification) {
         WebSocketNotificationDto socketDto = new WebSocketNotificationDto(
@@ -44,28 +43,29 @@ public class NotificationService implements NotificationServiceInterface {
                 notification.getType(),
                 notification.getRequest() != null ? notification.getRequest().getId() : null,
                 notification.getInventoryItem() != null ? notification.getInventoryItem().getId() : null,
-                notification.getCreatedAt()
-        );
+                notification.getCreatedAt());
 
         messagingTemplate.convertAndSend("/topic/notifications/user-" + notification.getUser().getId(), socketDto);
     }
 
     @Override
-    public void notify(User user, String title, String message, NotificationType type, Timestamp createdAt) {
+    public void notify(User user, String title, String message, NotificationType type, LocalDateTime createdAt) {
         Notification notification = new Notification(user, title, message, type, createdAt);
         notificationRepository.save(notification);
         broadcast(notification);
     }
 
     @Override
-    public void notifyWithRequest(User user, String title, String message, NotificationType type, Request request, Timestamp createdAt) {
+    public void notifyWithRequest(User user, String title, String message, NotificationType type, Request request,
+            LocalDateTime createdAt) {
         Notification notification = new Notification(user, title, message, type, request, createdAt);
         notificationRepository.save(notification);
         broadcast(notification);
     }
 
     @Override
-    public void notifyWithItem(User user, String title, String message, NotificationType type, InventoryItem item, Timestamp createdAt) {
+    public void notifyWithItem(User user, String title, String message, NotificationType type, InventoryItem item,
+            LocalDateTime createdAt) {
         Notification notification = new Notification(user, title, message, type, item, createdAt);
         notificationRepository.save(notification);
         broadcast(notification);
@@ -73,7 +73,7 @@ public class NotificationService implements NotificationServiceInterface {
 
     @Override
     public List<NotificationResponseDto> getUnreadNotifications(User user) {
-        if(user == null)
+        if (user == null)
             throw new IllegalArgumentException("User can't be null");
         return notificationRepository
                 .findByUserAndReadIsFalse(user)
@@ -84,10 +84,10 @@ public class NotificationService implements NotificationServiceInterface {
 
     @Override
     public List<NotificationResponseDto> getAllNotifications(User user) {
-        if(user == null)
+        if (user == null)
             throw new IllegalArgumentException("User can't be null");
         return notificationRepository
-                .findByUser(user)
+                .findByUserOrderByCreatedAtDesc(user)
                 .stream()
                 .map(notificationMapper::toDto)
                 .collect(Collectors.toList());
@@ -98,7 +98,7 @@ public class NotificationService implements NotificationServiceInterface {
         notificationRepository.findById(id).ifPresent(notification -> {
             notification.setRead(true);
             Notification savedNotification = notificationRepository.save(notification);
-            
+
             // Broadcast the update via WebSocket
             WebSocketNotificationDto socketDto = new WebSocketNotificationDto(
                     savedNotification.getId(),
@@ -108,9 +108,9 @@ public class NotificationService implements NotificationServiceInterface {
                     savedNotification.getType(),
                     savedNotification.getRequest() != null ? savedNotification.getRequest().getId() : null,
                     savedNotification.getInventoryItem() != null ? savedNotification.getInventoryItem().getId() : null,
-                    savedNotification.getCreatedAt()
-            );
-            messagingTemplate.convertAndSend("/topic/notifications/user-" + savedNotification.getUser().getId(), socketDto);
+                    savedNotification.getCreatedAt());
+            messagingTemplate.convertAndSend("/topic/notifications/user-" + savedNotification.getUser().getId(),
+                    socketDto);
         });
     }
 
@@ -119,12 +119,12 @@ public class NotificationService implements NotificationServiceInterface {
         if (user == null)
             throw new IllegalArgumentException("User can't be null");
 
-        List<Notification> notifications = notificationRepository.findByUser(user);
+        List<Notification> notifications = notificationRepository.findByUserAndReadIsFalse(user);
         notifications.forEach(notification -> {
             notification.setRead(true);
             notificationRepository.save(notification);
         });
-        
+
         // Broadcast the update via WebSocket for all notifications
         WebSocketNotificationDto socketDto = new WebSocketNotificationDto(
                 null, // null ID indicates bulk update
@@ -134,14 +134,13 @@ public class NotificationService implements NotificationServiceInterface {
                 NotificationType.GENERAL,
                 null,
                 null,
-                new Timestamp(System.currentTimeMillis())
-        );
+                LocalDateTime.now());
         messagingTemplate.convertAndSend("/topic/notifications/user-" + user.getId(), socketDto);
     }
 
     @Override
     public Long getUnreadCount(User user) {
-        if(user == null)
+        if (user == null)
             throw new IllegalArgumentException("User can't be null");
         return notificationRepository.countNotificationsByUserAndIsReadIsFalse(user);
     }
@@ -157,14 +156,14 @@ public class NotificationService implements NotificationServiceInterface {
 
     // Cleanup (optional)
     public Void deleteOldNotifications(int userId, int daysOld) {
-        Timestamp cutoff = new Timestamp(System.currentTimeMillis() - (long) daysOld * 24 * 60 * 60 * 1000);
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(daysOld);
         notificationRepository.deleteAllByUser_IdAndCreatedAtBefore(userId, cutoff);
         return null;
     }
 
     @Scheduled(cron = "0 0 3 * * ?") // Every day at 3 AM
     public void autoDeleteOldNotifications() {
-        Timestamp cutoff = new Timestamp(System.currentTimeMillis() - (60L * 24 * 60 * 60 * 1000)); // 60 days ago
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(60); // 60 days ago
         notificationRepository.deleteAllByCreatedAtBefore(cutoff);
     }
 
@@ -173,10 +172,11 @@ public class NotificationService implements NotificationServiceInterface {
         User storekeeper = userRepository
                 .findByDepartmentAndRole(
                         item.getDepartment(),
-                        roleRepository.findByName("STOREKEEPER").orElseThrow()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+                        roleRepository.findByName("STOREKEEPER").orElseThrow())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         int availableQty = inventoryBatchRepository.sumRemainingQuantityByItem(item);
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-        Timestamp yesterday = new Timestamp(now.getTime() - 24 * 60 * 60 * 1000);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime yesterday = now.minusDays(1);
 
         boolean alreadyNotified = !notificationRepository
                 .findRecentByUserAndItemAndType(storekeeper, item, NotificationType.LOW_STOCK, yesterday)
@@ -189,8 +189,7 @@ public class NotificationService implements NotificationServiceInterface {
                     "Stock for item " + item.getName() + " is low (" + availableQty + " " + item.getUnit() + " left)",
                     NotificationType.LOW_STOCK,
                     item,
-                    now
-            );
+                    now);
         }
     }
 
@@ -208,8 +207,7 @@ public class NotificationService implements NotificationServiceInterface {
             if (sender.getDepartment() != null) {
                 availableUsers = userRepository.findAllByOffice_DepartmentAndIdNot(
                         sender.getDepartment(),
-                        sender.getId()
-                ).orElse(List.of());
+                        sender.getId()).orElse(List.of());
             } else {
                 availableUsers = List.of();
             }
@@ -228,7 +226,7 @@ public class NotificationService implements NotificationServiceInterface {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         List<User> recipients = getRecipients(request, sender);
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+        LocalDateTime now = LocalDateTime.now();
 
         // Send notification to each recipient
         for (User recipient : recipients) {
@@ -237,15 +235,13 @@ public class NotificationService implements NotificationServiceInterface {
                     request.getSubject(),
                     request.getMessage(),
                     NotificationType.GENERAL,
-                    now
-            );
+                    now);
 
             emailService.sendGeneralNotificationEmail(
                     recipient.getEmail(),
                     request.getSubject(),
                     request.getMessage(),
-                    recipient.getFirstName()
-            );
+                    recipient.getFirstName());
         }
 
         return recipients;
@@ -265,8 +261,7 @@ public class NotificationService implements NotificationServiceInterface {
                 if (sender.getOffice() != null && sender.getOffice().getDepartment() != null) {
                     yield userRepository.findAllByOffice_DepartmentAndIdNot(
                             sender.getOffice().getDepartment(),
-                            sender.getId()
-                    ).orElse(List.of());
+                            sender.getId()).orElse(List.of());
                 }
                 yield List.of();
             }

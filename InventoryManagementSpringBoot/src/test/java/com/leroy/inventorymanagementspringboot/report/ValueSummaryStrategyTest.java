@@ -60,12 +60,14 @@ class ValueSummaryStrategyTest {
         item.setUnit("pieces");
 
         when(itemRepo.findAllByDepartment(dept)).thenReturn(Optional.of(List.of(item)));
-        when(balanceRepo.findTopByInventoryItemAndDepartmentAndSnapshotDateBeforeOrderBySnapshotDateDesc(any(), any(), any()))
-                .thenReturn(Optional.of(new InventoryBalance(item, dept, 5, new BigDecimal("5000"), Date.valueOf("2023-12-31"))));
+        when(balanceRepo.findTopByInventoryItemAndDepartmentAndSnapshotDateBeforeOrderBySnapshotDateDesc(any(), any(),
+                any()))
+                .thenReturn(Optional.of(new InventoryBalance(item, dept, 5, new BigDecimal("5000"),
+                        Date.valueOf("2023-12-31").toLocalDate().atStartOfDay())));
         when(txRepo.findByInventoryItemAndTransactionDateBetween(any(), any(), any()))
                 .thenReturn(List.of(
-                        new StockTransaction(item, StockTransactionType.IN, 10, new BigDecimal("900"), Timestamp.valueOf("2024-01-10 00:00:00"))));
-
+                        new StockTransaction(item, StockTransactionType.IN, 10, new BigDecimal("900"),
+                                Timestamp.valueOf("2024-01-10 00:00:00").toLocalDateTime())));
 
         when(fifoCalc.calculateIssuedValue(item, dept, start, end)).thenReturn(new BigDecimal("4800"));
 
@@ -79,4 +81,3 @@ class ValueSummaryStrategyTest {
         assertEquals(new BigDecimal("9200"), dto.getValueCarriedForward());
     }
 }
-

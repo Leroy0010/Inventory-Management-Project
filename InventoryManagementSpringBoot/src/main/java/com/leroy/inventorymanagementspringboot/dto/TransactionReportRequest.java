@@ -4,7 +4,7 @@ import com.leroy.inventorymanagementspringboot.enums.StockTransactionType;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,7 +13,7 @@ public class TransactionReportRequest {
     private Integer year;
     private Integer month; // optional
     private StockTransactionType transactionType; // optional
-    private LocalDate startDate; // optional
-    private LocalDate endDate; // optional but required if startDate is present
+    private LocalDateTime startDate; // optional
+    private LocalDateTime endDate; // optional but required if startDate is present
 
 }

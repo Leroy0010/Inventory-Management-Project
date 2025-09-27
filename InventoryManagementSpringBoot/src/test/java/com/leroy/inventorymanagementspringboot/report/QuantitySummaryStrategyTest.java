@@ -57,16 +57,20 @@ class QuantitySummaryStrategyTest {
         when(itemRepo.findAllByDepartment(dept)).thenReturn(Optional.of(List.of(item)));
 
         // Mock snapshot (brought forward = 5)
-        InventoryBalance balance = new InventoryBalance(item, dept, 5, new BigDecimal("5000"), Date.valueOf("2023-12-31"));
-        when(balanceRepo.findTopByInventoryItemAndDepartmentAndSnapshotDateBeforeOrderBySnapshotDateDesc(any(), any(), any()))
+        InventoryBalance balance = new InventoryBalance(item, dept, 5, new BigDecimal("5000"),
+                Date.valueOf("2023-12-31").toLocalDate().atStartOfDay());
+        when(balanceRepo.findTopByInventoryItemAndDepartmentAndSnapshotDateBeforeOrderBySnapshotDateDesc(any(), any(),
+                any()))
                 .thenReturn(Optional.of(balance));
 
         // Mock transactions: IN = 10, OUT = 3 + 2 = 5
         List<StockTransaction> transactions = List.of(
-                new StockTransaction(item, StockTransactionType.IN, 10, BigDecimal.ZERO, Timestamp.valueOf("2024-01-10 00:00:00")),
-                new StockTransaction(item, StockTransactionType.OUT, 3, BigDecimal.ZERO, Timestamp.valueOf("2024-01-20 00:00:00")),
-                new StockTransaction(item, StockTransactionType.OUT, 2, BigDecimal.ZERO, Timestamp.valueOf("2024-01-25 00:00:00"))
-        );
+                new StockTransaction(item, StockTransactionType.IN, 10, BigDecimal.ZERO,
+                        Timestamp.valueOf("2024-01-10 00:00:00").toLocalDateTime()),
+                new StockTransaction(item, StockTransactionType.OUT, 3, BigDecimal.ZERO,
+                        Timestamp.valueOf("2024-01-20 00:00:00").toLocalDateTime()),
+                new StockTransaction(item, StockTransactionType.OUT, 2, BigDecimal.ZERO,
+                        Timestamp.valueOf("2024-01-25 00:00:00").toLocalDateTime()));
         when(txRepo.findByInventoryItemAndTransactionDateBetween(any(), any(), any()))
                 .thenReturn(transactions);
 
@@ -96,7 +100,8 @@ class QuantitySummaryStrategyTest {
         when(itemRepo.findAllByDepartment(dept)).thenReturn(Optional.of(List.of(item)));
 
         // No snapshot returned
-        when(balanceRepo.findTopByInventoryItemAndDepartmentAndSnapshotDateBeforeOrderBySnapshotDateDesc(any(), any(), any()))
+        when(balanceRepo.findTopByInventoryItemAndDepartmentAndSnapshotDateBeforeOrderBySnapshotDateDesc(any(), any(),
+                any()))
                 .thenReturn(Optional.empty());
 
         // Fallback: getBalanceBefore returns 7
@@ -105,9 +110,10 @@ class QuantitySummaryStrategyTest {
 
         // Transactions
         List<StockTransaction> transactions = List.of(
-                new StockTransaction(item, StockTransactionType.IN, 5, BigDecimal.ZERO, Timestamp.valueOf("2024-01-15 00:00:00")),
-                new StockTransaction(item, StockTransactionType.OUT, 2, BigDecimal.ZERO, Timestamp.valueOf("2024-01-18 00:00:00"))
-        );
+                new StockTransaction(item, StockTransactionType.IN, 5, BigDecimal.ZERO,
+                        Timestamp.valueOf("2024-01-15 00:00:00").toLocalDateTime()),
+                new StockTransaction(item, StockTransactionType.OUT, 2, BigDecimal.ZERO,
+                        Timestamp.valueOf("2024-01-18 00:00:00").toLocalDateTime()));
         when(txRepo.findByInventoryItemAndTransactionDateBetween(any(), any(), any()))
                 .thenReturn(transactions);
 

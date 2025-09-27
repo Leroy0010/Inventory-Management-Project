@@ -5,9 +5,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
 @Table(name = "request_status_history")
 public class RequestStatusHistory {
@@ -15,7 +16,6 @@ public class RequestStatusHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
 
     @JsonBackReference
     @ManyToOne
@@ -30,13 +30,13 @@ public class RequestStatusHistory {
     @JoinColumn(name = "changed_by")
     private User changedBy;
 
-
     @Column(name = "changed_at")
-    private Timestamp changedAt;
+    private LocalDateTime changedAt;
 
-    public RequestStatusHistory() {}
+    public RequestStatusHistory() {
+    }
 
-    public RequestStatusHistory(Request request, RequestStatus status,  User changedBy, Timestamp changedAt) {
+    public RequestStatusHistory(Request request, RequestStatus status, User changedBy, LocalDateTime changedAt) {
         this.request = request;
         this.status = status;
         this.changedBy = changedBy;

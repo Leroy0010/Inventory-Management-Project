@@ -1,0 +1,379 @@
+databaseChangeLog:
+    - changeSet:
+          id: create-user-settings-table
+          author: system
+          changes:
+              - createTable:
+                    tableName: user_settings
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGSERIAL
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                        - column:
+                              name: user_id
+                              type: INTEGER
+                              constraints:
+                                  nullable: false
+                                  unique: true
+                                  foreignKeyName: fk_user_settings_user
+                                  references: users(id)
+                        # ===== CORE/COMMON SETTINGS =====
+                        - column:
+                              {
+                                  name: theme,
+                                  type: VARCHAR(20),
+                                  defaultValue: system,
+                              }
+                        - column:
+                              {
+                                  name: language,
+                                  type: VARCHAR(5),
+                                  defaultValue: en,
+                              }
+                        - column: { name: timezone, type: VARCHAR(50) }
+                        - column:
+                              {
+                                  name: auto_save,
+                                  type: BOOLEAN,
+                                  defaultValueBoolean: true,
+                              }
+                        - column:
+                              {
+                                  name: email_notifications,
+                                  type: BOOLEAN,
+                                  defaultValueBoolean: true,
+                              }
+                        - column:
+                              {
+                                  name: push_notifications,
+                                  type: BOOLEAN,
+                                  defaultValueBoolean: true,
+                              }
+                        - column:
+                              {
+                                  name: in_app_notifications,
+                                  type: BOOLEAN,
+                                  defaultValueBoolean: true,
+                              }
+                        - column:
+                              {
+                                  name: profile_visibility,
+                                  type: VARCHAR(20),
+                                  defaultValue: department,
+                              }
+                        - column:
+                              {
+                                  name: activity_tracking,
+                                  type: BOOLEAN,
+                                  defaultValueBoolean: true,
+                              }
+                        - column:
+                              {
+                                  name: marketing_emails,
+                                  type: BOOLEAN,
+                                  defaultValueBoolean: false,
+                              }
+                        - column:
+                              {
+                                  name: dashboard_layout,
+                                  type: VARCHAR(20),
+                                  defaultValue: comfortable,
+                              }
+                        - column:
+                              {
+                                  name: default_page_size,
+                                  type: INTEGER,
+                                  defaultValueNumeric: "25",
+                              }
+                        - column:
+                              {
+                                  name: auto_refresh,
+                                  type: BOOLEAN,
+                                  defaultValueBoolean: true,
+                              }
+                        - column:
+                              {
+                                  name: refresh_interval,
+                                  type: INTEGER,
+                                  defaultValueNumeric: "20",
+                              }
+                        - column:
+                              {
+                                  name: report_format,
+                                  type: VARCHAR(10),
+                                  defaultValue: pdf,
+                              }
+                        - column:
+                              {
+                                  name: two_factor_enabled,
+                                  type: BOOLEAN,
+                                  defaultValueBoolean: false,
+                              }
+                        - column:
+                              {
+                                  name: session_timeout,
+                                  type: INTEGER,
+                                  defaultValueNumeric: "60",
+                              }
+                        - column:
+                              {
+                                  name: login_notifications,
+                                  type: BOOLEAN,
+                                  defaultValueBoolean: true,
+                              }
+                        # ===== ADVANCED/EXTENDED SETTINGS =====
+                        - column: { name: advanced_settings, type: JSONB }
+                        # ===== METADATA =====
+                        - column:
+                              name: created_at
+                              type: TIMESTAMP
+                              defaultValueComputed: CURRENT_TIMESTAMP
+                              constraints: { nullable: false }
+                        - column:
+                              name: updated_at
+                              type: TIMESTAMP
+                              defaultValueComputed: CURRENT_TIMESTAMP
+                        - column:
+                              {
+                                  name: version,
+                                  type: VARCHAR(10),
+                                  defaultValue: "1.0.0",
+                              }
+
+              # ===== CHECK CONSTRAINTS (raw SQL) =====
+              - sql:
+                    sql: |
+                        ALTER TABLE user_settings
+                        ADD CONSTRAINT chk_theme CHECK (theme IN ('light','dark','system'));
+              - sql:
+                    sql: |
+                        ALTER TABLE user_settings
+                        ADD CONSTRAINT chk_language CHECK (language IN ('en','es','fr','de'));
+              - sql:
+                    sql: |
+                        ALTER TABLE user_settings
+                        ADD CONSTRAINT chk_profile_visibility CHECK (profile_visibility IN ('public','department','private'));
+              - sql:
+                    sql: |
+                        ALTER TABLE user_settings
+                        ADD CONSTRAINT chk_dashboard_layout CHECK (dashboard_layout IN ('compact','comfortable','spacious'));
+              - sql:
+                    sql: |
+                        ALTER TABLE user_settings
+                        ADD CONSTRAINT chk_default_page_size CHECK (default_page_size IN (10,25,50,100));
+              - sql:
+                    sql: |
+                        ALTER TABLE user_settings
+                        ADD CONSTRAINT chk_refresh_interval CHECK (refresh_interval IN (20, 30,60,120,300,600));
+              - sql:
+                    sql: |
+                        ALTER TABLE user_settings
+                        ADD CONSTRAINT chk_report_format CHECK (report_format IN ('pdf','excel','csv'));
+              - sql:
+                    sql: |
+                        ALTER TABLE user_settings
+                        ADD CONSTRAINT chk_session_timeout CHECK (session_timeout IN (15,30,60,120,240));
+
+              # ===== INDEXES =====
+              - createIndex:
+                    tableName: user_settings
+                    indexName: idx_user_settings
+                    columns:
+                        - column:
+                              name: user_id
+                        - column:
+                              name: theme
+                        - column:
+                              name: language
+                        - column:
+                              name: created_at
+                        - column:
+                              name: updated_at
+              - sql:
+                    sql: "CREATE INDEX IF NOT EXISTS idx_user_settings_advanced_settings_gin ON user_settings USING gin (advanced_settings);"
+
+              # ===== FUNCTION & TRIGGER (commented out for now due to Liquibase parsing issues) =====
+              # - sql:
+              #     splitStatements: false
+              #     sql: |
+              #       CREATE OR REPLACE FUNCTION update_user_settings_updated_at()
+              #       RETURNS TRIGGER AS $$
+              #       BEGIN
+              #           NEW.updated_at = CURRENT_TIMESTAMP;
+              #           RETURN NEW;
+              #       END;
+              #       $$ LANGUAGE plpgsql;
+              # - sql:
+              #     sql: |
+              #       CREATE TRIGGER trigger_update_user_settings_updated_at
+              #       BEFORE UPDATE ON user_settings
+              #       FOR EACH ROW
+              #       EXECUTE FUNCTION update_user_settings_updated_at();
+
+              # ===== COMMENTS =====
+              - setTableRemarks:
+                    {
+                        tableName: user_settings,
+                        remarks: "User preferences and application settings with hybrid model (core columns + JSONB)",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: id,
+                        remarks: "Primary key",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: user_id,
+                        remarks: "Foreign key to users table",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: theme,
+                        remarks: "UI theme preference (light, dark, system)",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: language,
+                        remarks: "Language preference (en, es, fr, de)",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: timezone,
+                        remarks: "User timezone",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: auto_save,
+                        remarks: "Enable automatic saving",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: email_notifications,
+                        remarks: "Email notification preference",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: push_notifications,
+                        remarks: "Push notification preference",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: in_app_notifications,
+                        remarks: "In-app notification preference",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: profile_visibility,
+                        remarks: "Profile visibility level",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: activity_tracking,
+                        remarks: "Activity tracking preference",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: marketing_emails,
+                        remarks: "Marketing email preference",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: dashboard_layout,
+                        remarks: "Dashboard layout preference",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: default_page_size,
+                        remarks: "Default table page size",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: auto_refresh,
+                        remarks: "Auto-refresh preference",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: refresh_interval,
+                        remarks: "Refresh interval in seconds",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: report_format,
+                        remarks: "Default report format",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: two_factor_enabled,
+                        remarks: "Two-factor authentication status",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: session_timeout,
+                        remarks: "Session timeout in minutes",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: login_notifications,
+                        remarks: "Login notification preference",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: advanced_settings,
+                        remarks: "Advanced settings stored as JSONB",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: created_at,
+                        remarks: "Record creation timestamp",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: updated_at,
+                        remarks: "Record last update timestamp",
+                    }
+              - setColumnRemarks:
+                    {
+                        tableName: user_settings,
+                        columnName: version,
+                        remarks: "Settings schema version",
+                    }
+
+    # ===== OPTIONAL: Insert defaults for existing users =====
+    - changeSet:
+          id: insert-default-user-settings
+          author: system
+          changes:
+              - sql:
+                    sql: |
+                        INSERT INTO user_settings (user_id, created_at, updated_at)
+                        SELECT u.id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                        FROM users u
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM user_settings us WHERE us.user_id = u.id
+                        );

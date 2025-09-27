@@ -1,8 +1,9 @@
 databaseChangeLog:
   - changeSet:
-      id: 001
+      id: 001-initial-schema
       author: leroy
       changes:
+        # Table Creation
         - createTable:
             tableName: departments
             columns:
@@ -24,7 +25,7 @@ databaseChangeLog:
                     nullable: true
               - column:
                   name: active
-                  type: boolean
+                  type: BOOLEAN
                   constraints:
                     nullable: false
               - column:
@@ -71,11 +72,6 @@ databaseChangeLog:
                   type: TEXT
                   constraints:
                     nullable: true
-        - addUniqueConstraint:
-            tableName: offices
-            columnNames: department_id, name
-            constraintName: uq_department_office_name
-
 
         - createTable:
             tableName: roles
@@ -92,14 +88,83 @@ databaseChangeLog:
                     nullable: false
                     unique: true
 
-#        - addCheckConstraint:
-#            tableName: roles
-#            constraintName: role_enum
-#            constraintBody: "name IN ('ADMIN', 'STAFF', 'STOREKEEPER')"
-        - sql:
-            sql: ALTER TABLE roles ADD CONSTRAINT role_enum CHECK (name IN ('ADMIN', 'STAFF', 'STOREKEEPER'))
+        - createTable:
+            tableName: request_status
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
 
+        - createTable:
+            tableName: inventory_items
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: unit
+                  type: TEXT
+              - column:
+                  name: image_path
+                  type: TEXT
+              - column:
+                  name: reorder_level
+                  type: INT
+                  defaultValueNumeric: "0"
 
+        - createTable:
+            tableName: inventory_batches
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: item_id
+                  type: INT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_batch_item
+                    references: inventory_items(id)
+                    deleteCascade: true
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: remaining_quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: unit_price
+                  type: NUMERIC(12,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: batch_date
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
 
         - createTable:
             tableName: users
@@ -153,13 +218,9 @@ databaseChangeLog:
               - column:
                   name: phone
                   type: VARCHAR(20)
-                  constraints:
-                    nullable: true
               - column:
                   name: bio
                   type: TEXT
-                  constraints:
-                    nullable: true
               - column:
                   name: created_at
                   type: TIMESTAMP
@@ -167,96 +228,12 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: CURRENT_TIMESTAMP
 
-
-        - createTable:
-            tableName: inventory_items
-            columns:
-              - column:
-                  name: id
-                  type: SERIAL
-                  constraints:
-                    primaryKey: true
-              - column:
-                  name: name
-                  type: TEXT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: description
-                  type: TEXT
-              - column:
-                  name: unit
-                  type: TEXT
-              - column:
-                  name: image_path
-                  type: TEXT
-              - column:
-                  name: reorder_level
-                  type: INT
-                  defaultValueNumeric: '0'
-
-        - createTable:
-            tableName: inventory_batches
-            columns:
-              - column:
-                  name: id
-                  type: SERIAL
-                  constraints:
-                    primaryKey: true
-              - column:
-                  name: item_id
-                  type: INT
-                  constraints:
-                    nullable: false
-                    foreignKeyName: fk_batch_item
-                    references: inventory_items(id)
-                    deleteCascade: true
-              - column:
-                  name: quantity
-                  type: INT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: remaining_quantity
-                  type: INT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: unit_price
-                  type: NUMERIC(12,2)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: batch_date
-                  type: TIMESTAMP
-                  defaultValueComputed: CURRENT_TIMESTAMP
-        - createTable:
-            tableName: request_status
-            columns:
-              - column:
-                  name: id
-                  type: SERIAL
-                  constraints:
-                    primaryKey: true
-              - column:
-                  name: name
-                  type: VARCHAR(30)
-                  constraints:
-                    nullable: false
-#        - addCheckConstraint:
-#            tableName: request_status
-#            constraintName: status_enum
-#            constraintBody:  "name IN ('PENDING', 'APPROVED', 'REJECTED', 'FULFILLED')"
-
-        - sql:
-            sql: ALTER TABLE request_status ADD CONSTRAINT status_enum CHECK (name IN ('PENDING', 'APPROVED', 'REJECTED', 'FULFILLED'))
-
         - createTable:
             tableName: requests
             columns:
               - column:
                   name: id
-                  type: SERIAL
+                  type: BIGSERIAL
                   constraints:
                     primaryKey: true
               - column:
@@ -316,7 +293,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: SERIAL
+                  type: BIGSERIAL
                   constraints:
                     primaryKey: true
               - column:
@@ -325,7 +302,6 @@ databaseChangeLog:
                   constraints:
                     foreignKeyName: fk_status_history_request
                     references: requests(id)
-
                     deleteCascade: true
               - column:
                   name: status_id
@@ -349,7 +325,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: SERIAL
+                  type: BIGSERIAL
                   constraints:
                     primaryKey: true
               - column:
@@ -359,7 +335,6 @@ databaseChangeLog:
                     foreignKeyName: fk_issuance_request_item
                     references: request_items(id)
                     deleteCascade: true
-
               - column:
                   name: batch_id
                   type: INT
@@ -382,7 +357,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: SERIAL
+                  type: BIGSERIAL
                   constraints:
                     primaryKey: true
               - column:
@@ -430,20 +405,13 @@ databaseChangeLog:
                   constraints:
                     foreignKeyName: fk_transaction_batch
                     references: inventory_batches(id)
-#        - addCheckConstraint:
-#            tableName: stock_transactions
-#            constraintName: transaction_type_enum
-#            constraintBody: "transaction_type IN ('IN', 'OUT')"
-
-        - sql:
-            sql: ALTER TABLE stock_transactions ADD CONSTRAINT transaction_type_enum CHECK (transaction_type IN ('IN', 'OUT'))
 
         - createTable:
             tableName: notifications
             columns:
               - column:
                   name: id
-                  type: SERIAL
+                  type: BIGSERIAL
                   constraints:
                     primaryKey: true
               - column:
@@ -493,7 +461,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: SERIAL
+                  type: BIGSERIAL
                   constraints:
                     primaryKey: true
               - column:
@@ -530,20 +498,13 @@ databaseChangeLog:
               - column:
                   name: quantity
                   type: INT
-#        - addCheckConstraint:
-#            tableName: cart_items
-#            constraintName: cart_item_quantity_check
-#            constraintBody: "quantity > 0"
-
-        - sql:
-            sql: ALTER TABLE cart_items ADD CONSTRAINT cart_item_quantity_check CHECK(quantity > 0)
 
         - createTable:
             tableName: inventory_balances
             columns:
               - column:
                   name: id
-                  type: SERIAL
+                  type: BIGSERIAL
                   constraints:
                     primaryKey: true
               - column:
@@ -554,9 +515,10 @@ databaseChangeLog:
                     references: inventory_items(id)
               - column:
                   name: snapshot_date
-                  type: DATE
+                  type: TIMESTAMP
                   constraints:
                     nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
               - column:
                   name: quantity
                   type: INT
@@ -576,26 +538,13 @@ databaseChangeLog:
               - column:
                   name: method
                   type: VARCHAR(20)
-#        - addCheckConstraint:
-#            tableName: inventory_balances
-#            constraintName: cost_method_enum
-#            constraintBody: "method IN ('FIFO', 'AVG')"
-
-        - sql:
-            sql: ALTER TABLE inventory_balances ADD CONSTRAINT cost_method_enum CHECK(method IN ('FIFO', 'AVG'))
-
-
-        - addUniqueConstraint:
-            tableName: inventory_balances
-            columnNames: item_id,snapshot_date,method,department_id
-            constraintName: uq_inventory_balance_snapshot
 
         - createTable:
             tableName: audit_log
             columns:
               - column:
                   name: id
-                  type: SERIAL
+                  type: BIGSERIAL
                   constraints:
                     primaryKey: true
               - column:
@@ -637,7 +586,32 @@ databaseChangeLog:
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
 
-        # Performance indexes for inventory summary reports
+        # Constraint and Index Creation
+        - addUniqueConstraint:
+            tableName: offices
+            columnNames: department_id, name
+            constraintName: uq_department_office_name
+
+        - sql:
+            sql: ALTER TABLE roles ADD CONSTRAINT role_enum CHECK (name IN ('ADMIN', 'STAFF', 'STOREKEEPER'))
+
+        - sql:
+            sql: ALTER TABLE request_status ADD CONSTRAINT status_enum CHECK (name IN ('PENDING', 'APPROVED', 'REJECTED', 'FULFILLED'))
+
+        - sql:
+            sql: ALTER TABLE stock_transactions ADD CONSTRAINT transaction_type_enum CHECK (transaction_type IN ('IN', 'OUT'))
+
+        - sql:
+            sql: ALTER TABLE cart_items ADD CONSTRAINT cart_item_quantity_check CHECK(quantity > 0)
+
+        - sql:
+            sql: ALTER TABLE inventory_balances ADD CONSTRAINT cost_method_enum CHECK(method IN ('FIFO', 'AVG'))
+
+        - addUniqueConstraint:
+            tableName: inventory_balances
+            columnNames: item_id, snapshot_date, method, department_id
+            constraintName: uq_inventory_balance_snapshot
+
         - createIndex:
             tableName: stock_transactions
             indexName: idx_stock_transactions_item_date

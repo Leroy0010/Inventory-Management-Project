@@ -375,9 +375,9 @@ public class DashboardService implements DashboardServiceInterface {
             }
         }
 
-        // Convert Timestamp to LocalDateTime
+        // Get LocalDateTime
         LocalDateTime createdAt = request.getSubmittedAt() != null
-                ? request.getSubmittedAt().toLocalDateTime()
+                ? request.getSubmittedAt()
                 : LocalDateTime.now();
 
         // Calculate time ago (simplified - you might want to use a proper time library)

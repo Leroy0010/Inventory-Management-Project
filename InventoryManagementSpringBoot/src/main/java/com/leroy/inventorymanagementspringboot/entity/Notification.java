@@ -5,9 +5,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
 @Table(name = "notifications")
 public class Notification {
@@ -16,46 +17,39 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-
     @Column(nullable = false)
     private String title;
-
 
     // Explicit getter methods to ensure they exist
     @Column(nullable = false)
     private String message;
 
-
     @Column(nullable = false)
     private boolean isRead;
-
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
-
     @ManyToOne
     @JoinColumn(name = "related_request_id")
     private Request request;
-
 
     @ManyToOne
     @JoinColumn(name = "related_item_id")
     private InventoryItem inventoryItem;
 
-
     @Column(name = "createdAt")
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
-    public Notification() {}
+    public Notification() {
+    }
 
-    public Notification(User user, String title, String message, NotificationType type, Timestamp createdAt) {
+    public Notification(User user, String title, String message, NotificationType type, LocalDateTime createdAt) {
         this.user = user;
         this.title = title;
         this.message = message;
@@ -65,7 +59,8 @@ public class Notification {
 
     }
 
-    public Notification(User user, String title, String message, NotificationType type, InventoryItem inventoryItem,  Timestamp createdAt) {
+    public Notification(User user, String title, String message, NotificationType type, InventoryItem inventoryItem,
+            LocalDateTime createdAt) {
         this.user = user;
         this.title = title;
         this.message = message;
@@ -75,7 +70,8 @@ public class Notification {
         isRead = false;
     }
 
-    public Notification(User user, String title, String message, NotificationType type, Request request, Timestamp createdAt) {
+    public Notification(User user, String title, String message, NotificationType type, Request request,
+            LocalDateTime createdAt) {
         this.user = user;
         this.title = title;
         this.message = message;

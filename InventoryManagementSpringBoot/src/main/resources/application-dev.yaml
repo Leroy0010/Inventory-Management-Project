@@ -9,10 +9,14 @@ spring:
         hibernate:
             ddl-auto: ${SPRING_JPA_DDL_AUTO:validate}
         show-sql: ${SPRING_JPA_SHOW_SQL:false}
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
         properties:
             hibernate:
                 format_sql: ${SPRING_JPA_FORMAT_SQL:false}
                 dialect: org.hibernate.dialect.PostgreSQLDialect
+                jdbc:
+                    time_zone: UTC
+        open-in-view: false
 
     devtools:
         restart:
@@ -44,7 +48,7 @@ spring:
 
 # JWT Configuration for Development
 jwt:
-    secret: ${JWT_SECRET:dev_jwt_secret_key_must_be_at_least_64_bytes_base64_encoded_for_development_only}
+    secret: ${JWT_SECRET:ZGV2X2p3dF9zZWNyZXRfa2V5X211c3RfYmVfYXRfbGVhc3RfNjRfYnl0ZXNfYmFzZTY0X2VuY29kZWRfZm9yX2RldmVsb3BtZW50X29ubHk=}
     expiration: ${JWT_EXPIRATION:86400000} # 24 hours
     refresh:
         expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days
@@ -57,6 +61,11 @@ server:
             cookie:
                 secure: false # HTTP for development
                 same-site: Lax
+
+# App Configuration for Development
+app:
+    frontend:
+        base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
 
 # Logging for Development
 logging:

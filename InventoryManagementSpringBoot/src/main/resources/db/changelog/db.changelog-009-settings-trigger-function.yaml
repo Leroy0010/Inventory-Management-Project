@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-user-settings-trigger
+      author: system
+      changes:
+      # ===== FUNCTION & TRIGGER =====
+        - sql:
+            splitStatements: false
+            sql: |
+              CREATE OR REPLACE FUNCTION update_user_settings_updated_at()
+              RETURNS TRIGGER AS $$
+              BEGIN
+                  NEW.updated_at = CURRENT_TIMESTAMP;
+                  RETURN NEW;
+              END;
+              $$ LANGUAGE plpgsql;
+        - sql:
+            sql: |
+              CREATE TRIGGER trigger_update_user_settings_updated_at
+              BEFORE UPDATE ON user_settings
+              FOR EACH ROW
+              EXECUTE FUNCTION update_user_settings_updated_at();

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,17 +27,17 @@ public class Request {
     private RequestStatus requestStatus;
 
     @Column(name = "submitted_at")
-    private Timestamp submittedAt;
+    private LocalDateTime submittedAt;
 
     @Column(name = "approved_at")
-    private Timestamp approvedAt;
+    private LocalDateTime approvedAt;
 
     @ManyToOne
     @JoinColumn(name = "approved_by")
     private User approver;
 
     @Column(name = "fulfilled_at") // New field for fulfillment timestamp
-    private Timestamp fulfilledAt;
+    private LocalDateTime fulfilledAt;
 
     @ManyToOne // New field for the user who fulfilled it
     @JoinColumn(name = "fulfilled_by")
@@ -62,8 +62,8 @@ public class Request {
     // Add this to link request to its status history
     private Set<RequestStatusHistory> statusHistory = new HashSet<>();
 
-
-    public Request() {}
+    public Request() {
+    }
 
     @Override
     public String toString() {
@@ -75,7 +75,7 @@ public class Request {
                 ", approvedAt=" + approvedAt +
                 ", approvedBy=" + approver +
                 ", fulfilledAt=" + fulfilledAt + // Include in toString
-                ", fulfiller=" + fulfiller +     // Include in toString
+                ", fulfiller=" + fulfiller + // Include in toString
                 '}';
     }
 }

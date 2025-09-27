@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,8 +44,8 @@ public class DepartmentService implements DepartmentServiceInterface {
         try {
             Department department = departmentMapper.toDepartment(departmentDto);
             department.setActive(true);
-            department.setCreatedAt(LocalDate.now());
-            department.setUpdatedAt(LocalDate.now());
+            department.setCreatedAt(LocalDateTime.now());
+            department.setUpdatedAt(LocalDateTime.now());
 
             Department saved = departmentRepository.save(department);
             return departmentMapper.toDepartmentDto(saved);
@@ -52,7 +53,6 @@ public class DepartmentService implements DepartmentServiceInterface {
             throw new DepartmentCreationException("Failed to create department", e);
         }
     }
-
 
     @Override
     public String getCurrentUserDepartmentName(UserDetails userDetails) {

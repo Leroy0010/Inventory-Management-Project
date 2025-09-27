@@ -23,7 +23,6 @@ public class InventorySnapshotJob {
     private final InventoryBalanceRepository inventoryBalanceRepository;
     private static final Logger logger = LogManager.getLogger(InventorySnapshotJob.class);
 
-
     public InventorySnapshotJob(EntityManager entityManager, InventoryBalanceRepository inventoryBalanceRepository) {
         this.entityManager = entityManager;
         this.inventoryBalanceRepository = inventoryBalanceRepository;
@@ -39,21 +38,21 @@ public class InventorySnapshotJob {
         logger.info("Generating inventory snapshots for date: {}", sqlDate);
 
         String nativeQuery = """
-                SELECT
-                    i.id AS item_id,
-                    o.department_id,
-                    SUM(CASE WHEN s.transaction_type = 'RECEIVED' THEN s.quantity ELSE -s.quantity END) AS total_quantity,
-                    SUM(CASE WHEN s.transaction_type = 'RECEIVED' THEN s.quantity * s.unit_price
-                             WHEN s.transaction_type = 'ISSUED' THEN -s.quantity * s.unit_price
-                             ELSE 0 END) AS total_value
-                FROM stock_transactions s
-                         JOIN inventory_items i ON s.item_id = i.id
-                         JOIN requests r ON s.related_request_id = r.id
-                         JOIN users u ON r.user_id = u.id
-                         JOIN offices o ON u.office_id = o.id
-                WHERE s.transaction_date < :snapshotDate
-                GROUP BY i.id, o.department_id
-            """;
+                    SELECT
+                        i.id AS item_id,
+                        o.department_id,
+                        SUM(CASE WHEN s.transaction_type = 'RECEIVED' THEN s.quantity ELSE -s.quantity END) AS total_quantity,
+                        SUM(CASE WHEN s.transaction_type = 'RECEIVED' THEN s.quantity * s.unit_price
+                                 WHEN s.transaction_type = 'ISSUED' THEN -s.quantity * s.unit_price
+                                 ELSE 0 END) AS total_value
+                    FROM stock_transactions s
+                             JOIN inventory_items i ON s.item_id = i.id
+                             JOIN requests r ON s.related_request_id = r.id
+                             JOIN users u ON r.user_id = u.id
+                             JOIN offices o ON u.office_id = o.id
+                    WHERE s.transaction_date < :snapshotDate
+                    GROUP BY i.id, o.department_id
+                """;
 
         Query query = entityManager.createNativeQuery(nativeQuery);
         query.setParameter("snapshotDate", sqlDate);
@@ -69,8 +68,12 @@ public class InventorySnapshotJob {
             InventoryItem item = entityManager.getReference(InventoryItem.class, itemId);
             Department dept = entityManager.getReference(Department.class, departmentId);
 
-            InventoryBalance balanceFIFO = new InventoryBalance(item, dept, sqlDate, quantity, totalValue, CostFlowMethod.FIFO);
-            InventoryBalance balanceAvg = new InventoryBalance(item, dept, sqlDate, quantity, totalValue, CostFlowMethod.AVG);
+            InventoryBalance balanceFIFO = new InventoryBalance(item, dept, sqlDate.toLocalDate().atStartOfDay(),
+                    quantity,
+                    totalValue, CostFlowMethod.FIFO);
+            InventoryBalance balanceAvg = new InventoryBalance(item, dept, sqlDate.toLocalDate().atStartOfDay(),
+                    quantity,
+                    totalValue, CostFlowMethod.AVG);
 
             inventoryBalanceRepository.save(balanceFIFO);
             inventoryBalanceRepository.save(balanceAvg);
