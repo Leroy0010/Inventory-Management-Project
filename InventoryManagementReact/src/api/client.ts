@@ -48,6 +48,8 @@ apiClient.interceptors.response.use(
                 '/auth/google',
                 '/auth/refresh',
                 '/auth/logout',
+                '/auth/forgot-password',
+                '/auth/reset-password',
                 '/csrf-token',
             ];
             const isAuthEndpoint = authEndpoints.some((endpoint) =>
@@ -65,7 +67,17 @@ apiClient.interceptors.response.use(
                     return apiClient(originalRequest);
                 } catch (refreshError) {
                     // Refresh failed, redirect to login only if not already on login page
-                    if (window.location.pathname !== '/login') {
+                    // and not on public pages like forgot-password
+                    const publicPages = [
+                        '/login',
+                        '/forgot-password',
+                        '/reset-password',
+                    ];
+                    const isOnPublicPage = publicPages.some((page) =>
+                        window.location.pathname.startsWith(page)
+                    );
+
+                    if (!isOnPublicPage) {
                         window.location.href = '/login';
                     }
                     return Promise.reject(refreshError);
@@ -148,11 +160,13 @@ export const handleApiError = (error: unknown): string => {
                     `Access denied. You do not have permission to perform this action: ${message}`
                 );
             case 404:
-                return message ||  'Resource not found.';
+                return message || 'Resource not found.';
             case 422:
                 return message || `Validation Error: ${message}`;
             case 500:
-                return message || 'Internal server error. Please try again later.';
+                return (
+                    message || 'Internal server error. Please try again later.'
+                );
             default:
                 return message || 'An unexpected error occurred.';
         }

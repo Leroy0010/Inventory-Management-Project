@@ -7,43 +7,64 @@ type ThemeProviderProps = {
     children: React.ReactNode;
     defaultTheme?: Theme;
     storageKey?: string;
+    onThemeChange?: (theme: Theme) => void;
 };
 
 export function ThemeProvider({
     children,
     defaultTheme = 'system',
     storageKey = 'vite-ui-theme',
+    onThemeChange,
     ...props
 }: ThemeProviderProps) {
-    const [theme, setTheme] = useState<Theme>(
+    const [theme, setThemeState] = useState<Theme>(
         () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
     );
+    const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>('light');
+
+    // Detect system theme preference
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+        const handleChange = (e: MediaQueryListEvent) => {
+            setSystemTheme(e.matches ? 'dark' : 'light');
+        };
+
+        // Set initial system theme
+        setSystemTheme(mediaQuery.matches ? 'dark' : 'light');
+
+        // Listen for system theme changes
+        mediaQuery.addEventListener('change', handleChange);
+
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+        };
+    }, []);
 
     useEffect(() => {
         const root = window.document.documentElement;
 
         root.classList.remove('light', 'dark');
 
-        if (theme === 'system') {
-            const systemTheme = window.matchMedia(
-                '(prefers-color-scheme: dark)'
-            ).matches
-                ? 'dark'
-                : 'light';
+        const resolvedTheme = theme === 'system' ? systemTheme : theme;
+        root.classList.add(resolvedTheme);
 
-            root.classList.add(systemTheme);
-            return;
-        }
+        // Set data attribute for CSS variables
+        root.setAttribute('data-theme', resolvedTheme);
+    }, [theme, systemTheme]);
 
-        root.classList.add(theme);
-    }, [theme]);
+    const setTheme = (newTheme: Theme) => {
+        localStorage.setItem(storageKey, newTheme);
+        setThemeState(newTheme);
+        onThemeChange?.(newTheme);
+    };
+
+    const resolvedTheme = theme === 'system' ? systemTheme : theme;
 
     const value = {
         theme,
-        setTheme: (theme: Theme) => {
-            localStorage.setItem(storageKey, theme);
-            setTheme(theme);
-        },
+        setTheme,
+        resolvedTheme,
     };
 
     return (

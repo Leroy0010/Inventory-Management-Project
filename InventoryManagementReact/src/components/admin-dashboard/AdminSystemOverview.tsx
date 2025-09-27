@@ -1,5 +1,11 @@
 import { BarChart3 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '../ui/card';
 
 export default function AdminSystemOverview() {
     return (
@@ -13,36 +19,36 @@ export default function AdminSystemOverview() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                 Database
                             </span>
                         </div>
-                        <span className="text-sm text-green-600 font-medium">
+                        <span className="text-sm text-green-600 dark:text-green-400 font-medium">
                             Healthy
                         </span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                 API Services
                             </span>
                         </div>
-                        <span className="text-sm text-green-600 font-medium">
+                        <span className="text-sm text-green-600 dark:text-green-400 font-medium">
                             Running
                         </span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                 Authentication
                             </span>
                         </div>
-                        <span className="text-sm text-green-600 font-medium">
+                        <span className="text-sm text-green-600 dark:text-green-400 font-medium">
                             Active
                         </span>
                     </div>

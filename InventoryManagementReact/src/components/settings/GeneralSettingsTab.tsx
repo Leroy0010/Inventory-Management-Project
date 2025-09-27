@@ -15,8 +15,9 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Palette, Globe, Clock, Calendar, Save } from 'lucide-react';
+import { Palette, Globe, Clock, Calendar, Save, Monitor } from 'lucide-react';
 import type { GeneralSettings } from '@/types/settings';
+import { useTheme } from '@/hooks/useTheme';
 
 interface GeneralSettingsTabProps {
     settings: GeneralSettings;
@@ -29,6 +30,8 @@ export function GeneralSettingsTab({
     onUpdate,
     isLoading,
 }: GeneralSettingsTabProps) {
+    const { theme, setTheme, resolvedTheme } = useTheme();
+
     const timezones = [
         'America/New_York',
         'America/Chicago',
@@ -49,6 +52,12 @@ export function GeneralSettingsTab({
         { value: 'de', label: 'Deutsch' },
     ];
 
+    const themeOptions = [
+        { value: 'light', label: 'Light', icon: '☀️' },
+        { value: 'dark', label: 'Dark', icon: '🌙' },
+        { value: 'system', label: 'System', icon: '🖥️' },
+    ];
+
     return (
         <div className="space-y-6">
             {/* Appearance */}
@@ -67,23 +76,44 @@ export function GeneralSettingsTab({
                         <div className="space-y-2">
                             <Label htmlFor="theme">Theme</Label>
                             <Select
-                                value={settings.theme}
-                                onValueChange={(value) =>
-                                    onUpdate({ theme: value as any })
-                                }
+                                value={theme}
+                                onValueChange={(value) => {
+                                    const newTheme = value as
+                                        | 'light'
+                                        | 'dark'
+                                        | 'system';
+                                    setTheme(newTheme);
+                                    onUpdate({ theme: newTheme });
+                                }}
                                 disabled={isLoading}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select theme" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="light">Light</SelectItem>
-                                    <SelectItem value="dark">Dark</SelectItem>
-                                    <SelectItem value="system">
-                                        System
-                                    </SelectItem>
+                                    {themeOptions.map((option) => (
+                                        <SelectItem
+                                            key={option.value}
+                                            value={option.value}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span>{option.icon}</span>
+                                                <span>{option.label}</span>
+                                                {option.value === 'system' && (
+                                                    <span className="text-xs text-muted-foreground">
+                                                        ({resolvedTheme})
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
+                            <p className="text-xs text-muted-foreground">
+                                {theme === 'system'
+                                    ? `Following system preference (currently ${resolvedTheme})`
+                                    : `Using ${theme} theme`}
+                            </p>
                         </div>
 
                         <div className="space-y-2">

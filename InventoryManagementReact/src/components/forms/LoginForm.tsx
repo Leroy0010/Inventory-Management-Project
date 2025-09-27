@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { GoogleSignInButton } from './GoogleSignInButton';
+import { TwoFactorVerification } from '@/components/auth/TwoFactorVerification';
 
 // Validation schema
 const loginSchema = z.object({
@@ -34,6 +35,8 @@ interface LoginFormProps {
 
 export function LoginForm({ onSuccess, className }: LoginFormProps) {
     const [showPassword, setShowPassword] = useState(false);
+    const [showTwoFactor, setShowTwoFactor] = useState(false);
+    const [userEmail, setUserEmail] = useState('');
     const navigate = useNavigate();
 
     const { error, clearError } = useAuthStore();
@@ -53,14 +56,27 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
             clearError();
             // console.log('Starting login process...');
 
-            const user = await loginMutation.mutateAsync({
+            const response = await loginMutation.mutateAsync({
                 email: data.email,
                 password: data.password,
             });
 
-            login(user);
+            // Check if response indicates 2FA is required
+            if (
+                response &&
+                typeof response === 'object' &&
+                'requiresTwoFactor' in response
+            ) {
+                // 2FA is required
+                setUserEmail(data.email);
+                setShowTwoFactor(true);
+                return;
+            }
 
-            // console.log('Login successful, result:', user);
+            // Normal login successful
+            login(response);
+
+            // console.log('Login successful, result:', response);
 
             // Add a small delay to ensure all backend operations complete
             // This prevents race conditions with token cleanup
@@ -76,6 +92,33 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
             // Error is handled by the mutation
         }
     };
+
+    // Handle 2FA success
+    const handleTwoFactorSuccess = () => {
+        setShowTwoFactor(false);
+        if (onSuccess) {
+            onSuccess();
+        }
+    };
+
+    // Handle back to login
+    const handleBackToLogin = () => {
+        setShowTwoFactor(false);
+        setUserEmail('');
+        clearError();
+    };
+
+    // Show 2FA component if needed
+    if (showTwoFactor) {
+        return (
+            <TwoFactorVerification
+                email={userEmail}
+                onBack={handleBackToLogin}
+                onSuccess={handleTwoFactorSuccess}
+                className={className}
+            />
+        );
+    }
 
     return (
         <Card className={className}>

@@ -211,7 +211,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     },
     security: {
         twoFactorEnabled: false,
-        twoFactorMethod: 'none',
+        twoFactorMethod: 'email',
         sessionTimeout: 60,
         loginNotifications: true,
         passwordExpiry: 90,

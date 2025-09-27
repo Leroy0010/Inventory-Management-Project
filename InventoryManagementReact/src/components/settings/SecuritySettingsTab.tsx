@@ -52,11 +52,17 @@ export function SecuritySettingsTab({
             label: 'Email',
             description: 'Receive codes via email',
         },
-        { value: 'sms', label: 'SMS', description: 'Receive codes via SMS' },
+        {
+            value: 'sms',
+            label: 'SMS (Coming Soon)',
+            description: 'Receive codes via SMS - Not available yet',
+            disabled: true,
+        },
         {
             value: 'app',
-            label: 'Authenticator App',
-            description: 'Use authenticator app',
+            label: 'Authenticator App (Coming Soon)',
+            description: 'Use authenticator app - Not available yet',
+            disabled: true,
         },
     ];
 
@@ -133,9 +139,12 @@ export function SecuritySettingsTab({
                                             <SelectItem
                                                 key={method.value}
                                                 value={method.value}
+                                                disabled={method.disabled}
                                             >
                                                 <div>
-                                                    <div className="font-medium">
+                                                    <div
+                                                        className={`font-medium ${method.disabled ? 'text-muted-foreground' : ''}`}
+                                                    >
                                                         {method.label}
                                                     </div>
                                                     <div className="text-sm text-muted-foreground">

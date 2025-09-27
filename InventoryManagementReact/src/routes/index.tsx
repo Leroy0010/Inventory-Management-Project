@@ -36,7 +36,6 @@ import {
     UserReport,
 } from './lazyLoadPages.ts';
 
-
 // Loading component
 const PageLoader = () => (
     <div className="flex items-center justify-center min-h-screen">
@@ -146,7 +145,6 @@ const router = createBrowserRouter([
                     </Suspense>
                 ),
             },
-           
 
             // Storekeeper routes
             {

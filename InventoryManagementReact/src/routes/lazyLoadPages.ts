@@ -8,11 +8,11 @@ export const ForgotPassword = React.lazy(
 
 export const ResetPasswordForm = React.lazy(
     () => import('@/components/forms/ResetPasswordForm')
-)
+);
 
 export const ForgotPasswordForm = React.lazy(
     () => import('@/components/forms/ForgotPasswordForm')
-)
+);
 
 export const Unauthorized = React.lazy(() => import('@/pages/Unauthorized'));
 export const NotFound = React.lazy(() => import('@/pages/NotFound'));
@@ -41,7 +41,6 @@ export const AddDepartment = React.lazy(
 
 // Staff pages
 export const StaffCart = React.lazy(() => import('@/pages/staff/Cart'));
-
 
 // Storekeeper pages
 

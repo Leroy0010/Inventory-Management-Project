@@ -35,7 +35,7 @@ interface AdminStatsGridProps {
     stats: DashboardStats[];
 }
 
-export default function AdminStatsGrid({stats}: AdminStatsGridProps) {
+export default function AdminStatsGrid({ stats }: AdminStatsGridProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
@@ -43,13 +43,13 @@ export default function AdminStatsGrid({stats}: AdminStatsGridProps) {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                                     {stat.title}
                                 </p>
-                                <p className="text-2xl font-bold">
+                                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                                     {stat.value}
                                 </p>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                     {stat.change}
                                 </p>
                             </div>

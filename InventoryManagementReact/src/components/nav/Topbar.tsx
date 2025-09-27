@@ -11,31 +11,53 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useTheme } from '@/hooks/useTheme';
+import { useThemeTopbar } from '@/hooks/useThemeTopbar';
 import { useAuthStore } from '@/stores/authStore';
-import { LogOut, Menu, Moon, Settings, Sun, User } from 'lucide-react';
+import { LogOut, Menu, Moon, Settings, Sun, User, Monitor } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import {useAuthQueries} from "@/hooks/queries/useAuth";
-
+import { useAuthQueries } from '@/hooks/queries/useAuth';
 
 interface TopbarProps {
     onMenuToggle?: () => void;
     isSidebarCollapsed?: boolean;
 }
 
-export function Topbar({ onMenuToggle, isSidebarCollapsed = false }: TopbarProps) {
-    const { user} = useAuthStore();
-    const {logoutMutation} = useAuthQueries();
-    const { theme, setTheme } = useTheme();
+export function Topbar({
+    onMenuToggle,
+    isSidebarCollapsed = false,
+}: TopbarProps) {
+    const { user } = useAuthStore();
+    const { logoutMutation } = useAuthQueries();
+    const { theme, setTheme, resolvedTheme } = useThemeTopbar();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
             await logoutMutation.mutateAsync();
         } catch (error) {
-            // 
+            //
         }
-        
+    };
+
+    const cycleTheme = () => {
+        if (theme === 'light') {
+            setTheme('dark');
+        } else if (theme === 'dark') {
+            setTheme('system');
+        } else {
+            setTheme('light');
+        }
+    };
+
+    const getThemeIcon = () => {
+        if (theme === 'system') {
+            return <Monitor className="w-5 h-5" />;
+        }
+        return resolvedTheme === 'dark' ? (
+            <Sun className="w-5 h-5" />
+        ) : (
+            <Moon className="w-5 h-5" />
+        );
     };
 
     return (
@@ -47,7 +69,11 @@ export function Topbar({ onMenuToggle, isSidebarCollapsed = false }: TopbarProps
                     size="icon"
                     onClick={onMenuToggle}
                     className="text-slate-300 hover:text-white hover:bg-slate-600 md:hidden"
-                    aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                    aria-label={
+                        isSidebarCollapsed
+                            ? 'Expand sidebar'
+                            : 'Collapse sidebar'
+                    }
                 >
                     <Menu className="w-5 h-5" />
                 </Button>
@@ -68,9 +94,10 @@ export function Topbar({ onMenuToggle, isSidebarCollapsed = false }: TopbarProps
                     variant="ghost"
                     size="icon"
                     className="text-slate-300 hover:text-white hover:bg-slate-600"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    onClick={cycleTheme}
+                    title={`Current theme: ${theme}${theme === 'system' ? ` (${resolvedTheme})` : ''}`}
                 >
-                    {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                    {getThemeIcon()}
                 </Button>
 
                 {/* Cart */}
@@ -99,16 +126,28 @@ export function Topbar({ onMenuToggle, isSidebarCollapsed = false }: TopbarProps
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56">
                         <DropdownMenuLabel className="flex flex-col">
-                            <span className="font-medium">{user?.firstName} {user?.lastName}</span>
-                            <span className="text-xs text-slate-500">{user?.email}</span>
-                            <span className="text-xs text-slate-400 capitalize">{user?.role.toLowerCase()}</span>
+                            <span className="font-medium">
+                                {user?.firstName} {user?.lastName}
+                            </span>
+                            <span className="text-xs text-slate-500">
+                                {user?.email}
+                            </span>
+                            <span className="text-xs text-slate-400 capitalize">
+                                {user?.role.toLowerCase()}
+                            </span>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => navigate("/profile")} className="flex items-center gap-2">
+                        <DropdownMenuItem
+                            onClick={() => navigate('/profile')}
+                            className="flex items-center gap-2"
+                        >
                             <User className="w-4 h-4" />
                             <span>Profile</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate("/settings")} className="flex items-center gap-2">
+                        <DropdownMenuItem
+                            onClick={() => navigate('/settings')}
+                            className="flex items-center gap-2"
+                        >
                             <Settings className="w-4 h-4" />
                             <span>Settings</span>
                         </DropdownMenuItem>

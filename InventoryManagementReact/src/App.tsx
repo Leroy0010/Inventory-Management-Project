@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/components/theme-provider';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ThemeSync } from '@/components/ThemeSync';
 import { queryClient } from '@/lib/queryClient';
 import { useAuthInit } from './hooks/useAuthInit';
 
@@ -92,6 +93,7 @@ function AppContent() {
                 />
             }
         >
+            <ThemeSync />
             <Suspense fallback={<AppLoader />}>
                 <AppRouter />
             </Suspense>

@@ -66,10 +66,10 @@ export default function AdminQuickActions({
                                 })()}
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-400 group-hover:text-blue-600 transition-colors">
+                                <h3 className="font-semibold text-gray-400 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                     {action.title}
                                 </h3>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
                                     {action.description}
                                 </p>
                             </div>

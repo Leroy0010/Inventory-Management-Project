@@ -12,7 +12,25 @@ import { useSettings } from '../hooks/useSettings';
 export default function Settings() {
     const { user } = useAuthStore();
     const { hasPermission } = usePermissions();
-    const [activeTab, setActiveTab] = useState<SettingsCategory>('general');
+
+    // Get active tab from localStorage or default to 'general'
+    const [activeTab, setActiveTab] = useState<SettingsCategory>(() => {
+        const savedTab = localStorage.getItem(
+            'settings-active-tab'
+        ) as SettingsCategory;
+        return savedTab &&
+            [
+                'general',
+                'notifications',
+                'privacy',
+                'application',
+                'security',
+                'advanced',
+            ].includes(savedTab)
+            ? savedTab
+            : 'general';
+    });
+
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [saveStatus, setSaveStatus] = useState<
         'idle' | 'saving' | 'saved' | 'error'
@@ -45,19 +63,20 @@ export default function Settings() {
         }
     }, [isSaving, error, saveStatus]);
 
-    // Handle settings update with API integration
-    const handleSettingsUpdate = async (
+    // Handle tab change and save to localStorage
+    const handleTabChange = (tab: SettingsCategory) => {
+        setActiveTab(tab);
+        localStorage.setItem('settings-active-tab', tab);
+    };
+
+    // Handle settings update (local only)
+    const handleSettingsUpdate = (
         category: SettingsCategory,
         newSettings: Partial<any>
     ) => {
-        try {
-            await updateSettings(category, newSettings);
-            setHasUnsavedChanges(true);
-            setSaveStatus('idle');
-        } catch (err) {
-            console.error('Failed to update settings:', err);
-            setSaveStatus('error');
-        }
+        setHasUnsavedChanges(true);
+        setSaveStatus('idle');
+        updateSettings(category, newSettings);
     };
 
     // Handle save all settings
@@ -124,7 +143,7 @@ export default function Settings() {
             notifications: ['VIEW_SETTINGS'],
             privacy: ['VIEW_SETTINGS'],
             application: ['VIEW_SETTINGS'],
-            security: ['VIEW_SETTINGS', 'MANAGE_SECURITY'],
+            security: ['VIEW_SETTINGS'],
             advanced: ['VIEW_SETTINGS', 'MANAGE_ADVANCED'],
         };
         return permissions[category] || [];
@@ -163,7 +182,7 @@ export default function Settings() {
 
             <SettingsLayout
                 activeTab={activeTab}
-                onTabChange={setActiveTab}
+                onTabChange={handleTabChange}
                 settings={settings}
                 onSettingsUpdate={handleSettingsUpdate}
                 availableTabs={availableTabs}

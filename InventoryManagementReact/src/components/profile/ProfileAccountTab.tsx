@@ -9,6 +9,7 @@ import {
 import { Settings } from 'lucide-react';
 import { ProfileInfo } from './ProfileInfo';
 import type { UserProfile } from '@/types/profile';
+import { Link } from 'react-router-dom';
 
 interface ProfileAccountTabProps {
     profile: UserProfile;
@@ -41,7 +42,7 @@ export function ProfileAccountTab({ profile }: ProfileAccountTabProps) {
                         <div className="pt-4 border-t">
                             <p className="text-sm text-gray-500">
                                 For additional account settings or support,
-                                please contact your administrator.
+                                go to <Link to="/settings" className="hover:text-blue-500 text-blue-200">settings</Link>.
                             </p>
                         </div>
                     </CardContent>

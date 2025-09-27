@@ -24,7 +24,7 @@ export function useAuthQueries() {
         clearUser,
         setError,
         clearError,
-        logout
+        logout,
     } = useAuthStore();
 
     // Get current user profile
@@ -40,17 +40,22 @@ export function useAuthQueries() {
     const loginMutation = useMutation({
         mutationFn: (credentials: LoginRequest) => authApi.login(credentials),
         onSuccess: (data) => {
-            const user: User = {
-                id: data.id,
-                email: data.email,
-                firstName: data.firstName,
-                lastName: data.fullName,
-                fullName: data.firstName,
-                role: data.role,
-            };
+            // Check if response indicates 2FA is required
+            if (
+                data &&
+                typeof data === 'object' &&
+                'requiresTwoFactor' in data
+            ) {
+                // Return the 2FA response as-is for the component to handle
+                return data;
+            }
+
+            // Normal login successful - data is User type
+            const user = data as User;
             setUser(user);
             clearError();
             queryClient.invalidateQueries({ queryKey: authKeys.profile() });
+            return user;
         },
         onError: (error) => {
             console.error('Login mutation onError called:', error);
@@ -68,7 +73,6 @@ export function useAuthQueries() {
             setError({ type: 'LOGIN', message: errorMessage });
         },
     });
-
 
     // Refresh token mutation
     const refreshMutation = useMutation({
@@ -95,15 +99,15 @@ export function useAuthQueries() {
     const logoutMutation = useMutation({
         mutationFn: authApi.logout,
         onSuccess: () => {
-            clearUser()
-            logout()
+            clearUser();
+            logout();
             queryClient.clear();
         },
         onError: () => {
             // Even if logout fails on server, clear local state
-            
-            clearUser()
-            logout()
+
+            clearUser();
+            logout();
             queryClient.clear();
         },
     });

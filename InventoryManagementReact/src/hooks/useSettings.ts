@@ -11,23 +11,38 @@ export function useSettings() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isInitialized, setIsInitialized] = useState(false);
 
     // Load settings from API
     const loadSettings = useCallback(async () => {
+        if (isLoading || isInitialized) {
+            console.log('Settings already loading or initialized, skipping...');
+            return;
+        }
+
         try {
             setIsLoading(true);
             setError(null);
 
+            console.log('Loading settings from API...');
+
             // Check if user has settings first
             const hasSettings = await UserSettingsApi.hasUserSettings();
+            console.log('User has settings:', hasSettings);
 
             if (hasSettings) {
                 const apiSettings = await UserSettingsApi.getUserSettings();
-                setSettings(convertApiResponseToSettings(apiSettings));
+                console.log('API settings loaded:', apiSettings);
+                const convertedSettings =
+                    convertApiResponseToSettings(apiSettings);
+                console.log('Converted settings:', convertedSettings);
+                setSettings(convertedSettings);
             } else {
                 // User doesn't have settings, use defaults
+                console.log('No settings found, using defaults');
                 setSettings(DEFAULT_SETTINGS);
             }
+            setIsInitialized(true);
         } catch (err) {
             console.error('Error loading settings from API:', err);
             setError('Failed to load settings from server');
@@ -44,10 +59,11 @@ export function useSettings() {
                     localErr
                 );
             }
+            setIsInitialized(true);
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [isLoading, isInitialized]);
 
     // Save all settings to API
     const saveSettings = useCallback(async (newSettings: UserSettings) => {
@@ -82,48 +98,33 @@ export function useSettings() {
         }
     }, []);
 
-    // Update specific settings category
+    // Update specific settings category (local only - no API call)
     const updateSettings = useCallback(
-        async (category: keyof UserSettings, newSettings: Partial<any>) => {
+        (category: keyof UserSettings, newSettings: Partial<any>) => {
+            console.log(`Updating ${category} settings locally:`, newSettings);
+
+            // Update local state immediately for better UX
+            const updatedLocalSettings = {
+                ...settings,
+                [category]: {
+                    ...(settings[category] as any),
+                    ...newSettings,
+                },
+            };
+            console.log('Updated local settings:', updatedLocalSettings);
+            setSettings(updatedLocalSettings);
+
+            // Save to localStorage as backup
             try {
-                setIsSaving(true);
-                setError(null);
-
-                // Update local state immediately for better UX
-                setSettings((prev) => ({
-                    ...prev,
-                    [category]: { ...(prev[category] as any), ...newSettings },
-                }));
-
-                // Update via API
-                const updatedSettings =
-                    await UserSettingsApi.updateSettingsCategory(
-                        category,
-                        newSettings
-                    );
-                const convertedSettings =
-                    convertApiResponseToSettings(updatedSettings);
-                setSettings(convertedSettings);
-
-                // Also save to localStorage as backup
-                try {
-                    localStorage.setItem(
-                        'user-settings',
-                        JSON.stringify(convertedSettings)
-                    );
-                } catch (localErr) {
-                    console.warn('Failed to save to localStorage:', localErr);
-                }
-            } catch (err) {
-                console.error('Error updating settings:', err);
-                setError('Failed to update settings');
-                // Revert local state on error
-                loadSettings();
-            } finally {
-                setIsSaving(false);
+                localStorage.setItem(
+                    'user-settings',
+                    JSON.stringify(updatedLocalSettings)
+                );
+            } catch (localErr) {
+                console.warn('Failed to save to localStorage:', localErr);
             }
         },
-        [loadSettings]
+        [settings]
     );
 
     // Reset settings to defaults
@@ -204,6 +205,12 @@ export function useSettings() {
         []
     );
 
+    // Manual refresh function
+    const refreshSettings = useCallback(async () => {
+        setIsInitialized(false);
+        await loadSettings();
+    }, [loadSettings]);
+
     // Load settings on mount
     useEffect(() => {
         loadSettings();
@@ -214,7 +221,8 @@ export function useSettings() {
         isLoading,
         isSaving,
         error,
-        loadSettings,
+        isInitialized,
+        loadSettings: refreshSettings,
         saveSettings,
         updateSettings,
         resetSettings,
