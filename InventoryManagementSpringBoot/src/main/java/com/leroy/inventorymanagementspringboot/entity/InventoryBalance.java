@@ -52,6 +52,7 @@ public class InventoryBalance {
     @Getter
     @Setter
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private CostFlowMethod method;
 
     public InventoryBalance() {
