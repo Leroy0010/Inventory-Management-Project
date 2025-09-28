@@ -7,8 +7,8 @@ spring:
         password: ${SPRING_DATASOURCE_PASSWORD}
         driver-class-name: org.postgresql.Driver
         hikari:
-            maximum-pool-size: 5
-            minimum-idle: 2
+            maximum-pool-size: 3
+            minimum-idle: 1
             idle-timeout: 300000
             max-lifetime: 1200000
             connection-timeout: 20000
@@ -91,9 +91,9 @@ spring:
     task:
         execution:
             pool:
-                core-size: 2
-                max-size: 8
-                queue-capacity: 100
+                core-size: 1
+                max-size: 4
+                queue-capacity: 50
             thread-name-prefix: MailSender-
 
 # JWT Configuration for Production
@@ -130,12 +130,12 @@ server:
     http2:
         enabled: true
     tomcat:
-        max-connections: 2000
-        max-threads: 50
-        min-spare-threads: 5
+        max-connections: 1000
+        max-threads: 25
+        min-spare-threads: 3
         connection-timeout: 20000
-        max-http-form-post-size: 1MB
-        max-swallow-size: 1MB
+        max-http-form-post-size: 512KB
+        max-swallow-size: 512KB
 
 # Application Configuration
 app:
