@@ -22,6 +22,5 @@ databaseChangeLog:
       file: db/changelog/db.changelog-010-create-push-subscription-table.yaml
   - include:
       file: db/changelog/db.changelog-011-add-admin-user.yaml
-  - include:
-      file: db/changelog/db.changelog-012-alter-audit-log-table.yaml
+ 
 

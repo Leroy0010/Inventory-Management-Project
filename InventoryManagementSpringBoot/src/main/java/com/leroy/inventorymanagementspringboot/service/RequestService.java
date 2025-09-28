@@ -526,7 +526,7 @@ public class RequestService implements RequestServiceInterface {
      *                                  view the request.
      */
     @Override
-    public RequestResponseDto getRequestById(Long id, UserDetails userDetails) {
+    public RequestResponseDto getRequestById(Integer id, UserDetails userDetails) {
         // Retrieve the current authenticated user.
         User currentUser = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException("Current user not found."));

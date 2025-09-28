@@ -32,17 +32,14 @@ public class OfficeService implements OfficeServiceInterface {
     }
 
     @Transactional
-    @Auditable(
-            action = AuditAction.CREATE,
-            entityClass = Office.class
-    )
+    @Auditable(action = AuditAction.CREATE, entityClass = Office.class)
     @Override
     public Office addOffice(CreateOfficeDto office, UserDetails storeKeeper) {
 
         User user = userRepository.findByEmail(storeKeeper.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if(officeRepository.existsByNameAndDepartment(office.getName(), user.getDepartment())) {
+        if (officeRepository.existsByNameAndDepartment(office.getName(), user.getDepartment())) {
             throw new IllegalArgumentException("An office with that name already exists in your department.");
 
         }
@@ -64,11 +61,8 @@ public class OfficeService implements OfficeServiceInterface {
     }
 
     @Transactional
-    @Auditable(
-            action = AuditAction.UPDATE,
-            entityClass = Office.class
-    )
-    public Office updateOffice(int officeId, UpdateOfficeDto updateOfficeDto, UserDetails storeKeeper) {
+    @Auditable(action = AuditAction.UPDATE, entityClass = Office.class)
+    public Office updateOffice(Integer officeId, UpdateOfficeDto updateOfficeDto, UserDetails storeKeeper) {
         User user = userRepository.findByEmail(storeKeeper.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -81,8 +75,8 @@ public class OfficeService implements OfficeServiceInterface {
         }
 
         // Check if name is being changed and if new name already exists
-        if (!office.getName().equals(updateOfficeDto.getName()) && 
-            officeRepository.existsByNameAndDepartment(updateOfficeDto.getName(), user.getDepartment())) {
+        if (!office.getName().equals(updateOfficeDto.getName()) &&
+                officeRepository.existsByNameAndDepartment(updateOfficeDto.getName(), user.getDepartment())) {
             throw new IllegalArgumentException("An office with that name already exists in your department.");
         }
 
@@ -94,11 +88,8 @@ public class OfficeService implements OfficeServiceInterface {
     }
 
     @Transactional
-    @Auditable(
-            action = AuditAction.DELETE,
-            entityClass = Office.class
-    )
-    public void deleteOffice(int officeId, UserDetails storeKeeper) {
+    @Auditable(action = AuditAction.DELETE, entityClass = Office.class)
+    public void deleteOffice(Integer officeId, UserDetails storeKeeper) {
         User user = userRepository.findByEmail(storeKeeper.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -119,7 +110,7 @@ public class OfficeService implements OfficeServiceInterface {
         officeRepository.delete(office);
     }
 
-    public OfficeResponseDto getOfficeWithStaffCount(int officeId, UserDetails storeKeeper) {
+    public OfficeResponseDto getOfficeWithStaffCount(Integer officeId, UserDetails storeKeeper) {
         User user = userRepository.findByEmail(storeKeeper.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

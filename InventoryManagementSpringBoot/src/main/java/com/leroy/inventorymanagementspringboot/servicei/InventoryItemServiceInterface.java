@@ -13,13 +13,14 @@ import com.leroy.inventorymanagementspringboot.entity.InventoryItem;
 public interface InventoryItemServiceInterface {
     InventoryItem addInventoryItem(CreateInventoryItemDto createInventoryItemDto, UserDetails userDetails);
 
-    InventoryItem addInventoryItemWithImage(CreateInventoryItemDto createInventoryItemDto, MultipartFile image, UserDetails userDetails);
+    InventoryItem addInventoryItemWithImage(CreateInventoryItemDto createInventoryItemDto, MultipartFile image,
+            UserDetails userDetails);
 
-    InventoryItemResponseDto getInventoryItemById(long id, UserDetails userDetails);
+    InventoryItemResponseDto getInventoryItemById(Integer id, UserDetails userDetails);
 
-    InventoryItem updateInventoryItem(long id, UpdateInventoryItemDto inventoryItem, UserDetails userDetails);
+    InventoryItem updateInventoryItem(Integer id, UpdateInventoryItemDto inventoryItem, UserDetails userDetails);
 
     List<InventoryItemResponseDto> getItemsByDepartment(UserDetails userDetails);
 
-    void deleteInventoryItem(long id, UserDetails userDetails);
+    void deleteInventoryItem(Integer id, UserDetails userDetails);
 }

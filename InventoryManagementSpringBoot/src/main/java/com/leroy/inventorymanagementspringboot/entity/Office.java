@@ -1,4 +1,5 @@
 package com.leroy.inventorymanagementspringboot.entity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,13 +11,14 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
 @Table(name = "offices")
 public class Office {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(nullable = false)
     private String name;
@@ -28,22 +30,23 @@ public class Office {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "department_id",  nullable = false)
+    @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
     public Office(String name, Department department) {
-        this.name=name;
-        this.department=department;
+        this.name = name;
+        this.department = department;
     }
 
     public Office(String name, String location, String description, Department department) {
-        this.name=name;
-        this.location=location;
-        this.description=description;
-        this.department=department;
+        this.name = name;
+        this.location = location;
+        this.description = description;
+        this.department = department;
     }
 
-    public Office() {}
+    public Office() {
+    }
 
     @Override
     public String toString() {

@@ -23,7 +23,7 @@ import java.util.Optional;
 @RequestMapping("/api/offices")
 public class OfficeController {
 
-    private final OfficeService  officeService;
+    private final OfficeService officeService;
     private final UserRepository userRepository;
 
     public OfficeController(OfficeService officeService, UserRepository userRepository) {
@@ -33,7 +33,8 @@ public class OfficeController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<String> addOffice(@Valid @RequestBody CreateOfficeDto officeDto, @AuthenticationPrincipal UserDetails authenticatedUser) {
+    public ResponseEntity<String> addOffice(@Valid @RequestBody CreateOfficeDto officeDto,
+            @AuthenticationPrincipal UserDetails authenticatedUser) {
         officeService.addOffice(officeDto, authenticatedUser);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("Office created");
@@ -41,16 +42,18 @@ public class OfficeController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<List<OfficeResponseDto>> getAllOffices(@AuthenticationPrincipal UserDetails authenticatedUser) {
-        User user = userRepository.findByEmail(authenticatedUser.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    public ResponseEntity<List<OfficeResponseDto>> getAllOffices(
+            @AuthenticationPrincipal UserDetails authenticatedUser) {
+        User user = userRepository.findByEmail(authenticatedUser.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         List<OfficeResponseDto> offices = officeService.getOfficesByDepartment(user.getDepartment()).orElse(List.of());
-        
+
         // Add staff count for each office
         for (OfficeResponseDto office : offices) {
             long staffCount = userRepository.countByOfficeId(office.getId());
             office.setStaffCount((int) staffCount);
         }
-        
+
         return ResponseEntity.ok(offices);
     }
 
@@ -61,7 +64,8 @@ public class OfficeController {
             User storeKeeper = userRepository.findByEmail(authenticatedUser.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not not found"));
 
-            Optional<List<OfficeResponseDto>> offices = officeService.getOfficesByDepartment(storeKeeper.getDepartment());
+            Optional<List<OfficeResponseDto>> offices = officeService
+                    .getOfficesByDepartment(storeKeeper.getDepartment());
 
             if (offices.isEmpty()) {
                 return ResponseEntity.ok(List.of()); // Return an empty list if no offices are found
@@ -77,23 +81,27 @@ public class OfficeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of());
         }
     }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<OfficeResponseDto> getOfficeById(@PathVariable int id, @AuthenticationPrincipal UserDetails authenticatedUser) {
+    public ResponseEntity<OfficeResponseDto> getOfficeById(@PathVariable Integer id,
+            @AuthenticationPrincipal UserDetails authenticatedUser) {
         OfficeResponseDto office = officeService.getOfficeWithStaffCount(id, authenticatedUser);
         return ResponseEntity.ok(office);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<Office> updateOffice(@PathVariable int id, @Valid @RequestBody UpdateOfficeDto officeDto, @AuthenticationPrincipal UserDetails authenticatedUser) {
+    public ResponseEntity<Office> updateOffice(@PathVariable Integer id, @Valid @RequestBody UpdateOfficeDto officeDto,
+            @AuthenticationPrincipal UserDetails authenticatedUser) {
         Office office = officeService.updateOffice(id, officeDto, authenticatedUser);
         return ResponseEntity.ok(office);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<?> deleteOffice(@PathVariable int id, @AuthenticationPrincipal UserDetails authenticatedUser) {
+    public ResponseEntity<?> deleteOffice(@PathVariable Integer id,
+            @AuthenticationPrincipal UserDetails authenticatedUser) {
         officeService.deleteOffice(id, authenticatedUser);
         return ResponseEntity.ok().build();
     }

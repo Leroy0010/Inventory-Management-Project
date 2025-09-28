@@ -42,8 +42,7 @@ public class AuditAspect {
             OfficeRepository officeRepository,
             UserRepository userRepository,
             RoleRepository roleRepository,
-            StockTransactionRepository stockTransactionRepository
-    ) {
+            StockTransactionRepository stockTransactionRepository) {
         this.auditLogRepository = auditLogRepository;
         this.objectMapper = objectMapper;
         this.requestRepository = requestRepository;
@@ -68,7 +67,7 @@ public class AuditAspect {
         if (method.isAnnotationPresent(AuditableList.class)) {
             auditableAnnotations = method.getAnnotation(AuditableList.class).value();
         } else {
-            auditableAnnotations = new Auditable[]{method.getAnnotation(Auditable.class)};
+            auditableAnnotations = new Auditable[] { method.getAnnotation(Auditable.class) };
         }
 
         Object[] args = joinPoint.getArgs();
@@ -99,7 +98,6 @@ public class AuditAspect {
         return result;
     }
 
-
     private User extractUser(Object[] args) {
         return Arrays.stream(args)
                 .filter(arg -> arg instanceof User)
@@ -116,14 +114,15 @@ public class AuditAspect {
                 if (id != null) {
                     return fetchEntityById(entityClass, id);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         return null;
     }
 
     private Object fetchEntityById(Class<?> entityClass, Object id) {
         if (entityClass.equals(Request.class)) {
-            return requestRepository.findById((Long) id).orElse(null);
+            return requestRepository.findById((Integer) id).orElse(null);
         } else if (entityClass.equals(InventoryItem.class)) {
             return inventoryItemRepository.findById((Integer) id).orElse(null);
         } else if (entityClass.equals(InventoryBatch.class)) {
@@ -145,8 +144,10 @@ public class AuditAspect {
     }
 
     private Map<String, Object> toMap(Object obj) {
-        if (obj == null) return null;
-        return objectMapper.convertValue(obj, new TypeReference<>() {});
+        if (obj == null)
+            return null;
+        return objectMapper.convertValue(obj, new TypeReference<>() {
+        });
     }
 
     private long resolveEntityId(Object result) {

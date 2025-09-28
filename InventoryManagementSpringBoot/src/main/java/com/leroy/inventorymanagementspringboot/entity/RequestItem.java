@@ -5,14 +5,15 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
 @Table(name = "request_items")
 public class RequestItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Integer id;
 
     @JsonBackReference
     @ManyToOne
@@ -25,7 +26,8 @@ public class RequestItem {
 
     private int quantity;
 
-    public RequestItem() {}
+    public RequestItem() {
+    }
 
     @Override
     public String toString() {

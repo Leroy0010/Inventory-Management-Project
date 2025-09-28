@@ -19,5 +19,5 @@ public interface RequestServiceInterface {
 
     List<RequestResponseDto> getUserRequests(UserDetails userDetails);
 
-    RequestResponseDto getRequestById(Long id, UserDetails userDetails);
+    RequestResponseDto getRequestById(Integer id, UserDetails userDetails);
 }

@@ -1,26 +1,30 @@
 package com.leroy.inventorymanagementspringboot.entity;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 
 @Entity
 @Table(name = "roles")
 public class Role {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
-
-    @Getter @Setter
+    @Getter
+    @Setter
     @Column(nullable = false, unique = true)
     private String name;
 
-    public Role(String name) {this.name=name;}
+    public Role(String name) {
+        this.name = name;
+    }
 
-    public Role() {}
+    public Role() {
+    }
 
     @Override
     public String toString() {

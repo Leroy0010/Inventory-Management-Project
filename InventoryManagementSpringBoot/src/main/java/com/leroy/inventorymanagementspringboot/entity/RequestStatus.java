@@ -4,17 +4,19 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter @Getter
+@Setter
+@Getter
 @Entity
 @Table(name = "request_status")
 public class RequestStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     private String name;
 
-    public RequestStatus() {}
+    public RequestStatus() {
+    }
 
     @Override
     public String toString() {

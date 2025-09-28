@@ -8,25 +8,24 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
 @Table(name = "inventory_items")
 public class InventoryItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
-
-    @Column(unique = true,  nullable = false)
+    @Column(unique = true, nullable = false)
     private String name;
 
     private String description;
 
     private String unit;
 
-    @Column(name ="reorder_level")
+    @Column(name = "reorder_level")
     private int reorderLevel;
-
 
     private String imagePath;
 
@@ -38,10 +37,11 @@ public class InventoryItem {
     @OneToMany(mappedBy = "inventoryItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InventoryBatch> batches = new ArrayList<>();
 
+    public InventoryItem() {
+    }
 
-    public InventoryItem() {}
-
-    public InventoryItem(String name, String description, String unit, int reorderLevel, String imagePath, Department department) {
+    public InventoryItem(String name, String description, String unit, int reorderLevel, String imagePath,
+            Department department) {
         this.name = name;
         this.description = description;
         this.unit = unit;
@@ -50,7 +50,7 @@ public class InventoryItem {
         this.department = department;
     }
 
-    public InventoryItem(String name, String description, String unit, String imagePath,  Department department) {
+    public InventoryItem(String name, String description, String unit, String imagePath, Department department) {
         this.name = name;
         this.description = description;
         this.unit = unit;

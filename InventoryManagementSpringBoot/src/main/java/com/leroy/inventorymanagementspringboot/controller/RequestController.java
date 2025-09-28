@@ -18,6 +18,7 @@ import java.util.List;
 @RequestMapping("/api/requests")
 public class RequestController {
     private final RequestService requestService;
+
     public RequestController(RequestService requestService) {
         this.requestService = requestService;
     }
@@ -32,7 +33,8 @@ public class RequestController {
 
     @PutMapping("/approve")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<?> approveOrRejectRequest(@Valid @RequestBody ApproveRequestDto dto, @AuthenticationPrincipal UserDetails storekeeper) {
+    public ResponseEntity<?> approveOrRejectRequest(@Valid @RequestBody ApproveRequestDto dto,
+            @AuthenticationPrincipal UserDetails storekeeper) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(requestService.approveOrRejectRequest(dto, storekeeper));
@@ -40,7 +42,8 @@ public class RequestController {
 
     @PostMapping("/fulfil")
     @PreAuthorize("hasAuthority('STAFF')")
-    public ResponseEntity<?> fulfilRequest(@Valid @RequestBody RequestFulfilmentDto dto,@AuthenticationPrincipal UserDetails staff) {
+    public ResponseEntity<?> fulfilRequest(@Valid @RequestBody RequestFulfilmentDto dto,
+            @AuthenticationPrincipal UserDetails staff) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(requestService.fulfillRequest(dto, staff));
@@ -56,8 +59,10 @@ public class RequestController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('STAFF', 'STOREKEEPER')") // Adjust roles as needed
-    public ResponseEntity<RequestResponseDto> getRequestById(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
-        RequestResponseDto dto = requestService.getRequestById(id, userDetails); // Example: pass userDetails for access control
+    public ResponseEntity<RequestResponseDto> getRequestById(@PathVariable Integer id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        RequestResponseDto dto = requestService.getRequestById(id, userDetails); // Example: pass userDetails for access
+                                                                                 // control
         return ResponseEntity.ok(dto);
     }
 }

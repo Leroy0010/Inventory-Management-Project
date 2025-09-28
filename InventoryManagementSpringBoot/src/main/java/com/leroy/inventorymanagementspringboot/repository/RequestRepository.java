@@ -63,7 +63,7 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
             "statusHistory.status",
             "statusHistory.changedBy"
     })
-    Optional<Request> findById(Long id);
+    Optional<Request> findById(Integer id);
 
     /**
      * Fetches requests where the submitting user's department matches the given
@@ -128,13 +128,12 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     long countByUserAndCurrentStatus(@Param("user") User user,
             @Param("statusName") String statusName);
 
-    
     @Query("""
-        SELECT COUNT(r)
-        FROM Request r
-        JOIN r.requestStatus rs
-        WHERE r.user.office.department = :department AND rs.name = :statusName
-        """)
+            SELECT COUNT(r)
+            FROM Request r
+            JOIN r.requestStatus rs
+            WHERE r.user.office.department = :department AND rs.name = :statusName
+            """)
     long countByDepartmentAndCurrentStatus(@Param("department") Department department,
             @Param("statusName") String statusName);
 

@@ -39,8 +39,10 @@ public class InventoryItemController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<InventoryItem> addInventoryItem(@Valid @RequestBody CreateInventoryItemDto inventoryItem, @AuthenticationPrincipal UserDetails storekeeper) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(inventoryItemService.addInventoryItem(inventoryItem, storekeeper));
+    public ResponseEntity<InventoryItem> addInventoryItem(@Valid @RequestBody CreateInventoryItemDto inventoryItem,
+            @AuthenticationPrincipal UserDetails storekeeper) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(inventoryItemService.addInventoryItem(inventoryItem, storekeeper));
     }
 
     @PostMapping(value = "/with-image", consumes = "multipart/form-data")
@@ -52,27 +54,28 @@ public class InventoryItemController {
             @RequestParam("reorderLevel") int reorderLevel,
             @RequestParam(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal UserDetails storekeeper) {
-        
+
         CreateInventoryItemDto inventoryItem = new CreateInventoryItemDto();
         inventoryItem.setName(name);
         inventoryItem.setDescription(description);
         inventoryItem.setUnit(unit);
         inventoryItem.setReorderLevel(reorderLevel);
-        
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(inventoryItemService.addInventoryItemWithImage(inventoryItem, image, storekeeper));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<InventoryItem> updateInventoryItem(@Valid @RequestBody UpdateInventoryItemDto inventoryItem, @PathVariable long id, @AuthenticationPrincipal UserDetails storekeeper) {
-        return ResponseEntity.status(HttpStatus.OK).body(inventoryItemService.updateInventoryItem(id, inventoryItem, storekeeper));
+    public ResponseEntity<InventoryItem> updateInventoryItem(@Valid @RequestBody UpdateInventoryItemDto inventoryItem,
+            @PathVariable Integer id, @AuthenticationPrincipal UserDetails storekeeper) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(inventoryItemService.updateInventoryItem(id, inventoryItem, storekeeper));
     }
 
     @GetMapping("/get-all-department-names")
     @PreAuthorize("hasAnyAuthority('STOREKEEPER', 'STAFF')")
-    public ResponseEntity<List<String>> getInventoryItemNamesByDepartment(@AuthenticationPrincipal UserDetails user
-    ) {
+    public ResponseEntity<List<String>> getInventoryItemNamesByDepartment(@AuthenticationPrincipal UserDetails user) {
         List<String> itemNames = inventoryItemService
                 .getItemsByDepartment(user)
                 .stream()
@@ -82,30 +85,33 @@ public class InventoryItemController {
 
     @GetMapping("/get-all-department")
     @PreAuthorize("hasAnyAuthority('STOREKEEPER', 'STAFF')")
-    public ResponseEntity<List<InventoryItemResponseDto>> getInventoryItemsByDepartment(@AuthenticationPrincipal UserDetails user
-    ) {
+    public ResponseEntity<List<InventoryItemResponseDto>> getInventoryItemsByDepartment(
+            @AuthenticationPrincipal UserDetails user) {
         return ResponseEntity.status(HttpStatus.OK).body(inventoryItemService.getItemsByDepartment(user));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<String> deleteInventoryItem(@Valid @PathVariable long id ,@AuthenticationPrincipal UserDetails storekeeper) {
+    public ResponseEntity<String> deleteInventoryItem(@Valid @PathVariable Integer id,
+            @AuthenticationPrincipal UserDetails storekeeper) {
         inventoryItemService.deleteInventoryItem(id, storekeeper);
         return ResponseEntity.status(HttpStatus.OK).body("Item deleted");
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('STOREKEEPER', 'STAFF')")
-    public ResponseEntity<InventoryItemResponseDto> getInventoryItemById(@Valid @PathVariable long id,  @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<InventoryItemResponseDto> getInventoryItemById(@Valid @PathVariable Integer id,
+            @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(inventoryItemService.getInventoryItemById(id, userDetails));
     }
 
     @GetMapping("/get-item-name-id")
     @PreAuthorize("hasAuthority('STOREKEEPER')")
-    public ResponseEntity<List<InventoryItemNameAndIdResponseDto>> getInventoryItemNameAndId(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<InventoryItemNameAndIdResponseDto>> getInventoryItemNameAndId(
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
             return ResponseEntity.ok(inventoryItemService.getInventoryItemNameAndId(userDetails));
-        } catch (EntityNotFoundException exception){
+        } catch (EntityNotFoundException exception) {
             throw new EntityNotFoundException(exception.getMessage());
         }
     }

@@ -12,19 +12,19 @@ import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
 @Table(name = "cart_items")
 public class CartItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
-
 
     @Column(nullable = false)
     @Min(value = 1)
@@ -32,11 +32,12 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "item_id")
-    private InventoryItem  inventoryItem;
+    private InventoryItem inventoryItem;
 
-    public CartItem() {}
+    public CartItem() {
+    }
 
-    public CartItem(Cart cart, int quantity,  InventoryItem inventoryItem) {
+    public CartItem(Cart cart, int quantity, InventoryItem inventoryItem) {
         this.cart = cart;
         this.quantity = quantity;
         this.inventoryItem = inventoryItem;

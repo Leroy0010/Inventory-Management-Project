@@ -33,7 +33,7 @@ public class AuditLog {
     private String entityType;
 
     @Column(nullable = false, name = "entity_id")
-    private long entityId;
+    private Integer entityId;
 
     private String context;
 
