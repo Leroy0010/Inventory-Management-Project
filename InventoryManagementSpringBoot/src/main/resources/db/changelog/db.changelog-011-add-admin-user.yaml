@@ -1,0 +1,28 @@
+databaseChangeLog:
+    - changeSet:
+          id: 011-create-admin-user
+          author: Leroy
+          changes:
+              - insert:
+                  tableName: users
+                  columns:
+                    - column:
+                          name: first_name
+                          value: Dennis
+                    - column:
+                          name: last_name
+                          value: Leroy
+                    - column:
+                          name: email
+                          value: dennis.aidoo@stu.ucc.edu.gh
+                    - column:
+                          name: password
+                          value: password
+                    - column:
+                          name: role_id
+                          value: 1
+                    - column:
+                          name: active
+                          value: true
+                   
+                          
