@@ -1,26 +1,28 @@
 databaseChangeLog:
-  - include:
-      file: db/changelog/db.changelog-001-initial-schema.yaml
-  - include:
-      file: db/changelog/db.changelog-002-default-data.yaml
-  - include:
-     file: db/changelog/db.changelog-003-alter-tables.yaml
+    - include:
+          file: db/changelog/db.changelog-001-initial-schema.yaml
+    - include:
+          file: db/changelog/db.changelog-002-default-data.yaml
+    - include:
+          file: db/changelog/db.changelog-003-alter-tables.yaml
 
-  - include:
-      file: db/changelog/db.changelog-004-alter-request-table.yaml
-  - include:
-      file: db/changelog/db.changelog-005-refresh-tokens.yaml
-  - include:
-      file: db/changelog/db.changelog-006-user-report-optimizations.yaml
-  - include:
-      file: db/changelog/db.changelog-007-alter-inventory-batches-table.yaml
-  - include:
-      file: db/changelog/db.changelog-008-create-settings-table.yaml
-  - include:
-      file: db/changelog/db.changelog-009-settings-trigger-function.yaml
-  - include:
-      file: db/changelog/db.changelog-010-create-push-subscription-table.yaml
-  - include:
-      file: db/changelog/db.changelog-011-add-admin-user.yaml
- 
-
+    - include:
+          file: db/changelog/db.changelog-004-alter-request-table.yaml
+    - include:
+          file: db/changelog/db.changelog-005-refresh-tokens.yaml
+    - include:
+          file: db/changelog/db.changelog-006-user-report-optimizations.yaml
+    - include:
+          file: db/changelog/db.changelog-007-alter-inventory-batches-table.yaml
+    - include:
+          file: db/changelog/db.changelog-008-create-settings-table.yaml
+    - include:
+          file: db/changelog/db.changelog-009-settings-trigger-function.yaml
+    - include:
+          file: db/changelog/db.changelog-010-create-push-subscription-table.yaml
+    - include:
+          file: db/changelog/db.changelog-011-add-admin-user.yaml
+    - include:
+          file: db/changelog/db.changelog-012-alter-audit-log-table.yaml
+    - include:
+          file: db/changelog/db.changelog-013-fix-type-mismatches.yaml

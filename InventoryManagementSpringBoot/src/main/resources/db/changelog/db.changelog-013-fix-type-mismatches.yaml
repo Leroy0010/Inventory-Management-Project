@@ -1,0 +1,173 @@
+databaseChangeLog:
+    - changeSet:
+          id: 013-fix-type-mismatches
+          author: leroy
+          changes:
+              # Fix cart_items.cart_id to match carts.id (BIGINT)
+              # carts.id is BIGSERIAL (BIGINT), but cart_items.cart_id is INT
+              - modifyDataType:
+                    tableName: cart_items
+                    columnName: cart_id
+                    newDataType: BIGINT
+
+              # Fix cart_items.item_id to match inventory_items.id (INTEGER)
+              # inventory_items.id is SERIAL (INTEGER), cart_items.item_id is already INT
+              - modifyDataType:
+                    tableName: cart_items
+                    columnName: item_id
+                    newDataType: INTEGER
+
+              # Fix cart_items.id to match CartItem.id (INTEGER)
+              # CartItem.id is Integer, but cart_items.id is SERIAL (INTEGER) - this should be fine
+              # No change needed for cart_items.id
+
+              # Fix request_items.request_id to match requests.id (INTEGER)
+              # requests.id is SERIAL (INTEGER), request_items.request_id is already INT
+              - modifyDataType:
+                    tableName: request_items
+                    columnName: request_id
+                    newDataType: INTEGER
+
+              # Fix request_items.item_id to match inventory_items.id (INTEGER)
+              # inventory_items.id is SERIAL (INTEGER), request_items.item_id is already INT
+              - modifyDataType:
+                    tableName: request_items
+                    columnName: item_id
+                    newDataType: INTEGER
+
+              # Fix request_items.id to match RequestItem.id (INTEGER)
+              # RequestItem.id is Integer, request_items.id is SERIAL (INTEGER) - this should be fine
+              # No change needed for request_items.id
+
+              # Fix request_status_history.request_id to match requests.id (INTEGER)
+              # requests.id is SERIAL (INTEGER), request_status_history.request_id is already INT
+              - modifyDataType:
+                    tableName: request_status_history
+                    columnName: request_id
+                    newDataType: INTEGER
+
+              # Fix request_status_history.status_id to match request_status.id (INTEGER)
+              # request_status.id is SERIAL (INTEGER), request_status_history.status_id is already INT
+              - modifyDataType:
+                    tableName: request_status_history
+                    columnName: status_id
+                    newDataType: INTEGER
+
+              # Fix request_status_history.changed_by to match users.id (INTEGER)
+              # users.id is SERIAL (INTEGER), request_status_history.changed_by is already INT
+              - modifyDataType:
+                    tableName: request_status_history
+                    columnName: changed_by
+                    newDataType: INTEGER
+
+              # Fix inventory_issuance.requested_item_id to match request_items.id (INTEGER)
+              # request_items.id is SERIAL (INTEGER), inventory_issuance.requested_item_id is already INT
+              - modifyDataType:
+                    tableName: inventory_issuance
+                    columnName: requested_item_id
+                    newDataType: INTEGER
+
+              # Fix inventory_issuance.batch_id to match inventory_batches.id (BIGINT)
+              # inventory_batches.id is BIGSERIAL (BIGINT), inventory_issuance.batch_id is already INT
+              - modifyDataType:
+                    tableName: inventory_issuance
+                    columnName: batch_id
+                    newDataType: BIGINT
+
+              # Fix stock_transactions.item_id to match inventory_items.id (INTEGER)
+              # inventory_items.id is SERIAL (INTEGER), stock_transactions.item_id is already INT
+              - modifyDataType:
+                    tableName: stock_transactions
+                    columnName: item_id
+                    newDataType: INTEGER
+
+              # Fix stock_transactions.related_request_id to match requests.id (INTEGER)
+              # requests.id is SERIAL (INTEGER), stock_transactions.related_request_id is already INT
+              - modifyDataType:
+                    tableName: stock_transactions
+                    columnName: related_request_id
+                    newDataType: INTEGER
+
+              # Fix stock_transactions.batch_id to match inventory_batches.id (BIGINT)
+              # inventory_batches.id is BIGSERIAL (BIGINT), stock_transactions.batch_id is already INT
+              - modifyDataType:
+                    tableName: stock_transactions
+                    columnName: batch_id
+                    newDataType: BIGINT
+
+              # Fix stock_transactions.created_by to match users.id (INTEGER)
+              # users.id is SERIAL (INTEGER), stock_transactions.created_by is already INT
+              - modifyDataType:
+                    tableName: stock_transactions
+                    columnName: created_by
+                    newDataType: INTEGER
+
+              # Fix notifications.user_id to match users.id (INTEGER)
+              # users.id is SERIAL (INTEGER), notifications.user_id is already INT
+              - modifyDataType:
+                    tableName: notifications
+                    columnName: user_id
+                    newDataType: INTEGER
+
+              # Fix notifications.related_request_id to match requests.id (INTEGER)
+              # requests.id is SERIAL (INTEGER), notifications.related_request_id is already INT
+              - modifyDataType:
+                    tableName: notifications
+                    columnName: related_request_id
+                    newDataType: INTEGER
+
+              # Fix notifications.related_item_id to match inventory_items.id (INTEGER)
+              # inventory_items.id is SERIAL (INTEGER), notifications.related_item_id is already INT
+              - modifyDataType:
+                    tableName: notifications
+                    columnName: related_item_id
+                    newDataType: INTEGER
+
+              # Fix inventory_balances.item_id to match inventory_items.id (INTEGER)
+              # inventory_items.id is SERIAL (INTEGER), inventory_balances.item_id is already INT
+              - modifyDataType:
+                    tableName: inventory_balances
+                    columnName: item_id
+                    newDataType: INTEGER
+
+              # Fix inventory_balances.department_id to match departments.id (INTEGER)
+              # departments.id is SERIAL (INTEGER), inventory_balances.department_id is already INT
+              - modifyDataType:
+                    tableName: inventory_balances
+                    columnName: department_id
+                    newDataType: INTEGER
+
+              # Fix audit_log.user_id to match users.id (INTEGER)
+              # users.id is SERIAL (INTEGER), audit_log.user_id is already INT
+              - modifyDataType:
+                    tableName: audit_log
+                    columnName: user_id
+                    newDataType: INTEGER
+
+              # Fix audit_log.entity_id to match entity IDs (INTEGER)
+              # Most entity IDs are INTEGER, audit_log.entity_id is already INT
+              - modifyDataType:
+                    tableName: audit_log
+                    columnName: entity_id
+                    newDataType: INTEGER
+
+              # Fix refresh_tokens.user_id to match users.id (INTEGER)
+              # users.id is SERIAL (INTEGER), refresh_tokens.user_id is already INT
+              - modifyDataType:
+                    tableName: refresh_tokens
+                    columnName: user_id
+                    newDataType: INTEGER
+
+              # Fix user_settings.user_id to match users.id (INTEGER)
+              # users.id is SERIAL (INTEGER), user_settings.user_id is already INT
+              - modifyDataType:
+                    tableName: user_settings
+                    columnName: user_id
+                    newDataType: INTEGER
+
+              # Fix push_subscriptions.user_id to match users.id (INTEGER)
+              # users.id is SERIAL (INTEGER), push_subscriptions.user_id is already INT
+              - modifyDataType:
+                    tableName: push_subscriptions
+                    columnName: user_id
+                    newDataType: INTEGER
