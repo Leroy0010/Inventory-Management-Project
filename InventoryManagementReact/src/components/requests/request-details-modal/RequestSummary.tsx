@@ -1,3 +1,4 @@
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { RequestResponseDto, RequestStatus } from '@/types/request';
@@ -8,7 +9,7 @@ interface RequestSummaryProps {
     request: RequestResponseDto;
     formatDate: (dateString: string) => string;
     getStatusBadgeVariant: (status: RequestStatus) => StatusBadgeVariant;
-    getStatusIcon: (status: RequestStatus) => JSX.Element;
+    getStatusIcon: (status: RequestStatus) => React.JSX.Element;
 }
 
 export default function RequestSummary({

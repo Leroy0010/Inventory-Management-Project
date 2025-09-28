@@ -68,4 +68,4 @@ function VirtualizedListComponent<T>({
 
 export const VirtualizedList = memo(VirtualizedListComponent) as <T>(
   props: VirtualizedListProps<T>
-) => JSX.Element;
+) => React.JSX.Element;
