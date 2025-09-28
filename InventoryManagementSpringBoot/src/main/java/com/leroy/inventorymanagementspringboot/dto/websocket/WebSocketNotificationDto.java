@@ -14,7 +14,7 @@ public class WebSocketNotificationDto {
     private String message;
     private boolean isRead;
     private NotificationType type;
-    private Long requestId;
+    private Integer requestId;
     private Integer itemId;
     private LocalDateTime createdAt;
 }

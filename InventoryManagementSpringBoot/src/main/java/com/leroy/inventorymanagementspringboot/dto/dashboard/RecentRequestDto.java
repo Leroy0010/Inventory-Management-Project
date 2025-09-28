@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecentRequestDto {
-    private Long id;
+    private Integer id;
     private String staffName;
     private String itemName;
     private String status;

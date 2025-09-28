@@ -150,12 +150,16 @@ public class AuditAspect {
         });
     }
 
-    private long resolveEntityId(Object result) {
+    private Integer resolveEntityId(Object result) {
         try {
             Method getId = result.getClass().getMethod("getId");
-            return ((Number) getId.invoke(result)).longValue();
+            Object id = getId.invoke(result);
+            if (id instanceof Number) {
+                return ((Number) id).intValue();
+            }
+            return null;
         } catch (Exception e) {
-            return 0;
+            return null;
         }
     }
 }
