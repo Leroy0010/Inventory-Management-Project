@@ -36,7 +36,7 @@
 
 # Production Dockerfile
 
-# Multi-stage build for production
+# Dockerfile for Render deployment
 FROM openjdk:21-jdk-slim AS builder
 
 # Install Maven
@@ -48,45 +48,48 @@ WORKDIR /app
 # Copy pom.xml first for better layer caching
 COPY pom.xml .
 
-# Download dependencies (this layer will be cached if pom.xml doesn't change)
+# Download dependencies
 RUN mvn dependency:go-offline -B
 
 # Copy source code
 COPY src ./src
 
 # Build the application
-RUN mvn clean package -DskipTests -Pprod
+RUN mvn clean package -DskipTests
 
-# Production stage
-FROM openjdk:21-jre-slim
+# Production stage - use the same JDK image
+FROM openjdk:21-jdk-slim
 
-# Create non-root user for security
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 # Set working directory
 WORKDIR /app
 
-# Copy the JAR file from builder stage
+# Copy the JAR file
 COPY --from=builder /app/target/InventoryManagementSpringBoot-0.0.1-SNAPSHOT.jar app.jar
 
 # Create logs directory
 RUN mkdir -p logs && chown -R appuser:appuser logs
 
-# Change ownership of the app directory
+# Change ownership
 RUN chown -R appuser:appuser /app
 
 # Switch to non-root user
 USER appuser
 
-# Expose port
-EXPOSE 8080
+# Expose port (Render uses PORT environment variable)
+EXPOSE $PORT
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8080/actuator/health || exit 1
+    CMD curl -f http://localhost:$PORT/actuator/health || exit 1
 
-# JVM optimizations for production
-ENV JAVA_OPTS="-Xms512m -Xmx2048m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+OptimizeStringConcat -Djava.security.egd=file:/dev/./urandom"
+# JVM optimizations for Render
+ENV JAVA_OPTS="-Xms256m -Xmx1024m -XX:+UseG1GC -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom"
 
 # Run the application
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
