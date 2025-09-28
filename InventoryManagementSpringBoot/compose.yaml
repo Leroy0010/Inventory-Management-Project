@@ -4,8 +4,10 @@
 
 services:
     backend:
-        # Instead of 'image', we use 'build' to tell Docker Compose to build an image from your Dockerfile
-        build: . # This tells Docker Compose to look for a Dockerfile in the current directory (your project root)
+        # Use development Dockerfile for local development
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
         develop:
             watch:
                 - action: rebuild
@@ -17,6 +19,8 @@ services:
         volumes:
             - C:/run/secrets/credentials.json:/run/secrets/credentials.json:ro
             - ~/.m2:/root/.m2
+            # Mount source code for hot reload (optional)
+            - ./src:/app/src
         ports:
             - "8080:8080" # Maps port 8080 on your host to port 8080 in the container
         env_file:
