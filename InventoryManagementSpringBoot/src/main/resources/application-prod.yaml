@@ -115,13 +115,14 @@ jwt:
 
 # Server Configuration for Production
 server:
-    port: ${PORT:8080}
+    port: ${SERVER_PORT:8080}
     servlet:
         session:
             cookie:
                 same-site: Strict
                 secure: ${COOKIE_SECURE:true}
                 max-age: 1800 # 30 minutes
+        context-path: ${SERVER_CONTEXT_PATH:}
     compression:
         enabled: true
         mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json

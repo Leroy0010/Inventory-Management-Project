@@ -1,0 +1,9 @@
+databaseChangeLog:
+    - changeSet:
+      id: 012-fix-auditlog-entityid
+      author: leroy
+      changes:
+          - modifyDataType:
+                tableName: audit_log
+                columnName: entity_id
+                newDataType: BIGINT
