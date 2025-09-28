@@ -47,8 +47,8 @@ EXPOSE $PORT
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:$PORT/actuator/health || exit 1
 
-# JVM optimizations for Render (512MB limit) - Container-aware
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport -XX:+UseG1GC -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom -XX:+UseCompressedOops -XX:+UseCompressedClassPointers"
+# JVM optimizations for Render (512MB limit) - Ultra-aggressive
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=50.0 -XX:+UseContainerSupport -XX:+UseG1GC -XX:+UseStringDeduplication -Djava.security.egd=file:/dev/./urandom -XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XX:+UseStringDeduplication -XX:+OptimizeStringConcat"
 
 # Run the application
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
