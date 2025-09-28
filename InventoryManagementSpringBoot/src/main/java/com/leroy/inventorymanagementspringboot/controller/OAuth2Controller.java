@@ -23,8 +23,7 @@ public class OAuth2Controller {
         String googleAuthUrl = String.format(
                 "https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=email profile openid&access_type=offline",
                 googleClientId,
-                googleRedirectUri
-        );
+                googleRedirectUri);
 
         return ResponseEntity.ok(Map.of("authUrl", googleAuthUrl));
     }

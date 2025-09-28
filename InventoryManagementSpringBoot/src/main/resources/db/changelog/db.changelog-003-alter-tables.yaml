@@ -36,9 +36,3 @@ databaseChangeLog:
             tableName: inventory_items
             columnNames: name, department_id
             constraintName: uq_inventory_item
-
-        - sql:
-            sql : ALTER TABLE stock_transactions DROP CONSTRAINT transaction_type_enum
-
-        - sql:
-            sql: ALTER TABLE stock_transactions ADD CONSTRAINT transaction_type_enum CHECK (transaction_type IN ('RECEIVED', 'ISSUED'))

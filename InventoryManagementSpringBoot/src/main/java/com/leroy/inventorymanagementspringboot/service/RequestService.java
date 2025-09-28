@@ -500,7 +500,7 @@ public class RequestService implements RequestServiceInterface {
             requests = requestRepository.findRequestsForDepartment(storekeeperDepartment);
         } else {
             // For STAFF and other roles: Fetch requests submitted by themselves
-            requests = requestRepository.findByUser(user);
+            requests = requestRepository.findByUserOrderBySubmittedAtDesc(user);
         }
 
         // 3. Map the fetched Request entities to DTOs and return

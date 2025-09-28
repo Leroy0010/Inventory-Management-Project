@@ -21,7 +21,7 @@ spring:
         open-in-view: false
 
     liquibase:
-        change-log: classpath:/db/changelog/db.changelog-master.yaml
+        change-log: classpath:db/changelog/db.changelog-master.yaml
         enabled: true
     application:
         name: InventoryManagementSpringBoot
@@ -94,16 +94,29 @@ jwt:
         http-only: ${JWT_COOKIE_HTTP_ONLY:true}
         same-site: ${JWT_COOKIE_SAME_SITE:Strict}
 
+# Server Configuration for Production
 server:
     port: ${SERVER_PORT:8080}
     servlet:
         session:
             cookie:
-                same-site: LAX
-                # IMPORTANT: For Render (HTTPS), this should be 'true' in production.
-                # You can either set it here and remember to change it, or use an env var.
-                # Let's set it to true for Render's HTTPS environment.
+                same-site: Strict
                 secure: ${COOKIE_SECURE:true}
+                max-age: 1800 # 30 minutes
+        context-path: ${SERVER_CONTEXT_PATH:}
+    compression:
+        enabled: true
+        mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+        min-response-size: 1024
+    http2:
+        enabled: true
+    tomcat:
+        max-connections: 10000
+        max-threads: 200
+        min-spare-threads: 10
+        connection-timeout: 20000
+        max-http-form-post-size: 2MB
+        max-swallow-size: 2MB
 
 app:
     frontend:
@@ -117,8 +130,64 @@ google:
         root-folder-id: ${GOOGLE_DRIVE_FOLDER_ID}
 
 aws:
-  s3:
-    bucket-name: ${AWS_S3_BUCKET_NAME}
-    region: ${AWS_S3_REGION}
-    access-key: ${AWS_S3_ACCESS_KEY}
-    secret-key: ${AWS_S3_SECRET_KEY}
+    s3:
+        bucket-name: ${AWS_S3_BUCKET_NAME}
+        region: ${AWS_S3_REGION}
+        access-key: ${AWS_S3_ACCESS_KEY}
+        secret-key: ${AWS_S3_SECRET_KEY}
+
+# VAPID Keys for Push Notifications
+vapid:
+    private:
+        key: ${VAPID_PRIVATE_KEY:Unp26wQzoZWGzTGD_7o8Jjfve95oFRm5wt3jYS_hrZs}
+    public:
+        key: ${VAPID_PUBLIC_KEY:BEqA-s8JXB450K8KblHvwC0l2oOLviV7_zh8ntpmTzKoGv7vAASqTpbgoENGqLCL2wUrvSLopkLfOEabvH1XU_8}
+
+# Actuator Configuration for Production Monitoring
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health,info,metrics,prometheus
+            base-path: /actuator
+    endpoint:
+        health:
+            show-details: when-authorized
+            show-components: always
+    health:
+        db:
+            enabled: true
+        diskspace:
+            enabled: true
+    prometheus:
+        metrics:
+            export:
+                enabled: true
+    metrics:
+        distribution:
+            percentiles-histogram:
+                http.server.requests: true
+            percentiles:
+                http.server.requests: 0.5, 0.95, 0.99
+            slo:
+                http.server.requests: 50ms, 100ms, 200ms, 500ms
+
+# Logging Configuration for Production
+logging:
+    level:
+        root: INFO
+        com.leroy.inventorymanagementspringboot: INFO
+        org.springframework.security: WARN
+        org.springframework.web: WARN
+        org.hibernate.SQL: WARN
+        org.hibernate.type.descriptor.sql.BasicBinder: WARN
+        org.springframework.boot.autoconfigure: WARN
+        org.springframework.boot.actuate: INFO
+    pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+        file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file:
+        name: logs/app.log
+        max-size: 10MB
+        max-history: 30
+        total-size-cap: 1GB

@@ -1,76 +1,212 @@
-# Production Profile Configuration
 spring:
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-  
-  jpa:
-    hibernate:
-      ddl-auto: ${SPRING_JPA_DDL_AUTO:validate}
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: false
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+    profiles:
+        active: prod
+    datasource:
+        url: ${SPRING_DATASOURCE_URL}
+        username: ${SPRING_DATASOURCE_USERNAME}
+        password: ${SPRING_DATASOURCE_PASSWORD}
+        driver-class-name: org.postgresql.Driver
+        hikari:
+            maximum-pool-size: 20
+            minimum-idle: 5
+            idle-timeout: 300000
+            max-lifetime: 1200000
+            connection-timeout: 20000
+            leak-detection-threshold: 60000
 
-  devtools:
-    restart:
-      enabled: false
-    livereload:
-      enabled: false
+    jpa:
+        hibernate:
+            ddl-auto: validate
+        show-sql: false
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        properties:
+            hibernate:
+                format_sql: false
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+                jdbc:
+                    time_zone: UTC
+                # Production optimizations
+                jdbc.batch_size: 25
+                order_inserts: true
+                order_updates: true
+                batch_versioned_data: true
+                generate_statistics: false
+                query.in_clause_parameter_padding: true
+        open-in-view: false
 
-  mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enabled: true
-            required: true
-        test-connection: false  # Disable for production
+    liquibase:
+        change-log: classpath:db/changelog/db.changelog-master.yaml
+        enabled: true
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+    application:
+        name: InventoryManagementSpringBoot
+
+    # Disable dev tools in production
+    devtools:
+        restart:
+            enabled: false
+        livereload:
+            enabled: false
+
+    security:
+        oauth2:
+            client:
+                registration:
+                    google:
+                        client-id: ${GOOGLE_CLIENT_ID}
+                        client-secret: ${GOOGLE_CLIENT_SECRET}
+                        redirect-uri: ${GOOGLE_REDIRECT_URI}
+                        scope:
+                            - email
+                            - profile
+                            - openid
+                        authorization-grant-type: authorization_code
+                        client-name: Google
+                provider:
+                    google:
+                        authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+                        token-uri: https://oauth2.googleapis.com/token
+                        user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
+                        jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+                        user-name-attribute: email
+
+    mail:
+        host: ${MAIL_HOST:smtp.gmail.com}
+        port: ${MAIL_PORT:465}
+        username: ${MAIL_USERNAME}
+        password: ${MAIL_PASSWORD}
+        properties:
+            mail:
+                debug: false
+                smtp:
+                    auth: ${MAIL_SMTP_AUTH:true}
+                    starttls:
+                        enabled: ${MAIL_SMTP_STARTTLS_ENABLED:false}
+                        required: ${MAIL_SMTP_STARTTLS_REQUIRED:false}
+                    ssl:
+                        enable: true
+                        protocols: ${MAIL_SMTP_SSL_PROTOCOLS:TLSv1.2}
+                test-connection: false
+
+    task:
+        execution:
+            pool:
+                core-size: 4
+                max-size: 20
+                queue-capacity: 200
+            thread-name-prefix: MailSender-
 
 # JWT Configuration for Production
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION:86400000}  # 24 hours
-  refresh:
-    expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7 days
-  cookie:
-    secure: true
-    http-only: true
-    same-site: Strict
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:1800000} # 30 minutes
+    refresh:
+        expiration: ${JWT_REFRESH_EXPIRATION:7200000} # 2 hours
+        max-tokens-per-user: ${JWT_MAX_TOKENS_PER_USER:5}
+    cookie:
+        name: ${JWT_COOKIE_NAME:jwt}
+        refresh:
+            name: ${JWT_REFRESH_COOKIE_NAME:refreshToken}
+        domain: ${JWT_COOKIE_DOMAIN:}
+        path: ${JWT_COOKIE_PATH:/}
+        secure: ${JWT_COOKIE_SECURE:true}
+        http-only: ${JWT_COOKIE_HTTP_ONLY:true}
+        same-site: ${JWT_COOKIE_SAME_SITE:Strict}
 
 # Server Configuration for Production
 server:
-  port: ${SERVER_PORT:8080}
-  servlet:
-    session:
-      cookie:
-        secure: true  # HTTPS for production
-        same-site: Strict
+    port: ${SERVER_PORT:8080}
+    servlet:
+        session:
+            cookie:
+                same-site: Strict
+                secure: ${COOKIE_SECURE:true}
+                max-age: 1800 # 30 minutes
+        context-path: ${SERVER_CONTEXT_PATH:}
+    compression:
+        enabled: true
+        mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+        min-response-size: 1024
+    http2:
+        enabled: true
+    tomcat:
+        max-connections: 10000
+        max-threads: 200
+        min-spare-threads: 10
+        connection-timeout: 20000
+        max-http-form-post-size: 2MB
+        max-swallow-size: 2MB
 
-# Logging for Production
+# Application Configuration
+app:
+    frontend:
+        base-url: ${FRONTEND_BASE_URL}
+
+# Google Drive Configuration
+google:
+    drive:
+        credentials-classpath: ${GOOGLE_DRIVE_CREDENTIALS_CLASS_PATH}
+        root-folder-id: ${GOOGLE_DRIVE_FOLDER_ID}
+
+# AWS S3 Configuration
+aws:
+    s3:
+        bucket-name: ${AWS_S3_BUCKET_NAME}
+        region: ${AWS_S3_REGION}
+        access-key: ${AWS_S3_ACCESS_KEY}
+        secret-key: ${AWS_S3_SECRET_KEY}
+
+# VAPID Keys for Push Notifications
+vapid:
+    private:
+        key: ${VAPID_PRIVATE_KEY}
+    public:
+        key: ${VAPID_PUBLIC_KEY}
+
+# Actuator Configuration for Production Monitoring
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health,info,metrics,prometheus
+            base-path: /actuator
+    endpoint:
+        health:
+            show-details: when-authorized
+            show-components: always
+    health:
+        db:
+            enabled: true
+        diskspace:
+            enabled: true
+    metrics:
+        export:
+            prometheus:
+                enabled: true
+        distribution:
+            percentiles-histogram:
+                http.server.requests: true
+            percentiles:
+                http.server.requests: 0.5, 0.95, 0.99
+            slo:
+                http.server.requests: 50ms, 100ms, 200ms, 500ms
+
+# Logging Configuration for Production
 logging:
-  level:
-    com.leroy.inventorymanagementspringboot: ${LOG_LEVEL:INFO}
-    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
-    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:WARN}
-    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:WARN}
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: ${LOG_FILE_PATH:logs/app.log}
+    level:
+        root: INFO
+        com.leroy.inventorymanagementspringboot: INFO
+        org.springframework.security: WARN
+        org.springframework.web: WARN
+        org.hibernate.SQL: WARN
+        org.hibernate.type.descriptor.sql.BasicBinder: WARN
+        org.springframework.boot.autoconfigure: WARN
+        org.springframework.boot.actuate: INFO
+    pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+        file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file:
+        name: logs/app.log
+        max-size: 10MB
+        max-history: 30
+        total-size-cap: 1GB

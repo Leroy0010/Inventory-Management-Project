@@ -39,7 +39,7 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
             "statusHistory.status",
             "statusHistory.changedBy"
     })
-    List<Request> findByUser(User user);
+    List<Request> findByUserOrderBySubmittedAtDesc(User user);
 
     /**
      * Fetches a single request by its ID.
@@ -126,6 +126,16 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
             WHERE r.user = :user AND rs.name = :statusName
             """)
     long countByUserAndCurrentStatus(@Param("user") User user,
+            @Param("statusName") String statusName);
+
+    
+    @Query("""
+        SELECT COUNT(r)
+        FROM Request r
+        JOIN r.requestStatus rs
+        WHERE r.user.office.department = :department AND rs.name = :statusName
+        """)
+    long countByDepartmentAndCurrentStatus(@Param("department") Department department,
             @Param("statusName") String statusName);
 
     // User Activity Report methods

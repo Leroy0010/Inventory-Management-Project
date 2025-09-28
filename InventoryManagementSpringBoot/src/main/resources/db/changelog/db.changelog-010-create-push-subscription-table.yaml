@@ -1,0 +1,53 @@
+databaseChangeLog:
+    - changeSet:
+          id: 010-create-push-subscription
+          author: Leroy
+          changes:
+              - createTable:
+                    tableName: push_subscriptions
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGSERIAL
+                              constraints:
+                                  primaryKey: true
+                        - column:
+                              name: user_id
+                              type: INTEGER
+                              constraints:
+                                  nullable: false
+                                  foreignKeyName: fk_push_subscription_user
+                                  references: users(id)
+                                  deleteCascade: true
+                        - column:
+                              name: endpoint
+                              type: VARCHAR(500)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: p256dh_key
+                              type: VARCHAR(200)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: auth_key
+                              type: VARCHAR(200)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: created_at
+                              type: TIMESTAMP
+                              constraints:
+                                  nullable: false
+                              defaultValueComputed: CURRENT_TIMESTAMP
+                        - column:
+                              name: updated_at
+                              type: TIMESTAMP
+                              constraints:
+                                  nullable: true
+                        - column:
+                              name: is_active
+                              type: BOOLEAN
+                              constraints:
+                                  nullable: false
+                              defaultValue: true

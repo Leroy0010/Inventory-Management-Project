@@ -18,4 +18,6 @@ databaseChangeLog:
       file: db/changelog/db.changelog-008-create-settings-table.yaml
   - include:
       file: db/changelog/db.changelog-009-settings-trigger-function.yaml
+  - include:
+      file: db/changelog/db.changelog-010-create-push-subscription-table.yaml
 

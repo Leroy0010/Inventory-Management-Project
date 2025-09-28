@@ -150,7 +150,7 @@ public class DashboardService implements DashboardServiceInterface {
                 : 0;
 
         // Get pending requests for this storekeeper
-        long pendingRequests = requestRepository.countByStatusNameAndApprover("PENDING", user);
+        long pendingRequests = requestRepository.countByDepartmentAndCurrentStatus( department, "PENDING");
 
         // Get department staff count (users in same department)
         long departmentStaff = department != null ? userRepository.countByDepartmentIncludingOffice(department) : 0;
@@ -262,7 +262,7 @@ public class DashboardService implements DashboardServiceInterface {
         int cartTotal = cartItems.stream().mapToInt(CartItem::getQuantity).sum();
 
         // Get user's request counts
-        long pendingRequests = requestRepository.countByUserAndStatusName(user, "PENDING");
+        long pendingRequests = requestRepository.countByUserAndCurrentStatus(user, "PENDING");
         long approvedRequests = requestRepository.countByUserAndStatusName(user, "APPROVED");
 
         // Get recent requests for staff dashboard (user's own requests)
