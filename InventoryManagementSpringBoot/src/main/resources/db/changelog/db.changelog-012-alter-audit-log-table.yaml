@@ -1,5 +1,5 @@
 databaseChangeLog:
-    - changeSet:
+  - changeSet:
       id: 012-fix-auditlog-entityid
       author: leroy
       changes:
