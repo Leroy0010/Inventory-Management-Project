@@ -90,8 +90,16 @@ export function useNotificationPermission() {
                     const subscription =
                         await serviceWorkerManager.subscribeToPush();
                     if (subscription) {
-                        await serviceWorkerManager.sendSubscriptionToServer();
-                        setIsPushSubscribed(true);
+                        const serverSuccess =
+                            await serviceWorkerManager.sendSubscriptionToServer();
+                        if (serverSuccess) {
+                            setIsPushSubscribed(true);
+                        } else {
+                            console.error(
+                                'Failed to send subscription to server'
+                            );
+                            setError('Failed to send subscription to server');
+                        }
                     }
 
                     toast({

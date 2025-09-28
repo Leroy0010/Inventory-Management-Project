@@ -6,13 +6,17 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc -b && vite build",
+        "build:prod": "NODE_ENV=production tsc -b && vite build --mode production",
         "build:optimized": "tsc -b && vite build && node scripts/optimize-css.js",
         "lint": "eslint .",
         "preview": "vite preview",
         "format": "prettier --write .",
         "prepare": "husky",
         "optimize:css": "node scripts/optimize-css.js",
-        "analyze:css": "node scripts/analyze-css.js"
+        "analyze:css": "node scripts/analyze-css.js",
+        "docker:build": "docker build -t inventory-management-frontend .",
+        "docker:run": "docker run -p 3000:80 inventory-management-frontend",
+        "deploy:prod": "npm run build:prod && npm run docker:build"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.2.1",

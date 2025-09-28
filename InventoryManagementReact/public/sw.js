@@ -80,26 +80,64 @@ self.addEventListener('push', (event) => {
 // Notification click event
 self.addEventListener('notificationclick', (event) => {
     console.log('Notification clicked:', event);
+    console.log('Notification data:', event.notification.data);
 
     event.notification.close();
 
-    const urlToOpen = event.notification.data?.url || '/notifications';
+    // Get the URL from notification data, with better fallback logic
+    let urlToOpen = '/notifications'; // Default fallback
+
+    if (event.notification.data) {
+        // Check for specific notification types and their URLs
+        if (event.notification.data.type === 'request') {
+            if (event.notification.data.requestId) {
+                urlToOpen = `/requests/${event.notification.data.requestId}`;
+            } else {
+                urlToOpen = '/requests';
+            }
+        } else if (event.notification.data.type === 'inventory') {
+            urlToOpen = '/inventory';
+        } else if (event.notification.data.type === 'cart') {
+            urlToOpen = '/cart';
+        } else if (event.notification.data.url) {
+            urlToOpen = event.notification.data.url;
+        }
+    }
+
+    console.log('Opening URL:', urlToOpen);
 
     event.waitUntil(
         clients
             .matchAll({ type: 'window', includeUncontrolled: true })
             .then((clientList) => {
-                // Check if there's already a window/tab open with the target URL
+                console.log('Found clients:', clientList.length);
+
+                // Check if there's already a window/tab open
                 for (const client of clientList) {
-                    if (client.url.includes(urlToOpen) && 'focus' in client) {
-                        return client.focus();
+                    console.log('Checking client URL:', client.url);
+                    if (
+                        client.url.includes(self.location.origin) &&
+                        'focus' in client
+                    ) {
+                        console.log('Focusing existing client');
+                        // Navigate the existing client to the new URL
+                        return client
+                            .postMessage({
+                                type: 'NAVIGATE',
+                                url: urlToOpen,
+                            })
+                            .then(() => client.focus());
                     }
                 }
 
                 // If no existing window, open a new one
+                console.log('Opening new window');
                 if (clients.openWindow) {
-                    return clients.openWindow(urlToOpen);
+                    return clients.openWindow(self.location.origin + urlToOpen);
                 }
+            })
+            .catch((error) => {
+                console.error('Error handling notification click:', error);
             })
     );
 });

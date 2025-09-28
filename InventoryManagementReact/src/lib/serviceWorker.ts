@@ -25,6 +25,12 @@ export class ServiceWorkerManager {
             return false;
         }
 
+        // Check if already registered
+        if (this.registration) {
+            console.log('Service Worker already registered');
+            return true;
+        }
+
         try {
             this.registration =
                 await navigator.serviceWorker.register('/sw.js');
@@ -76,12 +82,14 @@ export class ServiceWorkerManager {
             }
 
             // Subscribe to push notifications
+            const vapidKey =
+                import.meta.env.VITE_VAPID_PUBLIC_KEY ||
+                'BEqA-s8JXB450K8KblHvwC0l2oOLviV7_zh8ntpmTzKoGv7vAASqTpbgoENGqLCL2wUrvSLopkLfOEabvH1XU_8';
+            const applicationServerKey = this.urlBase64ToUint8Array(vapidKey);
+
             this.subscription = await this.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: this.urlBase64ToUint8Array(
-                    process.env.VITE_VAPID_PUBLIC_KEY ||
-                        'BEqA-s8JXB450K8KblHvwC0l2oOLviV7_zh8ntpmTzKoGv7vAASqTpbgoENGqLCL2wUrvSLopkLfOEabvH1XU_8'
-                ),
+                applicationServerKey: applicationServerKey as BufferSource,
             });
 
             console.log('Subscribed to push notifications:', this.subscription);
@@ -177,7 +185,7 @@ export class ServiceWorkerManager {
         for (let i = 0; i < rawData.length; ++i) {
             outputArray[i] = rawData.charCodeAt(i);
         }
-        return outputArray;
+        return outputArray as Uint8Array;
     }
 
     private getCurrentUserId(): number | null {

@@ -1,0 +1,16 @@
+services:
+    - type: web
+      name: inventory-management-frontend
+      env: node
+      plan: free
+      buildCommand: npm ci && npm run build
+      startCommand: npm run preview
+      envVars:
+          - key: VITE_API_BASE_URL
+            value: https://your-backend-url.onrender.com/api
+          - key: NODE_ENV
+            value: production
+          - key: VITE_APP_NAME
+            value: Inventory Management System
+          - key: VITE_APP_VERSION
+            value: 1.0.0
