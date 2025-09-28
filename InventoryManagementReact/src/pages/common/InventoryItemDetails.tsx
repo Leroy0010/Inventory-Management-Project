@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
+import {
+    useInventoryItem,
+    useDeleteInventoryItem,
+} from '@/hooks/queries/useInventoryItems';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 import { InventoryItemDetailsHeader } from '@/components/inventory-item-details/InventoryItemDetailsHeader';
@@ -15,8 +18,8 @@ export default function InventoryItemDetails() {
     const { user } = useAuthStore();
     const [isInCart, setIsInCart] = useState(false);
 
-    const { useItemQuery, deleteItemMutation } = useInventoryItemQueries();
-    const itemQuery = useItemQuery(Number(id));
+    const itemQuery = useInventoryItem(Number(id));
+    const deleteItemMutation = useDeleteInventoryItem();
 
     // Determine if user is storekeeper
     const isStorekeeper = user?.role === 'STOREKEEPER';

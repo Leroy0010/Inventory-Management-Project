@@ -34,7 +34,7 @@ export function EnhancedSidebarNavigation({
     canAccess,
 }: EnhancedSidebarNavigationProps) {
     return (
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto !no-scrollbar">
             {navGroups.map((group) => (
                 <EnhancedSidebarNavGroup
                     key={group.label}

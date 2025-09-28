@@ -96,7 +96,8 @@ export function NotificationProvider({
     children: React.ReactNode;
 }) {
     const [state, dispatch] = useReducer(notificationReducer, initialState);
-    const { connectionState } = useWebSocketNotification();
+    const { connectionState, unreadCount: wsUnreadCount } =
+        useWebSocketNotification();
     const queryClient = useQueryClient();
 
     // Update connection state in context
@@ -141,6 +142,7 @@ export function NotificationProvider({
     const value: NotificationContextType = {
         ...state,
         isConnected: connectionState.connected,
+        unreadCount: wsUnreadCount, // Use WebSocket unread count
         addNotification,
         removeNotification,
         markAsRead,

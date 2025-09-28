@@ -1,6 +1,6 @@
 import { useAdminDashboard } from '@/hooks/queries/useDashboard';
 import { useUnreadCount } from '@/hooks/queries/useNotification';
-import { useGetProfile } from '@/hooks/queries/useProfile';
+import { useProfile } from '@/hooks/queries/useAuth';
 import { useAuthStore } from '@/stores/authStore';
 import { AlertTriangle } from 'lucide-react';
 import AdminNotificationSummary from '../admin-dashboard/AdminNotificationSummary';
@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 
 export function AdminDashboard() {
     const { user } = useAuthStore();
-    const { data: profile } = useGetProfile();
+    const { data: profile } = useProfile();
     const { data: unreadCount = 0 } = useUnreadCount();
     const { data: dashboardData, isLoading, error } = useAdminDashboard();
     const navigate = useNavigate();

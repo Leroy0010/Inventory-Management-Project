@@ -20,6 +20,7 @@ import {
     Login,
     NotFound,
     Notifications,
+    NotificationTest,
     Office,
     OfficeDetails,
     Profile,
@@ -365,6 +366,16 @@ const router = createBrowserRouter([
                     <Suspense fallback={<PageLoader />}>
                         <ProtectedRoute>
                             <Notifications />
+                        </ProtectedRoute>
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'notification-test',
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <ProtectedRoute>
+                            <NotificationTest />
                         </ProtectedRoute>
                     </Suspense>
                 ),

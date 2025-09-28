@@ -53,7 +53,10 @@ export class StompNotificationClient {
 
                     // Flush any pending subscriptions
                     this.pendingSubscriptions.forEach((sub) => {
-                        const s = this.client!.subscribe(sub.destination, sub.handler);
+                        const s = this.client!.subscribe(
+                            sub.destination,
+                            sub.handler
+                        );
                         this.subscriptions.set(sub.id, s);
                     });
                     this.pendingSubscriptions = [];
@@ -61,13 +64,17 @@ export class StompNotificationClient {
                     resolve();
                 },
                 onStompError: (frame) => {
-                    console.error("❌ STOMP Error:", frame);
+                    console.error('❌ STOMP Error:', frame);
                     this.isConnected = false;
                     this.config.onStompError?.(frame);
-                    reject(new Error(frame.headers.message || "STOMP connection failed"));
+                    reject(
+                        new Error(
+                            frame.headers.message || 'STOMP connection failed'
+                        )
+                    );
                 },
                 onWebSocketError: (error) => {
-                    console.error("❌ WebSocket Error:", error);
+                    console.error('❌ WebSocket Error:', error);
                     this.isConnected = false;
                     this.config.onWebSocketError?.(error);
                     this.handleReconnect();
@@ -105,21 +112,37 @@ export class StompNotificationClient {
         onNotification: (notification: WebSocketNotification) => void
     ): string {
         const destination = `/topic/notifications/user-${userId}`;
-        const id = `user-${userId}-${Date.now()}`;
+        const id = `user-${userId}`;
+
+        // Check if already subscribed to this user
+        if (this.subscriptions.has(id)) {
+            console.log(
+                '⚠️ Already subscribed to user notifications for user:',
+                userId
+            );
+            return id;
+        }
+
         const handler = (message: IMessage) => {
             try {
-                const notification: WebSocketNotification = JSON.parse(message.body);
+                const notification: WebSocketNotification = JSON.parse(
+                    message.body
+                );
                 onNotification(notification);
             } catch (error) {
-                console.error("Error parsing notification:", error);
+                console.error('Error parsing notification:', error);
             }
         };
 
         if (this.client && this.isConnected) {
+            console.log('📡 Subscribing to user notifications:', destination);
             const s = this.client.subscribe(destination, handler);
             this.subscriptions.set(id, s);
         } else {
-            // console.log("⏳ Connection not ready, queueing subscription:", destination);
+            console.log(
+                '⏳ Connection not ready, queueing subscription:',
+                destination
+            );
             this.pendingSubscriptions.push({ destination, handler, id });
         }
 
@@ -165,7 +188,6 @@ export function getStompClient(): StompNotificationClient {
     }
     return stompClient;
 }
-
 
 export function destroyStompClient(): void {
     if (stompClient) {

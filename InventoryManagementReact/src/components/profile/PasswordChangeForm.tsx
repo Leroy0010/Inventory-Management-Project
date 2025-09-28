@@ -14,7 +14,7 @@ import {
 import { Lock, Eye, EyeOff, Shield, Loader2 } from 'lucide-react';
 import { updatePasswordSchema } from '@/types/profile';
 import type { UpdatePasswordFormData, PasswordStrength } from '@/types/profile';
-import { useChangePassword } from '@/hooks/queries/useProfile';
+import { useChangePassword } from '@/hooks/queries/useAuth';
 import {
     validatePasswordStrength,
     getPasswordStrengthColor,
@@ -68,7 +68,10 @@ export function PasswordChangeForm({
 
     const onSubmit = async (data: UpdatePasswordFormData) => {
         try {
-            await changePasswordMutation.mutateAsync(data);
+            await changePasswordMutation.mutateAsync({
+                currentPassword: data.oldPassword,
+                newPassword: data.newPassword,
+            });
             reset();
             setPasswordStrength('Very Weak');
             onSuccess?.();

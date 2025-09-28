@@ -1,4 +1,8 @@
-import { useDepartmentQueries } from '@/hooks/queries/useDepartments';
+import {
+    useDepartmentsAdmin,
+    useUpdateDepartment,
+    useDeleteDepartment,
+} from '@/hooks/queries/useDepartments';
 import { usePermissions } from '@/hooks/usePermissions';
 import type { DepartmentResponseDto } from '@/types/department';
 import { useState } from 'react';
@@ -23,7 +27,9 @@ export default function Departments() {
     });
 
     // Department queries
-    const { departmentsQueryAdmin } = useDepartmentQueries();
+    const departmentsQueryAdmin = useDepartmentsAdmin();
+    const updateDepartmentMutation = useUpdateDepartment();
+    const deleteDepartmentMutation = useDeleteDepartment();
     const departments = departmentsQueryAdmin.data || [];
     const isLoading = departmentsQueryAdmin.isLoading;
     const error = departmentsQueryAdmin.error;
@@ -55,17 +61,30 @@ export default function Departments() {
         setIsEditDialogOpen(true);
     };
 
-    const handleUpdateDepartment = () => {
-        // TODO: Implement API call
-        // Updating department
-        setIsEditDialogOpen(false);
-        setEditingDepartment(null);
-        setFormData({ name: '', description: '' });
+    const handleUpdateDepartment = async () => {
+        if (!editingDepartment) return;
+
+        try {
+            await updateDepartmentMutation.mutateAsync({
+                id: editingDepartment.id,
+                name: formData.name,
+            });
+            setIsEditDialogOpen(false);
+            setEditingDepartment(null);
+            setFormData({ name: '', description: '' });
+        } catch (error) {
+            // Error is handled by the mutation's onError callback
+            console.error('Failed to update department:', error);
+        }
     };
 
-    const handleDeleteDepartment = (departmentId: number) => {
-        // TODO: Implement API call
-        // Deleting department
+    const handleDeleteDepartment = async (departmentId: number) => {
+        try {
+            await deleteDepartmentMutation.mutateAsync(departmentId);
+        } catch (error) {
+            // Error is handled by the mutation's onError callback
+            console.error('Failed to delete department:', error);
+        }
     };
 
     if (isLoading) {

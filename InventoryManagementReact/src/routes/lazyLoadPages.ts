@@ -24,6 +24,9 @@ export const RequestDetails = React.lazy(
 export const SendMessage = React.lazy(() => import('@/pages/SendMessage'));
 export const Settings = React.lazy(() => import('@/pages/Settings'));
 export const Notifications = React.lazy(() => import('@/pages/Notifications'));
+export const NotificationTest = React.lazy(
+    () => import('@/pages/NotificationTest')
+);
 export const Dashboard = React.lazy(() => import('@/pages/common/Dashboard'));
 export const Requests = React.lazy(() => import('@/pages/common/Requests'));
 

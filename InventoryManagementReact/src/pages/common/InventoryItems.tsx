@@ -1,5 +1,8 @@
 import { useState, useMemo, memo, useCallback } from 'react';
-import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
+import {
+    useInventoryItems,
+    useDeleteInventoryItem,
+} from '@/hooks/queries/useInventoryItems';
 import { useNavigate } from 'react-router-dom';
 import {
     Card,
@@ -35,7 +38,8 @@ const InventoryItems = memo(function InventoryItems() {
         useState<InventoryItemResponseDto | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-    const { itemsQuery, deleteItemMutation } = useInventoryItemQueries();
+    const itemsQuery = useInventoryItems();
+    const deleteItemMutation = useDeleteInventoryItem();
     const { addItemMutation } = useCartQueries(user?.role === 'STAFF');
 
     // Determine if user is storekeeper
@@ -46,7 +50,7 @@ const InventoryItems = memo(function InventoryItems() {
         if (!itemsQuery.data) return [];
 
         return itemsQuery.data.filter(
-            (item) =>
+            (item: any) =>
                 item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 item.unit.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 item.id.toString().includes(searchTerm)
@@ -59,7 +63,7 @@ const InventoryItems = memo(function InventoryItems() {
 
         const total = itemsQuery.data.length;
         const lowStock = itemsQuery.data.filter(
-            (item) => item.reorderLevel >= item.quantity
+            (item: any) => item.reorderLevel >= item.quantity
         ).length;
         const inStock = total - lowStock;
 

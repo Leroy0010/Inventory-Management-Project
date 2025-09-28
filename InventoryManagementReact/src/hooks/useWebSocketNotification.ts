@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { notificationKeys } from './queries/useNotification';
 import { getStompClient } from '@/lib/stompClient';
 import { toast } from '@/hooks/useToast';
+import { useNotificationPermission } from '@/hooks/useNotificationPermission';
 import type {
     WebSocketNotification,
     WebSocketConnectionState,
@@ -13,6 +14,7 @@ import type { Frame } from '@stomp/stompjs';
 export function useWebSocketNotification(batchWindowMs = 1500) {
     const { user } = useAuthStore();
     const queryClient = useQueryClient();
+    const { showNotification } = useNotificationPermission();
     const subscriptionIdRef = useRef<string | null>(null);
     const reconnectAttemptsRef = useRef(0);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -119,36 +121,9 @@ export function useWebSocketNotification(batchWindowMs = 1500) {
 
         // Browser notifications individually
         queued.forEach((n) => {
-            showSystemNotification(n.title, n.message);
+            showNotification(n.title, { body: n.message });
         });
-    }, [queryClient, user?.id]);
-
-    const showSystemNotification = (title: string, message: string) => {
-        if ('Notification' in window) {
-            if (Notification.permission === 'granted') {
-                new Notification(title, {
-                    body: message,
-                    icon: '../assets/favicon.ico',
-                    badge: '../assets/favicon.ico',
-                    tag: 'inventory-notification',
-                    requireInteraction: false,
-                });
-            } else if (Notification.permission === 'default') {
-                // Request permission
-                Notification.requestPermission().then((permission) => {
-                    if (permission === 'granted') {
-                        new Notification(title, {
-                            body: message,
-                            icon: '../assets/favicon.ico',
-                            badge: '../assets/favicon.ico',
-                            tag: 'inventory-notification',
-                            requireInteraction: false,
-                        });
-                    }
-                });
-            }
-        }
-    };
+    }, [queryClient, user?.id, showNotification]);
 
     const showSingleNotification = (notification: WebSocketNotification) => {
         toast({
@@ -246,17 +221,29 @@ export function useWebSocketNotification(batchWindowMs = 1500) {
     }, [connectAndSubscribe]);
 
     useEffect(() => {
-        if (!user?.id) return;
+        if (!user?.id) {
+            console.log('❌ No user ID, skipping WebSocket connection');
+            return;
+        }
 
+        console.log('🔄 WebSocket hook effect running for user:', user.id);
         connectAndSubscribe();
 
         return () => {
+            console.log(
+                '🧹 Cleaning up WebSocket connection for user:',
+                user.id
+            );
             if (reconnectTimeoutRef.current)
                 clearTimeout(reconnectTimeoutRef.current);
             if (batchTimeoutRef.current) clearTimeout(batchTimeoutRef.current);
 
             const stompClient = getStompClient();
             if (subscriptionIdRef.current) {
+                console.log(
+                    '🔌 Unsubscribing from:',
+                    subscriptionIdRef.current
+                );
                 stompClient.unsubscribe(subscriptionIdRef.current);
                 subscriptionIdRef.current = null;
             }

@@ -58,11 +58,11 @@ export function RequestActions({
         setIsFulfillmentDialogOpen(false);
     };
 
-    if (
-        !hasPermission ||
-        !['PENDING', 'APPROVED'].includes(request.status) ||
-        !hasFulfillmentPermission
-    ) {
+    const shouldShow =
+        (hasPermission && request.status === 'PENDING') ||
+        (hasFulfillmentPermission && request.status === 'APPROVED');
+
+    if (!shouldShow) {
         return null;
     }
 

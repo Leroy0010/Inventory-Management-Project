@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useBatchQueries } from '@/hooks/queries/useBatch';
+import { useBatches } from '@/hooks/queries/useBatch';
 import { formatApiError, getFriendlyErrorMessage } from '@/lib/error-utils';
 import BatchHeader from '@/components/batch/BatchHeader';
 import BatchTable from '@/components/batch/BatchTable';
@@ -9,7 +9,7 @@ import BatchSkeleton from '@/components/batch/BatchSkeleton';
 
 export default function Batch() {
     const navigate = useNavigate();
-    const { batchesQuery } = useBatchQueries();
+    const batchesQuery = useBatches();
 
     const batches = batchesQuery.data || [];
     const isLoading = batchesQuery.isLoading;
@@ -32,7 +32,7 @@ export default function Batch() {
     if (error) {
         const apiError = formatApiError(error);
         const friendlyMessage = getFriendlyErrorMessage(apiError);
-        
+
         return (
             <div className="space-y-6">
                 <BatchHeader

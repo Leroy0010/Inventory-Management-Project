@@ -15,13 +15,14 @@ import { NotificationList } from '@/components/notifications/NotificationList';
 import { GeneralNotificationForm } from '@/components/notifications/GeneralNotificationForm';
 import { NotificationPreferences } from '@/components/notifications/NotificationPreferences';
 import { useUnreadCount } from '@/hooks/queries/useNotification';
-import { useWebSocketNotification } from '@/hooks/useWebSocketNotification';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 export default function NotificationsPage() {
     const [activeTab, setActiveTab] = useState('all');
     const { data: unreadCount = 0, isLoading: isLoadingCount } =
         useUnreadCount();
-    const { connectionState } = useWebSocketNotification();
+    // Connection state is managed by NotificationContext
+    const { isConnected } = useNotifications();
 
     const handleRefresh = () => {
         // This will trigger a refetch of all notification queries
@@ -59,19 +60,15 @@ export default function NotificationsPage() {
                     <div className="flex items-center gap-2 text-sm">
                         <div
                             className={`w-2 h-2 rounded-full ${
-                                connectionState.connected
+                                isConnected
                                     ? 'bg-green-500'
-                                    : connectionState.connecting
+                                    : false
                                       ? 'bg-yellow-500'
                                       : 'bg-red-500'
                             }`}
                         />
                         <span className="text-gray-600">
-                            {connectionState.connected
-                                ? 'Connected'
-                                : connectionState.connecting
-                                  ? 'Connecting...'
-                                  : 'Disconnected'}
+                            {isConnected ? 'Connected' : 'Disconnected'}
                         </span>
                     </div>
 
@@ -90,7 +87,7 @@ export default function NotificationsPage() {
             </div>
 
             {/* Connection Error Alert */}
-            {connectionState.error && (
+            {false && (
                 <Card className="border-red-200 bg-red-50">
                     <CardContent className="p-4">
                         <div className="flex items-center gap-2 text-red-800">
@@ -99,9 +96,7 @@ export default function NotificationsPage() {
                                 Connection Error
                             </span>
                         </div>
-                        <p className="text-red-700 mt-1">
-                            {connectionState.error}
-                        </p>
+                        <p className="text-red-700 mt-1">Connection error</p>
                     </CardContent>
                 </Card>
             )}

@@ -1,6 +1,6 @@
 import { useStorekeeperDashboard } from '@/hooks/queries/useDashboard';
 import { useUnreadCount } from '@/hooks/queries/useNotification';
-import { useGetProfile } from '@/hooks/queries/useProfile';
+import { useProfile } from '@/hooks/queries/useAuth';
 import { useAuthStore } from '@/stores/authStore';
 import {
     Activity,
@@ -29,7 +29,7 @@ import type { RequestStatus } from '@/types/request';
 
 export function StorekeeperDashboard() {
     const { user } = useAuthStore();
-    const { data: profile } = useGetProfile();
+    const { data: profile } = useProfile();
     const { data: unreadCount = 0 } = useUnreadCount();
     const { data: dashboardData, isLoading, error } = useStorekeeperDashboard();
     const navigate = useNavigate();

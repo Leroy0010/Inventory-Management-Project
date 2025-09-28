@@ -7,7 +7,7 @@ import {
     CardTitle,
     CardDescription,
 } from '@/components/ui/card';
-import { useDepartmentQueries } from '@/hooks/queries/useDepartments';
+import { useCreateDepartment } from '@/hooks/queries/useDepartments';
 import { useState, useEffect } from 'react';
 import { Building2 } from 'lucide-react';
 import {
@@ -28,7 +28,7 @@ export default function AddDepartmentForm({
     className,
     onSuccess,
 }: AddDepartmentFormProps) {
-    const { createDepartmentMutation } = useDepartmentQueries();
+    const createDepartmentMutation = useCreateDepartment();
     const [showSuccess, setShowSuccess] = useState<boolean>(false);
 
     const methods = useForm<AddDepartmentFormData>({

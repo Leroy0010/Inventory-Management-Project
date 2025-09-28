@@ -1,214 +1,135 @@
-// Service Worker for Inventory Management System
+// Service Worker for Background Notifications
 const CACHE_NAME = 'inventory-management-v1';
-const STATIC_CACHE = 'static-v1';
-const DYNAMIC_CACHE = 'dynamic-v1';
+const NOTIFICATION_TAG = 'inventory-notification';
 
-// Files to cache for offline functionality
-const STATIC_FILES = ['/', '/index.html', '/manifest.json', '/favicon.ico'];
-
-// Install event - cache static assets
+// Install event - cache resources
 self.addEventListener('install', (event) => {
-    console.log('[SW] Installing service worker...');
-
-    event.waitUntil(
-        caches
-            .open(STATIC_CACHE)
-            .then((cache) => {
-                console.log('[SW] Caching static files');
-                return cache.addAll(STATIC_FILES);
-            })
-            .then(() => {
-                console.log('[SW] Static files cached successfully');
-                return self.skipWaiting();
-            })
-            .catch((error) => {
-                console.error('[SW] Failed to cache static files:', error);
-            })
-    );
+    console.log('Service Worker installing...');
+    self.skipWaiting();
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-    console.log('[SW] Activating service worker...');
-
+    console.log('Service Worker activating...');
     event.waitUntil(
         caches
             .keys()
             .then((cacheNames) => {
                 return Promise.all(
                     cacheNames.map((cacheName) => {
-                        if (
-                            cacheName !== STATIC_CACHE &&
-                            cacheName !== DYNAMIC_CACHE
-                        ) {
-                            console.log('[SW] Deleting old cache:', cacheName);
+                        if (cacheName !== CACHE_NAME) {
+                            console.log('Deleting old cache:', cacheName);
                             return caches.delete(cacheName);
                         }
                     })
                 );
             })
             .then(() => {
-                console.log('[SW] Service worker activated');
+                console.log('Service Worker activated');
                 return self.clients.claim();
             })
     );
 });
 
-// Fetch event - serve cached content when available
-self.addEventListener('fetch', (event) => {
-    const { request } = event;
-    const url = new URL(request.url);
+// Push event - handle background notifications
+self.addEventListener('push', (event) => {
+    console.log('Push event received:', event);
 
-    // Skip non-GET requests
-    if (request.method !== 'GET') {
-        return;
+    let notificationData = {
+        title: 'Inventory Management',
+        body: 'You have a new notification',
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        tag: NOTIFICATION_TAG,
+        requireInteraction: false,
+        silent: false,
+        data: {
+            url: '/notifications',
+        },
+    };
+
+    // Parse push data if available
+    if (event.data) {
+        try {
+            const pushData = event.data.json();
+            notificationData = {
+                ...notificationData,
+                title: pushData.title || notificationData.title,
+                body:
+                    pushData.message || pushData.body || notificationData.body,
+                data: {
+                    ...notificationData.data,
+                    ...pushData.data,
+                    notificationId: pushData.id,
+                    type: pushData.type,
+                },
+            };
+        } catch (error) {
+            console.error('Error parsing push data:', error);
+        }
     }
 
-    // Skip chrome-extension and other non-http requests
-    if (!url.protocol.startsWith('http')) {
-        return;
-    }
+    const notificationPromise = self.registration.showNotification(
+        notificationData.title,
+        notificationData
+    );
 
-    event.respondWith(
-        caches.match(request).then((cachedResponse) => {
-            // Return cached version if available
-            if (cachedResponse) {
-                console.log('[SW] Serving from cache:', request.url);
-                return cachedResponse;
-            }
+    event.waitUntil(notificationPromise);
+});
 
-            // Otherwise, fetch from network
-            return fetch(request)
-                .then((response) => {
-                    // Don't cache non-successful responses
-                    if (
-                        !response ||
-                        response.status !== 200 ||
-                        response.type !== 'basic'
-                    ) {
-                        return response;
+// Notification click event
+self.addEventListener('notificationclick', (event) => {
+    console.log('Notification clicked:', event);
+
+    event.notification.close();
+
+    const urlToOpen = event.notification.data?.url || '/notifications';
+
+    event.waitUntil(
+        clients
+            .matchAll({ type: 'window', includeUncontrolled: true })
+            .then((clientList) => {
+                // Check if there's already a window/tab open with the target URL
+                for (const client of clientList) {
+                    if (client.url.includes(urlToOpen) && 'focus' in client) {
+                        return client.focus();
                     }
+                }
 
-                    // Clone the response
-                    const responseToCache = response.clone();
-
-                    // Cache dynamic content
-                    caches.open(DYNAMIC_CACHE).then((cache) => {
-                        cache.put(request, responseToCache);
-                    });
-
-                    return response;
-                })
-                .catch((error) => {
-                    console.error('[SW] Fetch failed:', error);
-
-                    // Return offline page for navigation requests
-                    if (request.destination === 'document') {
-                        return caches.match('/index.html');
-                    }
-
-                    throw error;
-                });
-        })
+                // If no existing window, open a new one
+                if (clients.openWindow) {
+                    return clients.openWindow(urlToOpen);
+                }
+            })
     );
 });
 
-// Background sync for offline actions
+// Background sync for offline notifications
 self.addEventListener('sync', (event) => {
-    console.log('[SW] Background sync triggered:', event.tag);
+    console.log('Background sync:', event.tag);
 
-    if (event.tag === 'background-sync') {
+    if (event.tag === 'notification-sync') {
         event.waitUntil(
-            // Handle offline actions here
-            handleBackgroundSync()
+            // Handle any pending notifications
+            console.log('Syncing notifications...')
         );
     }
 });
 
-// Push notifications
-self.addEventListener('push', (event) => {
-    console.log('[SW] Push notification received');
-
-    const options = {
-        body: event.data ? event.data.text() : 'New notification',
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        vibrate: [100, 50, 100],
-        data: {
-            dateOfArrival: Date.now(),
-            primaryKey: 1,
-        },
-        actions: [
-            {
-                action: 'explore',
-                title: 'View Details',
-                icon: '/favicon.ico',
-            },
-            {
-                action: 'close',
-                title: 'Close',
-                icon: '/favicon.ico',
-            },
-        ],
-    };
-
-    event.waitUntil(
-        self.registration.showNotification('Inventory Management', options)
-    );
-});
-
-// Notification click handler
-self.addEventListener('notificationclick', (event) => {
-    console.log('[SW] Notification clicked:', event.action);
-
-    event.notification.close();
-
-    if (event.action === 'explore') {
-        event.waitUntil(clients.openWindow('/'));
-    }
-});
-
-// Helper function for background sync
-async function handleBackgroundSync() {
-    try {
-        // Get pending offline actions from IndexedDB
-        const pendingActions = await getPendingActions();
-
-        for (const action of pendingActions) {
-            try {
-                await processOfflineAction(action);
-                await removePendingAction(action.id);
-            } catch (error) {
-                console.error('[SW] Failed to process offline action:', error);
-            }
-        }
-    } catch (error) {
-        console.error('[SW] Background sync failed:', error);
-    }
-}
-
-// Helper functions for offline data management
-async function getPendingActions() {
-    // This would typically use IndexedDB
-    // For now, return empty array
-    return [];
-}
-
-async function processOfflineAction(action) {
-    // Process the offline action
-    console.log('[SW] Processing offline action:', action);
-}
-
-async function removePendingAction(actionId) {
-    // Remove the processed action from IndexedDB
-    console.log('[SW] Removing pending action:', actionId);
-}
-
-// Message handler for communication with main thread
+// Message event - handle messages from main thread
 self.addEventListener('message', (event) => {
-    console.log('[SW] Message received:', event.data);
+    console.log('Service Worker received message:', event.data);
 
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }
+});
+
+// Error handling
+self.addEventListener('error', (event) => {
+    console.error('Service Worker error:', event.error);
+});
+
+self.addEventListener('unhandledrejection', (event) => {
+    console.error('Service Worker unhandled rejection:', event.reason);
 });

@@ -1,13 +1,8 @@
 import React from 'react';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SkeletonCard } from '@/components/ui/skeleton';
-import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
-import { Package, AlertTriangle,  TrendingDown } from 'lucide-react';
+import { useInventoryItems } from '@/hooks/queries/useInventoryItems';
+import { Package, AlertTriangle, TrendingDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface InventorySummaryProps {
@@ -15,7 +10,7 @@ interface InventorySummaryProps {
 }
 
 export function InventorySummary({ className }: InventorySummaryProps) {
-    const { itemsQuery } = useInventoryItemQueries();
+    const itemsQuery = useInventoryItems();
 
     // Calculate summary statistics
     const summary = React.useMemo(() => {
@@ -23,7 +18,7 @@ export function InventorySummary({ className }: InventorySummaryProps) {
 
         const totalItems = itemsQuery.data.length;
         const lowStockItems = itemsQuery.data.filter(
-            (item) => item.reorderLevel <= 10
+            (item: any) => item.reorderLevel <= 10
         ).length;
 
         return {
@@ -104,7 +99,6 @@ export function InventorySummary({ className }: InventorySummaryProps) {
                         </p>
                     </CardContent>
                 </Card>
-
 
                 {/* Stock Status */}
                 <Card>

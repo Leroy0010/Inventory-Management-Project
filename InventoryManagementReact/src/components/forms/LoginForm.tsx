@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuthQueries } from '@/hooks/queries/useAuth';
+import { useLogin } from '@/hooks/queries/useAuth';
 import { useAuthStore } from '@/stores/authStore';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormErrorAlert } from '@/components/ui/FormErrorAlert';
@@ -40,7 +40,7 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
     const navigate = useNavigate();
 
     const { error, clearError } = useAuthStore();
-    const { loginMutation } = useAuthQueries();
+    const loginMutation = useLogin();
     const { login } = useAuthStore();
 
     const {

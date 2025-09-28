@@ -3,7 +3,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent } from '@/components/ui/card';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
+import { useCreateInventoryItem } from '@/hooks/queries/useInventoryItems';
 import { Package, AlertCircle } from 'lucide-react';
 import { FormErrorAlert } from '@/components/ui/FormErrorAlert';
 import { InventoryFormFields } from './InventoryFormFields';
@@ -23,7 +23,7 @@ export default function AddInventoryForm({ className }: AddInventoryFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Queries
-    const { createItemMutation } = useInventoryItemQueries();
+    const createItemMutation = useCreateInventoryItem();
 
     const methods = useForm<AddInventoryFormData>({
         resolver: zodResolver(addInventorySchema),

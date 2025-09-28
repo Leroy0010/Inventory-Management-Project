@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { FormErrorAlert } from '@/components/ui/FormErrorAlert';
 import { ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useAuthQueries } from '@/hooks/queries/useAuth';
+import { useVerify2FA, useResendOtp } from '@/hooks/queries/useAuth';
 import OtpHeader from './OtpHeader';
 import OtpInput from './OtpInput';
 
@@ -26,7 +26,8 @@ export function TwoFactorVerification({
     const [isResending, setIsResending] = useState(false);
     const [resendCooldown, setResendCooldown] = useState(0);
     const { error, clearError } = useAuthStore();
-    const { verify2FAMutation, resendOtpMutation } = useAuthQueries();
+    const verify2FAMutation = useVerify2FA();
+    const resendOtpMutation = useResendOtp();
 
     // Handle OTP verification
     const handleVerifyOtp = async (otpCode: string) => {

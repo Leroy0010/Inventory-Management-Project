@@ -18,6 +18,9 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Bell, Mail, Smartphone, Clock, Volume2 } from 'lucide-react';
 import type { NotificationSettings } from '@/types/settings';
+import { NotificationPermissionButton } from '@/components/notifications/NotificationPermissionButton';
+import { NotificationTestPanel } from '@/components/notifications/NotificationTestPanel';
+import { BackgroundNotificationSettings } from '@/components/notifications/NotificationSettings';
 
 interface NotificationSettingsTabProps {
     settings: NotificationSettings;
@@ -40,6 +43,9 @@ export function NotificationSettingsTab({
 
     return (
         <div className="space-y-6">
+            {/* Background Notifications */}
+            <BackgroundNotificationSettings />
+
             {/* Notification Channels */}
             <Card>
                 <CardHeader>
@@ -90,14 +96,17 @@ export function NotificationSettingsTab({
                                     </p>
                                 </div>
                             </div>
-                            <Switch
-                                id="pushNotifications"
-                                checked={settings.pushNotifications}
-                                onCheckedChange={(checked) =>
-                                    onUpdate({ pushNotifications: checked })
-                                }
-                                disabled={isLoading}
-                            />
+                            <div className="flex items-center gap-2">
+                                <NotificationPermissionButton />
+                                <Switch
+                                    id="pushNotifications"
+                                    checked={settings.pushNotifications}
+                                    onCheckedChange={(checked) =>
+                                        onUpdate({ pushNotifications: checked })
+                                    }
+                                    disabled={isLoading}
+                                />
+                            </div>
                         </div>
 
                         <Separator />
@@ -321,6 +330,23 @@ export function NotificationSettingsTab({
                             </div>
                         </>
                     )}
+                </CardContent>
+            </Card>
+
+            {/* Notification Testing */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Bell className="h-5 w-5" />
+                        Test Notifications
+                    </CardTitle>
+                    <CardDescription>
+                        Test your notification settings to ensure they work
+                        correctly
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <NotificationTestPanel />
                 </CardContent>
             </Card>
         </div>

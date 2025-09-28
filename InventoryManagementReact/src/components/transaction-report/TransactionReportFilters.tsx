@@ -15,7 +15,7 @@ import {
 import { DatePicker } from '@/components/ui/date-picker';
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox';
 import { Filter, X } from 'lucide-react';
-import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
+import { useInventoryItems } from '@/hooks/queries/useInventoryItems';
 import type {
     TransactionReportRequest,
     StockTransactionType,
@@ -67,13 +67,14 @@ export default function TransactionReportFilters({
     const [endDate, setEndDate] = useState<Date | undefined>();
 
     // Get inventory items for dropdown
-    const { itemsQuery } = useInventoryItemQueries();
+    const itemsQuery = useInventoryItems();
 
     // Convert items to combobox options
-    const itemOptions: ComboboxOption[] = itemsQuery.data?.map((item) => ({
-        value: item.id.toString(),
-        label: item.name,
-    })) || [];
+    const itemOptions: ComboboxOption[] =
+        itemsQuery.data?.map((item: any) => ({
+            value: item.id.toString(),
+            label: item.name,
+        })) || [];
 
     const {
         handleSubmit,

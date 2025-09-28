@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useDepartmentQueries } from '@/hooks/queries/useDepartments';
+import { useDepartments } from '@/hooks/queries/useDepartments';
 import { useUserQueries } from '@/hooks/queries/useUser';
 import { toast } from 'sonner';
 import {
@@ -23,11 +23,12 @@ export default function AddStorekeeperForm({
     const [value, setValue] = useState('');
 
     // Queries
-    const { departmentsQuery } = useDepartmentQueries();
+    const departmentsQuery = useDepartments();
     const { createStorekeeperMutation } = useUserQueries();
 
     // Get department names from API
-    const departments = departmentsQuery.data?.map((dept) => dept.name) || [];
+    const departments =
+        departmentsQuery.data?.map((dept: any) => dept.name) || [];
 
     const methods = useForm<AddStorekeeperFormData>({
         resolver: zodResolver(addStorekeeperSchema),

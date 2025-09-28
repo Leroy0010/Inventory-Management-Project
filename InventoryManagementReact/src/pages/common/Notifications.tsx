@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Send } from 'lucide-react';
+import { Bell, Send, TestTube } from 'lucide-react';
 import { NotificationList } from '@/components/notifications/NotificationList';
 import { GeneralNotificationForm } from '@/components/notifications/GeneralNotificationForm';
-import { useWebSocketNotification } from '@/hooks/useWebSocketNotification';
+import { NotificationTest } from '@/components/notifications/NotificationTest';
 import { useUnreadCount } from '@/hooks/queries/useNotification';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 export default function Notifications() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -35,7 +36,8 @@ export default function Notifications() {
         }
     };
 
-    const { connectionState } = useWebSocketNotification();
+    // Connection state is managed by NotificationContext
+    const { isConnected } = useNotifications();
     const { data: unreadCount = 0 } = useUnreadCount();
 
     return (
@@ -53,19 +55,17 @@ export default function Notifications() {
                 <div className="mt-4 flex items-center gap-2">
                     <div
                         className={`w-2 h-2 rounded-full ${
-                            connectionState.connected
+                            isConnected
                                 ? 'bg-green-500'
-                                : connectionState.connecting
+                                : false
                                   ? 'bg-yellow-500'
                                   : 'bg-red-500'
                         }`}
                     />
                     <span className="text-sm text-gray-600">
-                        {connectionState.connected
+                        {isConnected
                             ? 'Real-time notifications enabled'
-                            : connectionState.connecting
-                              ? 'Connecting...'
-                              : 'Real-time notifications disabled'}
+                            : 'Real-time notifications disabled'}
                     </span>
                 </div>
             </div>
@@ -75,7 +75,7 @@ export default function Notifications() {
                 onValueChange={handleTabChange}
                 className="space-y-6"
             >
-                <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3">
+                <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger
                         value="list"
                         className="flex items-center gap-2"
@@ -95,6 +95,13 @@ export default function Notifications() {
                         <Send className="h-4 w-4" />
                         Send Notification
                     </TabsTrigger>
+                    <TabsTrigger
+                        value="test"
+                        className="flex items-center gap-2"
+                    >
+                        <TestTube className="h-4 w-4" />
+                        Test
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="list" className="space-y-6">
@@ -108,6 +115,12 @@ export default function Notifications() {
                             handleTabChange('list');
                         }}
                     />
+                </TabsContent>
+
+                <TabsContent value="test" className="space-y-6">
+                    <div className="flex justify-center">
+                        <NotificationTest />
+                    </div>
                 </TabsContent>
             </Tabs>
         </div>

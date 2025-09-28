@@ -7,13 +7,19 @@ import { ProfileSecurityTab } from '@/components/profile/ProfileSecurityTab';
 import ProfileSkeleton from '@/components/profile/ProfileSkeleton';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { Tabs } from '@/components/ui/tabs';
-import { useProfileQueries } from '@/hooks/queries/useProfile';
+import {
+    useProfile,
+    useUpdateProfile,
+    useChangePassword,
+} from '@/hooks/queries/useAuth';
 import { useState } from 'react';
 
 export default function Profile() {
     const [activeTab, setActiveTab] = useState('personal');
 
-    const { getProfile, updateProfile, changePassword } = useProfileQueries();
+    const getProfile = useProfile();
+    const updateProfile = useUpdateProfile();
+    const changePassword = useChangePassword();
 
     const handleProfileUpdate = () => {
         // Refetch profile data to get updated information

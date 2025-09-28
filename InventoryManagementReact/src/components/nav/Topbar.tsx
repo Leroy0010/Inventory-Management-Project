@@ -15,7 +15,7 @@ import { useThemeTopbar } from '@/hooks/useThemeTopbar';
 import { useAuthStore } from '@/stores/authStore';
 import { LogOut, Menu, Moon, Settings, Sun, User, Monitor } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthQueries } from '@/hooks/queries/useAuth';
+import { useLogout } from '@/hooks/queries/useAuth';
 
 interface TopbarProps {
     onMenuToggle?: () => void;
@@ -27,7 +27,7 @@ export function Topbar({
     isSidebarCollapsed = false,
 }: TopbarProps) {
     const { user } = useAuthStore();
-    const { logoutMutation } = useAuthQueries();
+    const logoutMutation = useLogout();
     const { theme, setTheme, resolvedTheme } = useThemeTopbar();
     const navigate = useNavigate();
 

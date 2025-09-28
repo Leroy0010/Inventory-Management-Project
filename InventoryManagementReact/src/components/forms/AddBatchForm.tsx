@@ -8,8 +8,8 @@ import {
 } from '../ui/card';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useInventoryItemQueries } from '@/hooks/queries/useInventoryItems';
-import { useBatchQueries } from '@/hooks/queries/useBatch';
+import { useInventoryItems } from '@/hooks/queries/useInventoryItems';
+import { useBatches, useCreateBatch } from '@/hooks/queries/useBatch';
 import { toast } from 'sonner';
 import { FormErrorAlert } from '@/components/ui/FormErrorAlert';
 import { type ComboboxOption } from '@/components/ui/combobox';
@@ -28,12 +28,12 @@ export default function AddBatchForm({ className }: AddBatchFormProps) {
     const [showSuccess, setShowSuccess] = useState<boolean>(false);
 
     // Queries
-    const { itemsQuery } = useInventoryItemQueries();
-    const { createBatchMutation } = useBatchQueries();
+    const itemsQuery = useInventoryItems();
+    const createBatchMutation = useCreateBatch();
 
     // Convert items to combobox options
     const itemOptions: ComboboxOption[] =
-        itemsQuery.data?.map((item) => ({
+        itemsQuery.data?.map((item: any) => ({
             value: item.name,
             label: item.name,
         })) || [];
