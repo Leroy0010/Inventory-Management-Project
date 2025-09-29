@@ -72,6 +72,11 @@ spring:
                         user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
                         jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
                         user-name-attribute: email
+            authorization-request:
+                cookie:
+                    name: oauth2_auth_request
+                    same-site: None
+                    secure: true
 
     mail:
         host: ${MAIL_HOST:smtp.gmail.com}
@@ -122,9 +127,13 @@ server:
     servlet:
         session:
             cookie:
-                same-site: Strict
-                secure: ${COOKIE_SECURE:true}
+                same-site: None
+                secure: true
                 max-age: 1800 # 30 minutes
+                domain: ${COOKIE_DOMAIN:}
+                path: /
+            timeout: 30m
+            tracking-modes: cookie
         context-path: ${SERVER_CONTEXT_PATH:}
     compression:
         enabled: true
@@ -165,6 +174,14 @@ vapid:
         key: ${VAPID_PRIVATE_KEY}
     public:
         key: ${VAPID_PUBLIC_KEY}
+
+# Logging Configuration for OAuth2 Debugging
+logging:
+    level:
+        org.springframework.security: INFO
+        org.springframework.security.oauth2: DEBUG
+        org.springframework.web: INFO
+        com.leroy.inventorymanagementspringboot.security: DEBUG
 
 # Actuator Configuration for Production Monitoring
 management:

@@ -15,6 +15,10 @@ services:
             generateValue: true
           - key: FRONTEND_BASE_URL
             value: https://your-frontend-app.onrender.com
+          - key: COOKIE_SECURE
+            value: true
+          - key: COOKIE_DOMAIN
+            value: .onrender.com
           - key: GOOGLE_CLIENT_ID
             value: your_google_client_id_here
           - key: GOOGLE_CLIENT_SECRET
