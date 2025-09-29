@@ -3,8 +3,7 @@ services:
       name: inventory-management-backend
       env: docker
       plan: free
-      buildCommand: mvn clean package -DskipTests
-      startCommand: java -jar target/InventoryManagementSpringBoot-0.0.1-SNAPSHOT.jar
+      dockerfilePath: ./Dockerfile.render
       envVars:
           - key: SPRING_PROFILES_ACTIVE
             value: prod
