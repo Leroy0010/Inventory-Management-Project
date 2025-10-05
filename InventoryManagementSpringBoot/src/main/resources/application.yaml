@@ -100,7 +100,7 @@ server:
     servlet:
         session:
             cookie:
-                same-site: Strict
+                same-site: ${COOKIE_SAME_SITE:LAX}
                 secure: ${COOKIE_SECURE:true}
                 max-age: 1800 # 30 minutes
         context-path: ${SERVER_CONTEXT_PATH:}

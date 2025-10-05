@@ -1,76 +1,193 @@
-# Development Profile Configuration
 spring:
+    profiles:
+        active: ${SPRING_PROFILES_ACTIVE:dev}
     datasource:
-        url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/InventoryManagementDB}
-        username: ${SPRING_DATASOURCE_USERNAME:postgres}
-        password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+        url: ${SPRING_DATASOURCE_URL}
+        username: ${SPRING_DATASOURCE_USERNAME}
+        password: ${SPRING_DATASOURCE_PASSWORD}
+        driver-class-name: org.postgresql.Driver
 
     jpa:
         hibernate:
-            ddl-auto: ${SPRING_JPA_DDL_AUTO:validate}
-        show-sql: ${SPRING_JPA_SHOW_SQL:false}
+            ddl-auto: validate
+        show-sql: false
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         properties:
             hibernate:
-                format_sql: ${SPRING_JPA_FORMAT_SQL:false}
+                format_sql: false
                 dialect: org.hibernate.dialect.PostgreSQLDialect
                 jdbc:
                     time_zone: UTC
         open-in-view: false
 
-    devtools:
+    liquibase:
+        change-log: classpath:db/changelog/db.changelog-master.yaml
+        enabled: true
+    application:
+        name: InventoryManagementSpringBoot
+    devtools: # These settings are generally for local development and might not have an effect in a Dockerized production environment
         restart:
-            enabled: ${SPRING_DEVTOOLS_RESTART:true}
+            enabled: true
         livereload:
-            enabled: ${SPRING_DEVTOOLS_LIVERELOAD:true}
-
-    mail:
-        host: ${MAIL_HOST:smtp.gmail.com}
-        port: ${MAIL_PORT:587}
-        username: ${MAIL_USERNAME:dev@example.com}
-        password: ${MAIL_PASSWORD:dev_password}
-        properties:
-            mail:
-                smtp:
-                    auth: true
-                    starttls:
-                        enabled: true
-                        required: true
-                test-connection: false # Disable for development
-
+            enabled: true
+            port: 8080
     security:
         oauth2:
             client:
                 registration:
                     google:
-                        client-id: ${GOOGLE_CLIENT_ID:dev_client_id}
-                        client-secret: ${GOOGLE_CLIENT_SECRET:dev_client_secret}
+                        client-id: ${GOOGLE_CLIENT_ID}
+                        client-secret: ${GOOGLE_CLIENT_SECRET}
+                        # Spring Security OAuth2 callback URI
+                        redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
+                        scope:
+                            - email
+                            - profile
+                            - openid
+                        authorization-grant-type: authorization_code
+                        client-name: Google
+                provider:
+                    google:
+                        authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+                        token-uri: https://oauth2.googleapis.com/token
+                        user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
+                        jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+                        user-name-attribute: email
+    mail:
+        host: ${MAIL_HOST:smtp.gmail.com}
+        port: ${MAIL_PORT:465}
+        username: ${MAIL_USERNAME}
+        password: ${MAIL_PASSWORD}
+        properties:
+            mail:
+                debug: true
+                smtp:
+                    auth: ${MAIL_SMTP_AUTH:true}
+                    starttls:
+                        enabled: ${MAIL_SMTP_STARTTLS_ENABLED:false}
+                        required: ${MAIL_SMTP_STARTTLS_REQUIRED:false}
+                    ssl:
+                        enable: true
+                        protocols: ${MAIL_SMTP_SSL_PROTOCOLS:TLSv1.2}
+                test-connection: ${MAIL_TEST_CONNECTION:true} # You might want to set this to false for production if it causes issues on startup
+    task:
+        execution:
+            pool:
+                core-size: 2
+                max-size: 10
+                queue-capacity: 100
+            thread-name-prefix: MailSender-
 
-# JWT Configuration for Development
 jwt:
-    secret: ${JWT_SECRET:ZGV2X2p3dF9zZWNyZXRfa2V5X211c3RfYmVfYXRfbGVhc3RfNjRfYnl0ZXNfYmFzZTY0X2VuY29kZWRfZm9yX2RldmVsb3BtZW50X29ubHk=}
-    expiration: ${JWT_EXPIRATION:86400000} # 24 hours
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:1800000} # 30 minutes in milliseconds
     refresh:
-        expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days
+        expiration: ${JWT_REFRESH_EXPIRATION:7200000} # 2 hours in milliseconds
+        max-tokens-per-user: ${JWT_MAX_TOKENS_PER_USER:5}
+    cookie:
+        name: ${JWT_COOKIE_NAME:jwt}
+        refresh:
+            name: ${JWT_REFRESH_COOKIE_NAME:refreshToken}
+        domain: ${JWT_COOKIE_DOMAIN:}
+        path: ${JWT_COOKIE_PATH:/}
+        secure: ${JWT_COOKIE_SECURE:true}
+        http-only: ${JWT_COOKIE_HTTP_ONLY:true}
+        same-site: ${JWT_COOKIE_SAME_SITE:Strict}
 
-# Server Configuration for Development
+# Server Configuration for Production
 server:
     port: ${SERVER_PORT:8080}
     servlet:
         session:
             cookie:
-                secure: false # HTTP for development
-                same-site: Lax
+                same-site: ${COOKIE_SAME_SITE:LAX}
+                secure: ${COOKIE_SECURE:true}
+                max-age: 1800 # 30 minutes
+        context-path: ${SERVER_CONTEXT_PATH:}
+    compression:
+        enabled: true
+        mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+        min-response-size: 1024
+    http2:
+        enabled: true
+    tomcat:
+        max-connections: 10000
+        max-threads: 200
+        min-spare-threads: 10
+        connection-timeout: 20000
+        max-http-form-post-size: 2MB
+        max-swallow-size: 2MB
 
-# App Configuration for Development
 app:
     frontend:
-        base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
+        # This will be the public URL of your Spring Boot backend on Render,
+        # as your JavaFX app will interact directly with your backend's public endpoint.
+        base-url: ${FRONTEND_BASE_URL}
 
-# Logging for Development
+google:
+    drive:
+        credentials-classpath: ${GOOGLE_DRIVE_CREDENTIALS_CLASS_PATH:c:/run/secrets/credentials.json}
+        root-folder-id: ${GOOGLE_DRIVE_FOLDER_ID}
+
+aws:
+    s3:
+        bucket-name: ${AWS_S3_BUCKET_NAME}
+        region: ${AWS_S3_REGION}
+        access-key: ${AWS_S3_ACCESS_KEY}
+        secret-key: ${AWS_S3_SECRET_KEY}
+
+# VAPID Keys for Push Notifications
+vapid:
+    private:
+        key: ${VAPID_PRIVATE_KEY:Unp26wQzoZWGzTGD_7o8Jjfve95oFRm5wt3jYS_hrZs}
+    public:
+        key: ${VAPID_PUBLIC_KEY:BEqA-s8JXB450K8KblHvwC0l2oOLviV7_zh8ntpmTzKoGv7vAASqTpbgoENGqLCL2wUrvSLopkLfOEabvH1XU_8}
+
+# Actuator Configuration for Production Monitoring
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health,info,metrics,prometheus
+            base-path: /actuator
+    endpoint:
+        health:
+            show-details: when-authorized
+            show-components: always
+    health:
+        db:
+            enabled: true
+        diskspace:
+            enabled: true
+    prometheus:
+        metrics:
+            export:
+                enabled: true
+    metrics:
+        distribution:
+            percentiles-histogram:
+                http.server.requests: true
+            percentiles:
+                http.server.requests: 0.5, 0.95, 0.99
+            slo:
+                http.server.requests: 50ms, 100ms, 200ms, 500ms
+
+# Logging Configuration for Production
 logging:
     level:
-        com.leroy.inventorymanagementspringboot: ${LOG_LEVEL:DEBUG}
-        org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
-        org.hibernate.SQL: ${HIBERNATE_SQL_LOG:WARN}
-        org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:WARN}
+        root: INFO
+        com.leroy.inventorymanagementspringboot: INFO
+        org.springframework.security: WARN
+        org.springframework.web: WARN
+        org.hibernate.SQL: WARN
+        org.hibernate.type.descriptor.sql.BasicBinder: WARN
+        org.springframework.boot.autoconfigure: WARN
+        org.springframework.boot.actuate: INFO
+    pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+        file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file:
+        name: logs/app.log
+        max-size: 10MB
+        max-history: 30
+        total-size-cap: 1GB

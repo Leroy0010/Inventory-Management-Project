@@ -41,6 +41,21 @@ spring:
         change-log: classpath:db/changelog/db.changelog-master.yaml
         enabled: true
 
+    # Session Configuration - JDBC (PostgreSQL)
+    session:
+        store-type: jdbc
+        jdbc:
+            initialize-schema: always
+            table-name: spring_session
+        timeout: 1800 # 30 minutes
+        cookie:
+            name: JSESSIONID
+            http-only: true
+            secure: true
+            same-site: none
+            max-age: 1800
+            domain: ${COOKIE_DOMAIN:}
+
     application:
         name: InventoryManagementSpringBoot
 
@@ -175,14 +190,6 @@ vapid:
     public:
         key: ${VAPID_PUBLIC_KEY}
 
-# Logging Configuration for OAuth2 Debugging
-logging:
-    level:
-        org.springframework.security: INFO
-        org.springframework.security.oauth2: DEBUG
-        org.springframework.web: INFO
-        com.leroy.inventorymanagementspringboot.security: DEBUG
-
 # Actuator Configuration for Production Monitoring
 management:
     endpoints:
@@ -199,9 +206,9 @@ management:
             enabled: true
         diskspace:
             enabled: true
-    metrics:
-        export:
-            prometheus:
+    prometheus:
+        metrics:
+            export:
                 enabled: true
         distribution:
             percentiles-histogram:
@@ -216,8 +223,10 @@ logging:
     level:
         root: INFO
         com.leroy.inventorymanagementspringboot: INFO
-        org.springframework.security: WARN
-        org.springframework.web: WARN
+        org.springframework.security: INFO
+        org.springframework.security.oauth2: DEBUG
+        org.springframework.web: INFO
+        com.leroy.inventorymanagementspringboot.security: DEBUG
         org.hibernate.SQL: WARN
         org.hibernate.type.descriptor.sql.BasicBinder: WARN
         org.springframework.boot.autoconfigure: WARN

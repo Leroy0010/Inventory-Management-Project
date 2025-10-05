@@ -1,0 +1,66 @@
+# Docker ignore file for both development and production
+
+# Git
+.git
+.gitignore
+README.md
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Environment files
+.env*
+env.*.example
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Maven
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# Node modules (if any)
+node_modules/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Documentation
+*.md
+docs/
+
+# Test files
+src/test/
+
+# Build artifacts
+*.jar
+*.war
+*.ear
+
+# Database files
+*.db
+*.sqlite
+
+# SSL certificates
+ssl/
+*.pem
+*.key
+*.crt
+
+# Nginx config
+nginx.conf

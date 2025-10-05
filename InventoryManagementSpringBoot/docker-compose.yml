@@ -1,0 +1,120 @@
+# Development Docker Compose
+# Complete development environment with all services
+
+version: "3.8"
+
+services:
+    # PostgreSQL Database
+    postgres:
+        image: postgres:16-alpine
+        container_name: inventory-postgres-dev
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB:-InventoryManagementDB}
+            POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+            POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+            - ./db.sql:/docker-entrypoint-initdb.d/init.sql
+        networks:
+            - inventory-network
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -U dev_user -d inventorymanagementdb_dev",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    # Spring Boot Application
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        container_name: inventory-app-dev
+        environment:
+            # Database Configuration
+            SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://database:5432/InventoryManagementDB}
+            SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+            SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgres}
+            SPRING_JPA_HIBERNATE_DDL_AUTO: none # Or 'create', 'create-drop' etc.
+
+            # Session Configuration (JDBC for dev)
+            SPRING_SESSION_STORE_TYPE: jdbc
+            SPRING_SESSION_JDBC_INITIALIZE_SCHEMA: always
+            SPRING_SESSION_JDBC_TABLE_NAME: spring_session
+            SPRING_SESSION_TIMEOUT: 1800
+
+            # Application Configuration
+            SPRING_PROFILES_ACTIVE: dev
+            SERVER_PORT: 8080
+
+            # OAuth2 Configuration (Development)
+            GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-your_dev_client_id}
+            GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-your_dev_client_secret}
+            GOOGLE_REDIRECT_URI: http://localhost:8080/login/oauth2/code/google
+
+            # JWT Configuration
+            JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_key_very_long_and_secure}
+            JWT_EXPIRATION: 1800000
+
+            # Frontend Configuration
+            FRONTEND_BASE_URL: http://localhost:5173
+
+            # Cookie Configuration
+            COOKIE_DOMAIN: localhost
+            COOKIE_SECURE: false
+
+            # Mail Configuration (Optional for dev)
+            MAIL_USERNAME: ${MAIL_USERNAME:-}
+            MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+
+            # VAPID Keys (Optional for dev)
+            VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+            VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+
+        ports:
+            - "8080:8080" # Application port
+            - "5005:5005" # Debug port
+        volumes:
+            - ./src:/app/src # Hot reload
+            - ./logs:/app/logs
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - inventory-network
+        restart: unless-stopped
+
+    # pgAdmin for Database Management (Optional)
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        container_name: inventory-pgadmin-dev
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@inventory.com
+            PGADMIN_DEFAULT_PASSWORD: admin123
+            PGADMIN_CONFIG_SERVER_MODE: "False"
+        ports:
+            - "5050:80"
+        volumes:
+            - pgadmin_data:/var/lib/pgadmin
+        depends_on:
+            - postgres
+        networks:
+            - inventory-network
+        profiles:
+            - tools
+
+volumes:
+    postgres_data:
+        driver: local
+    pgadmin_data:
+        driver: local
+
+networks:
+    inventory-network:
+        driver: bridge

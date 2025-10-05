@@ -1,31 +1,29 @@
-# Development Dockerfile
+# Development Dockerfile - optimized for hot reload & debugging
 FROM openjdk:21-jdk-slim
 
-# Install Maven
-RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
 WORKDIR /app
 
-# Copy pom.xml first for better layer caching
-COPY pom.xml .
+RUN apt-get update && apt-get install -y curl wget && rm -rf /var/lib/apt/lists/*
 
-# Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN mvn dependency:go-offline -B
+COPY mvnw mvnw.cmd ./ 
+COPY .mvn .mvn
+COPY pom.xml ./
 
-# Copy source code
+RUN chmod +x ./mvnw
+RUN ./mvnw dependency:go-offline -B
+
 COPY src ./src
 
-# Build the application (without running tests for faster builds)
-RUN mvn clean compile -DskipTests
+EXPOSE 8080 5005
 
-# Expose port
-EXPOSE 8080
+ENV JAVA_OPTS="-Xms512m -Xmx1g \
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \
+    -Dspring.profiles.active=dev \
+    -Dspring.devtools.restart.enabled=true \
+    -Dspring.devtools.livereload.enabled=true"
 
-# Development optimizations
-ENV SPRING_PROFILES_ACTIVE=dev
-ENV SPRING_DEVTOOLS_RESTART_ENABLED=true
-ENV SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-# Run the application in development mode
-CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.jvmArguments=-Xmx512m -Xms256m"]
+CMD ["./mvnw", "spring-boot:run", "-Dspring-boot.run.jvmArguments=\"$JAVA_OPTS\""]
+

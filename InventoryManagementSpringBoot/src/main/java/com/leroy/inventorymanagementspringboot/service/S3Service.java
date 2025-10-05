@@ -8,7 +8,6 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.File;
@@ -46,7 +45,6 @@ public class S3Service {
                         .bucket(bucketName)
                         .key(key)
                         .contentType(mimeType)
-                        .acl(ObjectCannedACL.PUBLIC_READ) // make file public (like Google Drive sharing)
                         .build(),
                 RequestBody.fromFile(localFile.toPath())
         );
