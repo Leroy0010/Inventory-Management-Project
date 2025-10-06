@@ -16,7 +16,7 @@ spring:
 
     jpa:
         hibernate:
-            ddl-auto: validate
+            ddl-auto: none
         show-sql: false
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         properties:
@@ -47,17 +47,17 @@ spring:
         jdbc:
             initialize-schema: always
             table-name: spring_session
-        timeout: 1800 # 30 minutes
+        timeout: ${SPRING_SESSION_TIMEOUT}
         cookie:
-            name: JSESSIONID
-            http-only: true
-            secure: true
-            same-site: none
-            max-age: 1800
-            domain: ${COOKIE_DOMAIN:}
+            name: ${SPRING_SESSION_COOKIE_NAME}
+            http-only: ${SPRING_SESSION_COOKIE_NAME_HTTP_ONLY}
+            secure: ${SPRING_SESSION_COOKIE_SECURE}
+            same-site: ${SPRING_SESSION_COOKIE_SAME_SITE}
+            max-age: ${SPRING_SESSION_COOKIE_MAX_AGE}
+            domain: ${SPRING_SESSION_COOKIE_DOMAIN}
 
     application:
-        name: InventoryManagementSpringBoot
+        name: ${SPRING_APPLICATION_NAME}
 
     # Disable dev tools in production
     devtools:
@@ -94,8 +94,8 @@ spring:
                     secure: true
 
     mail:
-        host: ${MAIL_HOST:smtp.gmail.com}
-        port: ${MAIL_PORT:465}
+        host: ${MAIL_HOST}
+        port: ${MAIL_PORT}
         username: ${MAIL_USERNAME}
         password: ${MAIL_PASSWORD}
         properties:
@@ -107,9 +107,9 @@ spring:
                         enabled: ${MAIL_SMTP_STARTTLS_ENABLED:false}
                         required: ${MAIL_SMTP_STARTTLS_REQUIRED:false}
                     ssl:
-                        enable: true
+                        enable: ${MAIL_SMTP_SSL_ENABLED:true}
                         protocols: ${MAIL_SMTP_SSL_PROTOCOLS:TLSv1.2}
-                test-connection: false
+                test-connection: ${MAIL_TEST_CONNECTION:false}
 
     task:
         execution:
@@ -122,31 +122,31 @@ spring:
 # JWT Configuration for Production
 jwt:
     secret: ${JWT_SECRET}
-    expiration: ${JWT_EXPIRATION:1800000} # 30 minutes
+    expiration: ${JWT_EXPIRATION}
     refresh:
-        expiration: ${JWT_REFRESH_EXPIRATION:7200000} # 2 hours
-        max-tokens-per-user: ${JWT_MAX_TOKENS_PER_USER:5}
+        expiration: ${JWT_REFRESH_EXPIRATION}
+        max-tokens-per-user: ${JWT_MAX_TOKENS_PER_USER}
     cookie:
-        name: ${JWT_COOKIE_NAME:jwt}
+        name: ${JWT_COOKIE_NAME}
         refresh:
-            name: ${JWT_REFRESH_COOKIE_NAME:refreshToken}
+            name: ${JWT_REFRESH_COOKIE_NAME}
         domain: ${JWT_COOKIE_DOMAIN:}
         path: ${JWT_COOKIE_PATH:/}
-        secure: ${JWT_COOKIE_SECURE:true}
-        http-only: ${JWT_COOKIE_HTTP_ONLY:true}
-        same-site: ${JWT_COOKIE_SAME_SITE:Strict}
+        secure: ${JWT_COOKIE_SECURE}
+        http-only: ${JWT_COOKIE_HTTP_ONLY}
+        same-site: ${JWT_COOKIE_SAME_SITE}
 
 # Server Configuration for Production
 server:
-    port: ${PORT:8080}
+    port: ${SERVER_PORT}
     servlet:
         session:
             cookie:
-                same-site: None
-                secure: true
-                max-age: 1800 # 30 minutes
+                same-site: ${COOKIE_SAME_SITE}
+                secure: ${COOKIE_SECURE}
+                max-age: ${COOKIE_MAX_AGE}
                 domain: ${COOKIE_DOMAIN:}
-                path: /
+                path: ${COOKIE_PATH}
             timeout: 30m
             tracking-modes: cookie
         context-path: ${SERVER_CONTEXT_PATH:}

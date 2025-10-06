@@ -7,7 +7,7 @@ README.md
 
 # Docker files
 Dockerfile*
-docker-compose*.yml
+docker-compose*.yaml
 .dockerignore
 
 # Environment files

@@ -8,12 +8,11 @@ services:
         image: postgres:16-alpine
         container_name: inventory-postgres-prod
         environment:
-            POSTGRES_DB: ${POSTGRES_DB:-inventorymanagementdb_prod}
-            POSTGRES_USER: ${POSTGRES_USER:-prod_user}
-            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prod_password_secure}
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
             POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
-        ports:
-            - "5432:5432"
+
         volumes:
             - postgres_prod_data:/var/lib/postgresql/data
             - ./custom-pg-hba.conf:/etc/postgresql/pg_hba.conf
@@ -28,7 +27,7 @@ services:
             interval: 30s
             timeout: 10s
             retries: 5
-        restart: unless-stopped
+        restart: always
         deploy:
             resources:
                 limits:
@@ -44,20 +43,20 @@ services:
         container_name: inventory-app-prod
         environment:
             # Database Configuration
-            SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://database:5432/InventoryManagementDB}
-            SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
-            SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgres}
+            SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+            SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+            SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
             SPRING_JPA_HIBERNATE_DDL_AUTO: none # Or 'create', 'create-drop' etc.
 
             # Session Configuration (JDBC for production)
             SPRING_SESSION_STORE_TYPE: jdbc
             SPRING_SESSION_JDBC_INITIALIZE_SCHEMA: always
             SPRING_SESSION_JDBC_TABLE_NAME: spring_session
-            SPRING_SESSION_TIMEOUT: 1800
+            SPRING_SESSION_TIMEOUT: ${SPRING_SESSION_TIMEOUT}
 
             # Application Configuration
             SPRING_PROFILES_ACTIVE: prod
-            SERVER_PORT: 8080
+            SERVER_PORT: ${SERVER_PORT}
 
             # OAuth2 Configuration (Production)
             GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
@@ -66,20 +65,20 @@ services:
 
             # JWT Configuration
             JWT_SECRET: ${JWT_SECRET}
-            JWT_EXPIRATION: ${JWT_EXPIRATION:-1800000}
+            JWT_EXPIRATION: ${JWT_EXPIRATION}
 
             # Frontend Configuration
             FRONTEND_BASE_URL: ${FRONTEND_BASE_URL}
 
             # Cookie Configuration
             COOKIE_DOMAIN: ${COOKIE_DOMAIN}
-            COOKIE_SECURE: ${COOKIE_SECURE:-true}
+            COOKIE_SECURE: ${COOKIE_SECURE}
 
             # Mail Configuration
             MAIL_USERNAME: ${MAIL_USERNAME}
             MAIL_PASSWORD: ${MAIL_PASSWORD}
-            MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
-            MAIL_PORT: ${MAIL_PORT:-465}
+            MAIL_HOST: ${MAIL_HOST}
+            MAIL_PORT: ${MAIL_PORT}
 
             # VAPID Keys
             VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
@@ -101,7 +100,7 @@ services:
                 condition: service_healthy
         networks:
             - inventory-network
-        restart: unless-stopped
+        restart: always
         deploy:
             resources:
                 limits:
