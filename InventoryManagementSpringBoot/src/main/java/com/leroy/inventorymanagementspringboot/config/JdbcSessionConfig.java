@@ -8,12 +8,12 @@ import org.springframework.session.web.http.DefaultCookieSerializer;
 
 /**
  * JDBC Session Configuration for PostgreSQL
- * 
+ * <p>
  * This configuration enables JDBC-based session storage using PostgreSQL
  * database.
  * Sessions are stored in the spring_session table which is automatically
  * created.
- * 
+ * <p>
  * Benefits over in-memory sessions:
  * - Sessions persist across application restarts
  * - OAuth2 authorization requests are properly maintained
@@ -32,21 +32,33 @@ public class JdbcSessionConfig {
     public CookieSerializer cookieSerializer() {
         DefaultCookieSerializer serializer = new DefaultCookieSerializer();
 
-        // Cookie settings for OAuth2 cross-domain support
+        // Cookie settings (configurable via environment variables)
         serializer.setCookieName("JSESSIONID");
         serializer.setUseHttpOnlyCookie(true);
-        serializer.setUseSecureCookie(true);
-        serializer.setSameSite("None");
+
+        // Respect environment flags for dev/prod
+        boolean secure = Boolean.parseBoolean(System.getenv().getOrDefault("COOKIE_SECURE", "true"));
+        String sameSite = System.getenv().getOrDefault("COOKIE_SAME_SITE", "LAX");
+
+        serializer.setUseSecureCookie(secure);
+        serializer.setSameSite(sameSite);
         serializer.setCookieMaxAge(1800); // 30 minutes
         serializer.setCookiePath("/");
 
-        // Domain setting (will be set via environment variable)
+        // Domain setting (env-driven). If it's a plain hostname like 'localhost',
+        // set as fixed domain; if it looks like a regex with capture groups, use
+        // pattern.
         String cookieDomain = System.getenv("COOKIE_DOMAIN");
         if (cookieDomain != null && !cookieDomain.isEmpty()) {
-            serializer.setDomainNamePattern(cookieDomain);
+            String trimmed = cookieDomain.trim();
+            boolean looksLikeRegexWithGroup = trimmed.contains("(") && trimmed.contains(")");
+            if (looksLikeRegexWithGroup) {
+                serializer.setDomainNamePattern(trimmed);
+            } else {
+                serializer.setDomainName(trimmed);
+            }
         }
 
         return serializer;
     }
 }
-

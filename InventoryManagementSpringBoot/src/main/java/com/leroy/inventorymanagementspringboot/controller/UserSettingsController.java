@@ -36,7 +36,11 @@ public class UserSettingsController {
      * Access: All authenticated users
      */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserSettingsDto> getUserSettings(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         try {
             Integer userId = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not found")).getId();
@@ -83,9 +87,13 @@ public class UserSettingsController {
      * Access: All authenticated users
      */
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserSettingsDto> saveUserSettings(
             @Valid @RequestBody UserSettingsDto settingsDto,
             @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         try {
             Integer userId = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not found")).getId();
@@ -114,10 +122,14 @@ public class UserSettingsController {
      * Access: All authenticated users
      */
     @PatchMapping("/{category}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserSettingsDto> updateSettingsCategory(
             @PathVariable String category,
             @RequestBody Map<String, Object> categorySettings,
             @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         try {
             Integer userId = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not found")).getId();
@@ -147,7 +159,11 @@ public class UserSettingsController {
      * Access: All authenticated users
      */
     @PostMapping("/reset")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserSettingsDto> resetToDefaults(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         try {
             Integer userId = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not found")).getId();
@@ -169,7 +185,11 @@ public class UserSettingsController {
      * Access: All authenticated users (own settings only)
      */
     @DeleteMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteUserSettings(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         try {
             Integer userId = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not found")).getId();
@@ -191,7 +211,11 @@ public class UserSettingsController {
      * Access: All authenticated users
      */
     @GetMapping("/exists")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, Boolean>> hasUserSettings(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         try {
             Integer userId = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not found")).getId();
@@ -262,7 +286,11 @@ public class UserSettingsController {
      * Access: All authenticated users
      */
     @GetMapping("/export")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, Object>> exportUserSettings(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         try {
             Integer userId = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not found")).getId();
@@ -285,9 +313,13 @@ public class UserSettingsController {
      * Access: All authenticated users
      */
     @PostMapping("/import")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserSettingsDto> importUserSettings(
             @RequestBody Map<String, Object> importData,
             @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         try {
             Integer userId = userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not found")).getId();

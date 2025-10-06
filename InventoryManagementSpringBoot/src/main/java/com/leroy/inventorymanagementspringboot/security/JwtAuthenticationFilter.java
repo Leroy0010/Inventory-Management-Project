@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -28,47 +30,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final CookieUtil cookieUtil;
 
-    private final Logger logger =  LogManager.getLogger(JwtAuthenticationFilter.class);
+    private final Logger logger = LogManager.getLogger(JwtAuthenticationFilter.class);
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, CookieUtil cookieUtil) {
-        this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
-        this.cookieUtil = cookieUtil;
-    }
+
 
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         String jwt = cookieUtil.getJwtFromCookie(request).orElse(null);
+        if (jwt != null) {
+            logger.debug("JWT token found in cookie");
+        }
 
         if (jwt == null) {
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 jwt = authHeader.substring(7);
+                logger.debug("JWT token found in Authorization header");
             }
         }
 
         if (jwt == null) {
-//            logger.debug("No JWT token found in cookies or Authorization header");
+            // logger.debug("No JWT token found in cookies or Authorization header");
             filterChain.doFilter(request, response);
             return;
         }
 
-//        logger.debug("JWT Received: {}", jwt);
+        // logger.debug("JWT Received: {}", jwt);
 
         try {
             final String userEmail = jwtUtil.extractUsername(jwt);
-//            logger.debug("Extracted username: {}", userEmail);
+            logger.debug("Extracted username from JWT: {}", userEmail);
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                logger.debug("Loading user details for: {}", userEmail);
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                logger.debug("User details loaded successfully for: {}", userEmail);
                 // Corrected code snippet from your JwtAuthenticationFilter
                 if (jwtUtil.isTokenValid(jwt, userDetails)) {
-//                    logger.debug("Token is valid. Setting authentication.");
+                    logger.debug("JWT is valid. Building SecurityContext for {}", userEmail);
 
                     var claims = jwtUtil.extractAllClaims(jwt);
 
@@ -80,8 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         logger.warn("No 'roles' claim found in JWT for user: {}", userEmail);
                         // Fallback to database authorities if roles are not present in the token
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities()
-                        );
+                                userDetails, null, userDetails.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     } else {
@@ -90,20 +92,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 .map(SimpleGrantedAuthority::new)
                                 .collect(Collectors.toList());
 
-//                        logger.debug("Authorities from JWT: {}", authorities);
+                        logger.debug("Authorities from JWT for {}: {}", userEmail, authorities);
 
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, authorities
-                        );
+                                userDetails, null, authorities);
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 } else {
-                    logger.warn("Token is invalid for user: {}", userEmail);
+                    logger.warn("JWT is invalid for user: {}. Will not set SecurityContext.", userEmail);
                 }
             }
         } catch (Exception e) {
-            logger.error("JWT authentication failed: {}", e.getMessage());
+            logger.error("JWT authentication failed: {}", e.getMessage(), e);
         }
 
         filterChain.doFilter(request, response);

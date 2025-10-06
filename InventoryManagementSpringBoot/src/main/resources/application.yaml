@@ -1,6 +1,12 @@
 spring:
     profiles:
         active: ${SPRING_PROFILES_ACTIVE:dev}
+    session:
+        jdbc:
+            initialize-schema: always
+    docker:
+        compose:
+            enabled: false
     datasource:
         url: ${SPRING_DATASOURCE_URL}
         username: ${SPRING_DATASOURCE_USERNAME}
@@ -29,8 +35,8 @@ spring:
         restart:
             enabled: true
         livereload:
-            enabled: true
-            port: 8080
+            enabled: false
+
     security:
         oauth2:
             client:
@@ -124,11 +130,6 @@ app:
         # as your JavaFX app will interact directly with your backend's public endpoint.
         base-url: ${FRONTEND_BASE_URL}
 
-google:
-    drive:
-        credentials-classpath: ${GOOGLE_DRIVE_CREDENTIALS_CLASS_PATH:c:/run/secrets/credentials.json}
-        root-folder-id: ${GOOGLE_DRIVE_FOLDER_ID}
-
 aws:
     s3:
         bucket-name: ${AWS_S3_BUCKET_NAME}
@@ -149,7 +150,7 @@ management:
         web:
             exposure:
                 include: health,info,metrics,prometheus
-            base-path: /actuator
+
     endpoint:
         health:
             show-details: when-authorized
@@ -177,7 +178,11 @@ logging:
     level:
         root: INFO
         com.leroy.inventorymanagementspringboot: INFO
-        org.springframework.security: WARN
+        # Enable detailed auth debugging for our security classes
+        com.leroy.inventorymanagementspringboot.security: DEBUG
+        com.leroy.inventorymanagementspringboot.controller: DEBUG
+        # See Spring Security auth decisions without being too noisy
+        org.springframework.security: INFO
         org.springframework.web: WARN
         org.hibernate.SQL: WARN
         org.hibernate.type.descriptor.sql.BasicBinder: WARN

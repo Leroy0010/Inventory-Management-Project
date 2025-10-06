@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-spring-session-tables
+      author: Leroy
+      sqlFile:
+        path: ./scripts/schema-postgresql.sql
+        relativeToChangelogFile: true

@@ -14,8 +14,6 @@ interface BackendAuthResponse {
     lastName: string;
 }
 
-
-
 // Auth API functions
 export const authApi = {
     // Login with email and password

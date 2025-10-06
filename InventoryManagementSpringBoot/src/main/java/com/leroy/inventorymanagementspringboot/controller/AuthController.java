@@ -1,9 +1,9 @@
 package com.leroy.inventorymanagementspringboot.controller;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,7 +36,9 @@ import com.leroy.inventorymanagementspringboot.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.transaction.annotation.Transactional;
 
+@RequiredArgsConstructor
 @RestController
 public class AuthController {
 
@@ -51,21 +53,7 @@ public class AuthController {
     private final OtpService otpService;
     private final UserSettingsService userSettingsService;
 
-    public AuthController(AuthenticationManager authenticationManager, UserDetailsService userDetailsService,
-            JwtUtil jwtUtil, UserRepository userRepository, UserMapper userMapper,
-            PasswordResetService passwordResetService, RefreshTokenService refreshTokenService, CookieUtil cookieUtil,
-            OtpService otpService, UserSettingsService userSettingsService) {
-        this.authenticationManager = authenticationManager;
-        this.userDetailsService = userDetailsService;
-        this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.passwordResetService = passwordResetService;
-        this.refreshTokenService = refreshTokenService;
-        this.cookieUtil = cookieUtil;
-        this.otpService = otpService;
-        this.userSettingsService = userSettingsService;
-    }
+
 
     @PostMapping("/api/auth/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
@@ -170,6 +158,7 @@ public class AuthController {
     }
 
     @PostMapping("/api/auth/refresh")
+    @Transactional
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         try {
             // Get refresh token from cookie

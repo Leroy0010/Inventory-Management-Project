@@ -3,6 +3,7 @@ package com.leroy.inventorymanagementspringboot.config;
 import java.io.IOException;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,7 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -33,6 +35,7 @@ import com.leroy.inventorymanagementspringboot.service.CustomUserDetailService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -47,15 +50,6 @@ public class SecurityConfig {
 
     private static final Logger logger = LogManager.getLogger(SecurityConfig.class);
 
-    public SecurityConfig(CustomUserDetailService userDetailsService,
-            JwtAuthenticationFilter jwtAuthFilter,
-            OAuth2AuthenticationSuccessHandler oauth2SuccessHandler,
-            OAuth2AuthenticationFailureHandler oauth2FailureHandler) {
-        this.userDetailsService = userDetailsService;
-        this.jwtAuthFilter = jwtAuthFilter;
-        this.oauth2SuccessHandler = oauth2SuccessHandler;
-        this.oauth2FailureHandler = oauth2FailureHandler;
-    }
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -170,9 +164,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/reports/**").hasAnyAuthority("ADMIN", "STOREKEEPER")
                         .anyRequest().authenticated())
 
-                // Session management
+                // Set session management to stateless
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                // Add your JWT filter
+                // Placing it after the LogoutFilter is a good practice,
+                // but before the AuthorizationFilter is even better.
+                .addFilterBefore(jwtAuthFilter, AuthorizationFilter.class)
+
+                // Disable default Spring Security filters to avoid conflicts
+                // This line can sometimes fix obscure issues, but might not be necessary.
+                .httpBasic(AbstractHttpConfigurer::disable)
                 // Security headers
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)

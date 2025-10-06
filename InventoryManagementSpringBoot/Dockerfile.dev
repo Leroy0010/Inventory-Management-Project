@@ -3,7 +3,7 @@ FROM openjdk:21-jdk-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl wget && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y curl wget && rm -rf /var/lib/apt/lists/*
 
 COPY mvnw mvnw.cmd ./ 
 COPY .mvn .mvn
@@ -16,14 +16,16 @@ COPY src ./src
 
 EXPOSE 8080 5005
 
-ENV JAVA_OPTS="-Xms512m -Xmx1g \
+ENV MAVEN_OPTS="-Xms512m -Xmx1g \
     -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \
     -Dspring.profiles.active=dev \
     -Dspring.devtools.restart.enabled=true \
     -Dspring.devtools.livereload.enabled=true"
 
+
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-CMD ["./mvnw", "spring-boot:run", "-Dspring-boot.run.jvmArguments=\"$JAVA_OPTS\""]
+CMD ["./mvnw", "spring-boot:run"]
+
 

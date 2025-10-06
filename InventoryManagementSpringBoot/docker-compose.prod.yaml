@@ -1,7 +1,6 @@
 # Production Docker Compose
 # Production environment with JDBC sessions and optimized settings
 
-version: "3.8"
 
 services:
     # PostgreSQL Database
@@ -17,7 +16,6 @@ services:
             - "5432:5432"
         volumes:
             - postgres_prod_data:/var/lib/postgresql/data
-            - ./db.sql:/docker-entrypoint-initdb.d/init.sql
             - ./custom-pg-hba.conf:/etc/postgresql/pg_hba.conf
         networks:
             - inventory-network
@@ -93,9 +91,6 @@ services:
             AWS_S3_ACCESS_KEY: ${AWS_S3_ACCESS_KEY}
             AWS_S3_SECRET_KEY: ${AWS_S3_SECRET_KEY}
 
-            # Google Drive Configuration
-            GOOGLE_DRIVE_CREDENTIALS_CLASS_PATH: ${GOOGLE_DRIVE_CREDENTIALS_CLASS_PATH}
-            GOOGLE_DRIVE_FOLDER_ID: ${GOOGLE_DRIVE_FOLDER_ID}
 
         ports:
             - "8080:8080"

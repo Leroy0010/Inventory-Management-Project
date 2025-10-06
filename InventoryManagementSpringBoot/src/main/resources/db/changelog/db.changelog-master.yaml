@@ -26,3 +26,5 @@ databaseChangeLog:
           file: db/changelog/db.changelog-012-alter-audit-log-table.yaml
     - include:
           file: db/changelog/db.changelog-013-fix-type-mismatches.yaml
+    - include:
+        file: db/changelog/db.changelog-014-create-spring-session-tables.yaml

@@ -67,7 +67,7 @@ InventoryManagementSpringBoot/
     make prod
 
     # Or using docker-compose directly
-    docker-compose -f docker-compose.prod.yml up -d
+    docker-compose -f docker-compose.prod.yaml up -d
     ```
 
 ## 🔧 Development Environment Details
@@ -292,16 +292,16 @@ docker-compose exec app bash
 
 ```bash
 # Build production images
-docker-compose -f docker-compose.prod.yml build
+docker-compose -f docker-compose.prod.yaml build
 
 # Start production services
-docker-compose -f docker-compose.prod.yml up -d
+docker-compose -f docker-compose.prod.yaml up -d
 
 # Stop production services
-docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yaml down
 
 # View production logs
-docker-compose -f docker-compose.prod.yml logs -f
+docker-compose -f docker-compose.prod.yaml logs -f
 ```
 
 ### Makefile Commands
@@ -359,7 +359,7 @@ docker-compose exec app psql -h postgres -U dev_user -d inventorymanagementdb_de
 # Check container memory usage
 docker stats
 
-# Increase memory limits in docker-compose.yml
+# Increase memory limits in docker-compose.yaml
 deploy:
   resources:
     limits:
