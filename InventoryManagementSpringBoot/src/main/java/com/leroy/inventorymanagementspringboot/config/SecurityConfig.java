@@ -1,6 +1,5 @@
 package com.leroy.inventorymanagementspringboot.config;
 
-import java.io.IOException;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -40,7 +38,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Value("${app.frontend.base-url:http://localhost:5173}")
+    @Value("${app.frontend.base-url}")
     private String frontendBaseUrl;
 
     private final CustomUserDetailService userDetailsService;
@@ -77,7 +75,7 @@ public class SecurityConfig {
         // Allow specific origins
         configuration.setAllowedOriginPatterns(List.of(
                 frontendBaseUrl,
-                "http://localhost:3000",
+                "http://localhost:5173",
                 "https://*.vercel.app",
                 "https://*.netlify.app"));
 
@@ -91,7 +89,7 @@ public class SecurityConfig {
                 "Accept-Language",
                 "Content-Language",
                 "Content-Type",
-                "Authorization",
+                "Authorization", // CRITICAL for JWT
                 "X-Requested-With",
                 "Origin",
                 "Access-Control-Request-Method",
@@ -103,7 +101,7 @@ public class SecurityConfig {
                 "If-Modified-Since",
                 "X-XSRF-TOKEN"));
 
-        // Allow credentials
+        // Allow credentials (necessary if you are using cookies/session, but still safe for JWT)
         configuration.setAllowCredentials(true);
 
         // Expose headers
@@ -148,6 +146,14 @@ public class SecurityConfig {
 
                 // Authorization rules
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/health/**",
+                                "/actuator/info",
+                                "/actuator/prometheus",
+                                "/api/health/**",
+                                "/health/**"
+                        ).permitAll()
                         .requestMatchers("/api/auth/**", "/auth/**").permitAll()
                         .requestMatchers("/api/csrf-token").permitAll()
                         .requestMatchers("/api/cors-test/**").permitAll() // Allow CORS testing
@@ -164,16 +170,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/reports/**").hasAnyAuthority("ADMIN", "STOREKEEPER")
                         .anyRequest().authenticated())
 
-                // Set session management to stateless
+                // Set session management to stateless (CRITICAL for JWT)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Add your JWT filter
-                // Placing it after the LogoutFilter is a good practice,
-                // but before the AuthorizationFilter is even better.
-                .addFilterBefore(jwtAuthFilter, AuthorizationFilter.class)
+                // Add JWT filter before Spring Security checks username/password (CRITICAL)
+                // We only need to add this filter once.
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
                 // Disable default Spring Security filters to avoid conflicts
-                // This line can sometimes fix obscure issues, but might not be necessary.
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // Security headers
                 .headers(headers -> headers
@@ -188,30 +192,22 @@ public class SecurityConfig {
                 // Exception handling
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((HttpServletRequest request, HttpServletResponse response,
-                                org.springframework.security.core.AuthenticationException authException) -> {
-                            try {
-                                response.setContentType("application/json");
-                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                                response.getWriter()
-                                        .write("{\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}");
-                            } catch (IOException e) {
-                                logger.error("Error writing authentication error response", e);
-                            }
+                                                   org.springframework.security.core.AuthenticationException authException) -> {
+                            // This handler fires when a request comes in without authentication, or with bad credentials.
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter()
+                                    .write("{\"error\":\"Unauthorized\",\"message\":\"Authentication required or token invalid\"}");
                         })
                         .accessDeniedHandler((HttpServletRequest request, HttpServletResponse response,
-                                org.springframework.security.access.AccessDeniedException accessDeniedException) -> {
-                            try {
-                                response.setContentType("application/json");
-                                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                                response.getWriter().write("{\"error\":\"Forbidden\",\"message\":\"Access denied\"}");
-                            } catch (IOException e) {
-                                logger.error("Error writing access denied response", e);
-                            }
+                                              org.springframework.security.access.AccessDeniedException accessDeniedException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write("{\"error\":\"Forbidden\",\"message\":\"Access denied\"}");
                         }))
 
                 // Authentication provider and filters
-                .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .authenticationProvider(authenticationProvider());
 
         return http.build();
     }

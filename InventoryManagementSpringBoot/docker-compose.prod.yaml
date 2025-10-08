@@ -73,6 +73,9 @@ services:
             # Cookie Configuration
             COOKIE_DOMAIN: ${COOKIE_DOMAIN}
             COOKIE_SECURE: ${COOKIE_SECURE}
+            COOKIE_HTTP_ONLY: ${COOKIE_HTTP_ONLY}
+            COOKIE_MAX_AGE: ${COOKIE_MAX_AGE}
+            COOKIE_PATH: ${COOKIE_PATH}
 
             # Mail Configuration
             MAIL_USERNAME: ${MAIL_USERNAME}

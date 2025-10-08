@@ -12,6 +12,7 @@ export default defineConfig({
             // Enable React 18 features
             jsxRuntime: 'automatic',
         }),
+
         tailwindcss(),
         // HTML optimization plugin
         createHtmlPlugin({
@@ -60,12 +61,32 @@ export default defineConfig({
         hmr: {
             overlay: false, // Disable error overlay for better UX
         },
+        proxy: {
+            '/api': 'http://springboot-alb-1463112470.eu-north-1.elb.amazonaws.com',
+            '/oauth2':
+                'http://springboot-alb-1463112470.eu-north-1.elb.amazonaws.com',
+            '/ws-notifications': {
+                target: 'http://springboot-alb-1463112470.eu-north-1.elb.amazonaws.com',
+                changeOrigin: true,
+                ws: true, // This is the crucial part for WebSocket proxying
+            },
+        },
+
+        watch: {
+            // Fixes issues on network drives and some Windows setups
+            usePolling: true, 
+            // Add a small delay (e.g., 500ms) to debounce restarts 
+            // after multiple file changes (like auto-saves).
+            interval: 500, 
+        },
     },
     define: {
         global: 'window',
         __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
     },
     build: {
+        // Prevent Vite from inlining small assets as data: URLs to satisfy strict CSP
+        assetsInlineLimit: 0,
         sourcemap: process.env.NODE_ENV === 'development',
         minify: 'terser',
         terserOptions: {

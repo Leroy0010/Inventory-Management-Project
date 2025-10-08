@@ -122,10 +122,7 @@
             }
         </script>
 
-        <!-- Performance and Security Headers -->
-        <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-        <meta http-equiv="X-Frame-Options" content="DENY" />
-        <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+        <!-- Security headers must be set by the server/CDN, not via meta tags -->
 
         <!-- DNS Prefetch for better performance -->
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
@@ -192,14 +189,6 @@
             </style>
         </div>
         <script type="module" src="/src/main.tsx"></script>
-        <script>
-            // Hide loading fallback when React app loads
-            window.addEventListener('load', function () {
-                const fallback = document.getElementById('loading-fallback');
-                if (fallback) {
-                    fallback.style.display = 'none';
-                }
-            });
-        </script>
+        <!-- Inline scripts are avoided to comply with strict CSP; logic moved to src/main.tsx -->
     </body>
 </html>

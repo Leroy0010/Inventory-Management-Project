@@ -40,7 +40,7 @@ export class StompNotificationClient {
             this.client = new Client({
                 webSocketFactory: () =>
                     new SockJS(
-                        `${import.meta.env.VITE_WS_URL || 'http://localhost:8080'}/ws-notifications`,
+                        `${import.meta.env.VITE_WS_URL}`,
                         undefined,
                         { withCredentials: true } as any
                     ),
@@ -93,10 +93,7 @@ export class StompNotificationClient {
     private handleReconnect() {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
-            // console.log(
-            //     `🔄 Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`
-            // );
-
+            
             setTimeout(() => {
                 this.connect().catch(() => {
                     // retry later

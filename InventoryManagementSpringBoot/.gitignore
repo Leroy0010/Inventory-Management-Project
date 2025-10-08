@@ -37,3 +37,25 @@ build/
 
 ### VS Code ###
 .vscode/
+
+.terraform
+
+terraform/.terraform
+**/.terraform/
+
+
+# --- ADD THESE LINES TO YOUR .gitignore ---
+
+# Ignore the terraform state files inside any folder
+**/*.tfstate
+**/*.tfstate.backup
+
+# Ignore the log files inside any logs folder
+**/logs/*.log
+**/logs/*.log.gz
+
+# Ignore temporary plan output files
+**/tfplan
+**/plan.out
+
+terraform/secrets.tf

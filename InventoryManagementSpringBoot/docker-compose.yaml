@@ -13,7 +13,7 @@ services:
             POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
         ports:
           # Bind to localhost
-          - "127.0.0.1:5432:5432"
+          - "5432:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data
         networks:
@@ -59,7 +59,7 @@ services:
             # OAuth2 Configuration (Development)
             GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-your_dev_client_id}
             GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-your_dev_client_secret}
-            GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:8080/login/oauth2/code/google}
+            GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
 
             # JWT Configuration
             JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_key_very_long_and_secure}
@@ -73,6 +73,7 @@ services:
             JWT_COOKIE_HTTP_ONLY: ${JWT_COOKIE_HTTP_ONLY:-true}
             JWT_COOKIE_SAME_SITE: ${JWT_COOKIE_SAME_SITE:-Lax}
 
+
             # Frontend Configuration
             FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:5173}
 
@@ -80,6 +81,9 @@ services:
             COOKIE_DOMAIN: ${COOKIE_DOMAIN:-localhost}
             COOKIE_SECURE: ${COOKIE_SECURE:-false}
             COOKIE_SAME_SITE: ${COOKIE_SAME_SITE:-LAX}
+            COOKIE_HTTP_ONLY: ${COOKIE_HTTP_ONLY}
+            COOKIE_MAX_AGE: ${COOKIE_MAX_AGE}
+            COOKIE_PATH: ${COOKIE_PATH}
 
             # Mail Configuration (Optional for dev)
             MAIL_USERNAME: ${MAIL_USERNAME:-}
@@ -98,7 +102,7 @@ services:
         ports:
           - "8080:8080"
             # Bind debug port to localhost only
-          - "127.0.0.1:5005:5005"
+          - "5005:5005"
         volumes:
             - ./src:/app/src # Hot reload
             - ./logs:/app/logs

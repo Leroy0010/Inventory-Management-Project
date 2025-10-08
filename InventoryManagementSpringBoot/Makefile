@@ -41,24 +41,24 @@ dev-shell:
 prod: prod-up
 
 prod-build:
-	docker-compose -f docker-compose.prod.yml build
+	docker-compose -f docker-compose.prod.yaml build
 
 prod-up:
-	docker-compose -f docker-compose.prod.yml up -d
+	docker-compose -f docker-compose.prod.yaml up -d
 
 prod-down:
-	docker-compose -f docker-compose.prod.yml down
+	docker-compose -f docker-compose.prod.yaml down
 
 prod-logs:
-	docker-compose -f docker-compose.prod.yml logs -f app
+	docker-compose -f docker-compose.prod.yaml logs -f app
 
 prod-shell:
-	docker-compose -f docker-compose.prod.yml exec app bash
+	docker-compose -f docker-compose.prod.yaml exec app bash
 
 # Cleanup
 clean:
 	docker-compose down -v
-	docker-compose -f docker-compose.prod.yml down -v
+	docker-compose -f docker-compose.prod.yaml down -v
 	docker system prune -f
 
 # Development with tools (pgAdmin)
@@ -67,4 +67,4 @@ dev-tools:
 
 # Production with nginx
 prod-nginx:
-	docker-compose -f docker-compose.prod.yml --profile nginx up -d
+	docker-compose -f docker-compose.prod.yaml --profile nginx up -d

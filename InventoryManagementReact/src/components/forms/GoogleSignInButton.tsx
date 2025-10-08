@@ -23,7 +23,7 @@ export function GoogleSignInButton({
         setTimeout(() => {
             // Redirect to Spring Security OAuth2 endpoint
             window.location.href =
-                import.meta.env.VITE_WS_URL + '/oauth2/authorization/google';
+                import.meta.env.VITE_GOOGLE_SIGN_IN + '/authorization/google';
         }, 100);
     };
 

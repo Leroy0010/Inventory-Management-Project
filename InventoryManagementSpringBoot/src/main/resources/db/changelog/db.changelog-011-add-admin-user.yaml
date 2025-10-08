@@ -17,7 +17,7 @@ databaseChangeLog:
                           value: dennis.aidoo@stu.ucc.edu.gh
                     - column:
                           name: password
-                          value: password
+                          value: $2a$12$sdSMntRKltTwPYUPB6Ei3OipfpIwLP9S1zBp3lEYsiq1nOsbVsXv6
                     - column:
                           name: role_id
                           value: 1
