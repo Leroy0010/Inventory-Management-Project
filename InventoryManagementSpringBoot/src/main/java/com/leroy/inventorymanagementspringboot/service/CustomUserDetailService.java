@@ -18,12 +18,10 @@ import java.util.Collections;
 public class CustomUserDetailService implements UserDetailsService {
     private final UserRepository userRepository;
 
-
     @Autowired
     public CustomUserDetailService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
 
     @Override
     @Transactional

@@ -1,6 +1,6 @@
 spring:
-    profiles:
-        active: prod
+#    profiles:
+#        active: prod
     datasource:
         url: ${SPRING_DATASOURCE_URL}
         username: ${SPRING_DATASOURCE_USERNAME}
@@ -46,7 +46,7 @@ spring:
         store-type: jdbc
         jdbc:
             initialize-schema: always
-            table-name: spring_session
+            table-name: SPRING_SESSION
         timeout: ${SPRING_SESSION_TIMEOUT}
         cookie:
             name: ${SPRING_SESSION_COOKIE_NAME}

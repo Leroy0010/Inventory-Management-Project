@@ -4,6 +4,7 @@ spring:
     session:
         jdbc:
             initialize-schema: always
+            table-name: SPRING_SESSION
     docker:
         compose:
             enabled: false

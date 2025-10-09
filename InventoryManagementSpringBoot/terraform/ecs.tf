@@ -45,7 +45,7 @@ resource "aws_ecs_task_definition" "springboot" {
         { name = "JWT_COOKIE_NAME", value = "jwt"},
         { name = "JWT_MAX_TOKENS_PER_USER", value = "5"},
         { name = "JWT_COOKIE_HTTP_ONLY", value = "true" },
-        { name = "JWT_COOKIE_DOMAIN", value = "" },
+        { name = "JWT_COOKIE_DOMAIN", value = "localhost" },
         { name = "GOOGLE_CLIENT_ID", value = "11976876973-ao6rgeaqlafv7sduuik80fl1gg5gg090.apps.googleusercontent.com" },
         { name = "GOOGLE_REDIRECT_URI", value = "http://springboot-alb-1463112470.eu-north-1.elb.amazonaws.com/login/oauth2/code/google" },
         { name = "MAIL_HOST", value = "smtp.gmail.com"},
@@ -55,7 +55,7 @@ resource "aws_ecs_task_definition" "springboot" {
         { name = "MAIL_SMTP_SSL_ENABLED", value = "true" },
         { name = "MAIL_SMTP_SSL_PROTOCOLS", value = "TLSv1.2" },
         { name = "MAIL_TEST_CONNECTION", value = "true" },
-        { name = "FRONTEND_BASE_URL", value = "https://inventory-management-rm3l.onrender.com" },
+        { name = "FRONTEND_BASE_URL", value = "http://localhost:5173" },
         { name = "POSTGRES_DB", value = "InventoryManagementDB" },
         { name = "POSTGRES_USER", value = "postgres" }, # Note: If your app uses this, keep it. If it only uses SPRING_DATASOURCE_USERNAME, you can remove this duplicate.
         { name = "SERVER_PORT", value = "8080" },
@@ -65,7 +65,7 @@ resource "aws_ecs_task_definition" "springboot" {
         { name = "SERVER_CONTEXT_PATH", value = "/" },
         { name = "COOKIE_SECURE", value = "true" },
         { name = "COOKIE_SAME_SITE", value = "None" },
-        { name = "COOKIE_DOMAIN", value = "" },
+        { name = "COOKIE_DOMAIN", value = "localhost" },
         { name = "COOKIE_MAX_AGE", value = "1800" },
         { name = "COOKIE_PATH", value = "/" },
         { name = "COOKIE_HTTP_ONLY", value = "true"},
@@ -76,7 +76,7 @@ resource "aws_ecs_task_definition" "springboot" {
         { name = "SPRING_SESSION_COOKIE_SECURE", value = "true" },
         { name = "SPRING_SESSION_COOKIE_SAME_SITE", value = "None" },
         { name = "SPRING_SESSION_COOKIE_MAX_AGE", value = "1800" },
-        { name = "SPRING_SESSION_COOKIE_DOMAIN", value = "springboot-alb-1463112470.eu-north-1.elb.amazonaws.com" },
+        { name = "SPRING_SESSION_COOKIE_DOMAIN", value = "localhost" },
         { name = "SPRING_APPLICATION_NAME", value = "InventoryManagementSpringBoot" }
       ]
 

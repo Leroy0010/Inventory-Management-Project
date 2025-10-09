@@ -32,8 +32,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final Logger logger = LogManager.getLogger(JwtAuthenticationFilter.class);
 
-
-
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,

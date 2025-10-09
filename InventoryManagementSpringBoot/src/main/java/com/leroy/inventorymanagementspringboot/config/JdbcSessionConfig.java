@@ -25,7 +25,7 @@ public class JdbcSessionConfig {
 
     /**
      * Configure cookie serializer for cross-domain OAuth2 support
-     * 
+     *
      * @return CookieSerializer with proper settings for HTTPS and cross-domain
      */
     @Bean
