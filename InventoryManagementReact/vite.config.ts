@@ -61,16 +61,16 @@ export default defineConfig({
         hmr: {
             overlay: false, // Disable error overlay for better UX
         },
-        proxy: {
-            '/api': 'http://springboot-alb-1463112470.eu-north-1.elb.amazonaws.com',
-            '/oauth2':
-                'http://springboot-alb-1463112470.eu-north-1.elb.amazonaws.com',
-            '/ws-notifications': {
-                target: 'http://springboot-alb-1463112470.eu-north-1.elb.amazonaws.com',
-                changeOrigin: true,
-                ws: true, // This is the crucial part for WebSocket proxying
-            },
-        },
+        // proxy: {
+        //     '/api': 'http://springboot-alb-1463112470.eu-north-1.elb.amazonaws.com',
+        //     '/oauth2':
+        //         'http://springboot-alb-1463112470.eu-north-1.elb.amazonaws.com',
+        //     '/ws-notifications': {
+        //         target: 'http://springboot-alb-1463112470.eu-north-1.elb.amazonaws.com',
+        //         changeOrigin: true,
+        //         ws: true, // This is the crucial part for WebSocket proxying
+        //     },
+        // },
 
         watch: {
             // Fixes issues on network drives and some Windows setups
