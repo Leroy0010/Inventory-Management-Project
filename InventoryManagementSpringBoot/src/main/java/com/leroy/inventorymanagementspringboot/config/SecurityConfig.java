@@ -14,12 +14,13 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -47,7 +48,6 @@ public class SecurityConfig {
     private final OAuth2AuthenticationFailureHandler oauth2FailureHandler;
 
     private static final Logger logger = LogManager.getLogger(SecurityConfig.class);
-
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -89,7 +89,7 @@ public class SecurityConfig {
                 "Accept-Language",
                 "Content-Language",
                 "Content-Type",
-                "Authorization", // CRITICAL for JWT
+                "Authorization",
                 "X-Requested-With",
                 "Origin",
                 "Access-Control-Request-Method",
@@ -99,9 +99,10 @@ public class SecurityConfig {
                 "Expires",
                 "Last-Modified",
                 "If-Modified-Since",
-                "X-XSRF-TOKEN"));
+                "X-XSRF-TOKEN",
+                "Cookie")); // IMPORTANT: Add Cookie header for session support
 
-        // Allow credentials (necessary if you are using cookies/session, but still safe for JWT)
+        // Allow credentials (necessary for OAuth2 sessions)
         configuration.setAllowCredentials(true);
 
         // Expose headers
@@ -110,7 +111,8 @@ public class SecurityConfig {
                 "Access-Control-Allow-Origin",
                 "Access-Control-Allow-Credentials",
                 "Access-Control-Allow-Headers",
-                "Access-Control-Allow-Methods"));
+                "Access-Control-Allow-Methods",
+                "Set-Cookie")); // IMPORTANT: Expose Set-Cookie header
 
         // Cache preflight for 1 hour
         configuration.setMaxAge(3600L);
@@ -135,11 +137,35 @@ public class SecurityConfig {
                 // CORS configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // CSRF protection disabled - using JWT tokens for authentication
-                .csrf(AbstractHttpConfigurer::disable)
+                // CSRF protection - ENABLED for OAuth2 (but configured for JWT compatibility)
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        .ignoringRequestMatchers(
+                                "/api/auth/**",
+                                "/auth/**",
+                                "/actuator/**",
+                                "/api/health/**",
+                                "/health/**",
+                                "/ws-notifications/**",
+                                "/oauth2/**",
+                                "/login/oauth2/**"))
+
+                // Session management - STATELESS for API, but SESSION for OAuth2
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Changed from STATELESS
+                        .sessionFixation().migrateSession()
+                        .maximumSessions(1)
+                        .expiredUrl(frontendBaseUrl + "/login?session=expired"))
 
                 // OAuth2 configuration
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/oauth2/authorization")
+                        )
+                        .redirectionEndpoint(redirection -> redirection
+                                .baseUri("/login/oauth2/code/*")
+                        )
                         .loginPage("/oauth2/authorization/google")
                         .successHandler(oauth2SuccessHandler)
                         .failureHandler(oauth2FailureHandler))
@@ -156,10 +182,9 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/auth/**", "/auth/**").permitAll()
                         .requestMatchers("/api/csrf-token").permitAll()
-                        .requestMatchers("/api/cors-test/**").permitAll() // Allow CORS testing
-                        .requestMatchers("/oauth2/**").permitAll()
-                        .requestMatchers("/login/oauth2/**").permitAll()
-                        .requestMatchers("/ws-notifications/**").permitAll() // Allow WebSocket connections
+                        .requestMatchers("/api/cors-test/**").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/ws-notifications/**").permitAll()
                         .requestMatchers("/api/cart/**").hasAuthority("STAFF")
                         .requestMatchers("/api/users/get-profile", "/api/users/update-profile",
                                 "/api/users/change-password")
@@ -170,20 +195,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/reports/**").hasAnyAuthority("ADMIN", "STOREKEEPER")
                         .anyRequest().authenticated())
 
-                // Set session management to stateless (CRITICAL for JWT)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Add JWT filter - POSITION IS CRITICAL (before OAuth2 filter)
+                .addFilterBefore(jwtAuthFilter, OAuth2LoginAuthenticationFilter.class)
 
-                // Add JWT filter before Spring Security checks username/password (CRITICAL)
-                // We only need to add this filter once.
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
-                // Disable default Spring Security filters to avoid conflicts
-                .httpBasic(AbstractHttpConfigurer::disable)
                 // Security headers
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
-                        .contentTypeOptions(contentTypeOptions -> {
-                        })
+                        .contentTypeOptions(contentTypeOptions -> {})
                         .httpStrictTransportSecurity(hstsConfig -> hstsConfig
                                 .maxAgeInSeconds(31536000))
                         .referrerPolicy(referrerPolicy -> referrerPolicy
@@ -193,7 +211,6 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((HttpServletRequest request, HttpServletResponse response,
                                                    org.springframework.security.core.AuthenticationException authException) -> {
-                            // This handler fires when a request comes in without authentication, or with bad credentials.
                             response.setContentType("application/json");
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.getWriter()
@@ -206,7 +223,7 @@ public class SecurityConfig {
                             response.getWriter().write("{\"error\":\"Forbidden\",\"message\":\"Access denied\"}");
                         }))
 
-                // Authentication provider and filters
+                // Authentication provider
                 .authenticationProvider(authenticationProvider());
 
         return http.build();

@@ -38,6 +38,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
+        // Skip JWT check for OAuth2 endpoints to avoid conflicts
+        String path = request.getServletPath();
+        if (path.startsWith("/oauth2/") || path.startsWith("/login/oauth2/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String jwt = cookieUtil.getJwtFromCookie(request).orElse(null);
         if (jwt != null) {
             logger.debug("JWT token found in cookie");
@@ -52,12 +59,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (jwt == null) {
-            // logger.debug("No JWT token found in cookies or Authorization header");
             filterChain.doFilter(request, response);
             return;
         }
-
-        // logger.debug("JWT Received: {}", jwt);
 
         try {
             final String userEmail = jwtUtil.extractUsername(jwt);
@@ -67,25 +71,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 logger.debug("Loading user details for: {}", userEmail);
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                 logger.debug("User details loaded successfully for: {}", userEmail);
-                // Corrected code snippet from your JwtAuthenticationFilter
+
                 if (jwtUtil.isTokenValid(jwt, userDetails)) {
                     logger.debug("JWT is valid. Building SecurityContext for {}", userEmail);
 
                     var claims = jwtUtil.extractAllClaims(jwt);
 
-                    // Correctly cast the roles to List<String> to provide type information
                     @SuppressWarnings("unchecked")
                     List<String> roles = (List<String>) claims.get("roles");
 
                     if (roles == null) {
                         logger.warn("No 'roles' claim found in JWT for user: {}", userEmail);
-                        // Fallback to database authorities if roles are not present in the token
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     } else {
-                        // Now the stream operations are type-safe
                         var authorities = roles.stream()
                                 .map(SimpleGrantedAuthority::new)
                                 .collect(Collectors.toList());
