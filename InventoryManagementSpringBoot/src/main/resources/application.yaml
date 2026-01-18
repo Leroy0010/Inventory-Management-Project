@@ -67,7 +67,7 @@ spring:
         password: ${MAIL_PASSWORD}
         properties:
             mail:
-                debug: true
+                debug: false
                 smtp:
                     auth: ${MAIL_SMTP_AUTH:true}
                     starttls:
@@ -97,9 +97,9 @@ jwt:
             name: ${JWT_REFRESH_COOKIE_NAME:refreshToken}
         domain: ${JWT_COOKIE_DOMAIN:}
         path: ${JWT_COOKIE_PATH:/}
-        secure: ${JWT_COOKIE_SECURE:true}
+        secure: ${JWT_COOKIE_SECURE:false}
         http-only: ${JWT_COOKIE_HTTP_ONLY:true}
-        same-site: ${JWT_COOKIE_SAME_SITE:Strict}
+        same-site: ${JWT_COOKIE_SAME_SITE:Lax}
 
 # Server Configuration for Production
 server:
@@ -172,7 +172,11 @@ management:
             percentiles:
                 http.server.requests: 0.5, 0.95, 0.99
             slo:
-                http.server.requests: 50ms, 100ms, 200ms, 500ms
+                http.server.requests:
+                  - 50ms
+                  - 100ms
+                  - 200ms
+                  - 500ms
 
 # Logging Configuration for Production
 logging:
@@ -194,6 +198,9 @@ logging:
         file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file:
         name: logs/app.log
-        max-size: 10MB
-        max-history: 30
+    logback:
+      rollingpolicy:
         total-size-cap: 1GB
+        max-history: 30
+        max-file-size: 10MB
+

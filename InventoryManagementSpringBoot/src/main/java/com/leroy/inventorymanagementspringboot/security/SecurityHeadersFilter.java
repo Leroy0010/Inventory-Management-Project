@@ -43,7 +43,7 @@ public class SecurityHeadersFilter implements Filter {
                     "base-uri 'self'; " +
                     "form-action 'self'; " +
                     "frame-ancestors 'none';";
-        
+
         httpResponse.setHeader("Content-Security-Policy", csp);
         
         // HSTS (only for HTTPS)

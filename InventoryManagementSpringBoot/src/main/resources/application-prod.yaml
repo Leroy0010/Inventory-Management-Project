@@ -169,12 +169,6 @@ app:
     frontend:
         base-url: ${FRONTEND_BASE_URL}
 
-# Google Drive Configuration
-google:
-    drive:
-        credentials-classpath: ${GOOGLE_DRIVE_CREDENTIALS_CLASS_PATH}
-        root-folder-id: ${GOOGLE_DRIVE_FOLDER_ID}
-
 # AWS S3 Configuration
 aws:
     s3:
@@ -210,13 +204,18 @@ management:
         metrics:
             export:
                 enabled: true
+    metrics:
         distribution:
             percentiles-histogram:
                 http.server.requests: true
             percentiles:
                 http.server.requests: 0.5, 0.95, 0.99
             slo:
-                http.server.requests: 50ms, 100ms, 200ms, 500ms
+              http.server.requests:
+                - 50ms
+                - 100ms
+                - 200ms
+                - 500ms
 
 # Logging Configuration for Production
 logging:
@@ -235,7 +234,9 @@ logging:
         console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
         file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file:
-        name: logs/app.log
-        max-size: 10MB
-        max-history: 30
+      name: logs/app.log
+    logback:
+      rollingpolicy:
         total-size-cap: 1GB
+        max-history: 30
+        max-file-size: 10MB

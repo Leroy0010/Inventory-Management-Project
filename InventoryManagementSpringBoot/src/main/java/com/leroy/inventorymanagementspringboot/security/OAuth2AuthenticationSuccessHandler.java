@@ -50,7 +50,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, 
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                       Authentication authentication) throws IOException, ServletException {
         try {
             OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
@@ -83,9 +83,9 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
         } catch (Exception e) {
             logger.error("OAuth2 authentication failed: {}", e.getMessage(), e);
-            
+
             // Redirect to React app with error
-            String redirectUrl = frontendBaseUrl + "/login?google_auth=error&message=" + 
+            String redirectUrl = frontendBaseUrl + "/login?google_auth=error&message=" +
                 java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
             response.sendRedirect(redirectUrl);
         }

@@ -56,7 +56,7 @@ public class PushNotificationService {
                     "title", title,
                     "message", message,
                     "url", "/notifications",
-                    "icon", "/favicon.ico",
+                    "icon", "/push-notification.png",
                     "type", "general", // Default type
                     "timestamp", System.currentTimeMillis());
 
@@ -171,7 +171,7 @@ public class PushNotificationService {
                     "title", title,
                     "message", message,
                     "url", "/notifications",
-                    "icon", "/favicon.ico",
+                    "icon", "/push-notification.png",
                     "type", type != null ? type : "general",
                     "timestamp", System.currentTimeMillis(),
                     "data", data != null ? data : Map.of());
